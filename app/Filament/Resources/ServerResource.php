@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ServerResource\Pages;
 use App\FilamentPageSidebar\FilamentPageSideBar;
+use App\Infrastructure\Entities\ServerStatus;
 use App\Models\Server;
 use AymanAlhattami\FilamentPageWithSidebar\PageNavigationItem;
 use Filament\Forms;
@@ -74,6 +75,15 @@ class ServerResource extends Resource
                 Tables\Columns\TextColumn::make('public_ipv4')
                     ->label('IP Address'),
                 Tables\Columns\TextColumn::make('status')
+                    ->badge()
+                    ->color(fn (ServerStatus $state): string => match ($state->value) {
+                        'new' => 'primary',
+                        'starting', 'provisioning' => 'info',
+                        'running' => 'success',
+                        'paused' => 'warning',
+                        'stopped', 'deleting' => 'danger',
+                        'archived', 'unknown' => 'gray',
+                    })
                     ->alignEnd(),
             ])
             ->filters([
