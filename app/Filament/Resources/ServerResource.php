@@ -4,6 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ServerResource\Pages;
 use App\Models\Server;
+use AymanAlhattami\FilamentPageWithSidebar\FilamentPageSidebar;
+use AymanAlhattami\FilamentPageWithSidebar\PageNavigationItem;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -18,6 +20,17 @@ class ServerResource extends Resource
     protected static ?string $model = Server::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-server';
+
+    public static function sidebar(Model $record): FilamentPageSidebar
+    {
+        return FilamentPageSidebar::make()
+            ->setNavigationItems([
+                PageNavigationItem::make('Dashboard')
+                    ->url(static::getUrl('view', ['record' => $record])),
+                PageNavigationItem::make('Edit')
+                    ->url(static::getUrl('edit', ['record' => $record])),
+            ]);
+    }
 
     public static function form(Form $form): Form
     {
@@ -50,8 +63,8 @@ class ServerResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make()
-                    ->url(fn (Model $record): string => ServerResource::getUrl('custom', ['record' => $record])),
+                //                Tables\Actions\ViewAction::make()
+                //                    ->url(fn (Model $record): string => static::getUrl('custom', ['record' => $record])),
                 //                    ->visible(fn (Model $record) => $record->provisioned_at !== null),
                 //                Tables\Actions\EditAction::make(),
             ])
@@ -64,8 +77,7 @@ class ServerResource extends Resource
                 Tables\Actions\CreateAction::make(),
             ])
             ->recordUrl(
-                fn (Model $record): string => ServerResource::getUrl('custom', ['record' => $record])
-                //                fn (Model $record): string => ! $record->provisioned_at ? ServerResource::getUrl('custom', ['server' => $record]) : ServerResource::getUrl('edit', ['record' => $record])
+                fn (Model $record): string => ! $record->provisioned_at ? static::getUrl('provisioning', ['record' => $record]) : static::getUrl('view', ['record' => $record])
             );
     }
 
@@ -80,9 +92,11 @@ class ServerResource extends Resource
     {
         return [
             'index' => Pages\ListServers::route('/'),
+            'view' => Pages\ViewServer::route('/{record}'),
             'create' => Pages\CreateServer::route('/create'),
             'edit' => Pages\EditServer::route('/{record}/edit'),
-            'custom' => Pages\ServerProvisioning::route('/{record}'),
+            'provisioning' => Pages\ServerProvisioning::route('/{record}/provisioning'),
+            'dashboard' => Pages\DashboardServer::route('/{record}/dashboard'),
         ];
     }
 

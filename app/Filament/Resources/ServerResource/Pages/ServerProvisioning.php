@@ -15,17 +15,11 @@ class ServerProvisioning extends Page
 
     public Server $record;
 
-    public function mount(Server $record): void
+    public function mount(): void
     {
-        $this->record = $record;
-        static::$view = static::getViewBasedOnServer($record);
-    }
-
-    public static function getViewBasedOnServer(Server $server): string
-    {
-        return $server->provisioned_at
-            ? 'filament.resources.server-resource.pages.dashboard'
-            : 'filament.resources.server-resource.pages.server-provisioning';
+        if ($this->record->provisioned_at !== null) {
+            $this->redirect(ServerResource::getUrl('view', ['record' => $this->record]));
+        }
     }
 
     public function getHeading(): string
