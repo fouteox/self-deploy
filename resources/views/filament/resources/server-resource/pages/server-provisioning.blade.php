@@ -1,7 +1,7 @@
 @php
-    $isNew = $server->status === \App\Infrastructure\Entities\ServerStatus::New;
-    $isStarting = $server->status === \App\Infrastructure\Entities\ServerStatus::Starting;
-    $isProvisioning = $server->status === \App\Infrastructure\Entities\ServerStatus::Provisioning;
+    $isNew = $record->status === \App\Infrastructure\Entities\ServerStatus::New;
+    $isStarting = $record->status === \App\Infrastructure\Entities\ServerStatus::Starting;
+    $isProvisioning = $record->status === \App\Infrastructure\Entities\ServerStatus::Provisioning;
 
     $statusClasses = [
         'completed' => 'text-green-500',
@@ -10,19 +10,19 @@
     ];
 
     $lastStepWasCompleted = $isProvisioning;
-    $completedSteps = $server->completed_provision_steps->toArray();
-    $installedSoftware = $server->installed_software->toArray();
-
-
+    $completedSteps = $record->completed_provision_steps->toArray();
+    $installedSoftware = $record->installed_software->toArray();
 
     $totalSteps = 2 + count(\App\Server\ProvisionStep::forFreshServer()) + count(\App\Server\Software::defaultStack());
-    $currentStep = 0;
+    $currentStep = 1;
 
-    if (!$isNew) {
+    $statusForServerCreation = $isNew ? 'current' : 'completed';
+    if ($statusForServerCreation === 'completed') {
         $currentStep++;
     }
 
-    if (!$isStarting && $isNew) {
+    $statusForServerStarting = $isStarting ? 'current' : ($isNew ? 'upcoming' : 'completed');
+    if ($statusForServerStarting === 'completed') {
         $currentStep++;
     }
 
@@ -49,9 +49,9 @@
                     Server Provisioning
                 </x-slot>
 
-                @if ($server->status === \App\Infrastructure\Entities\ServerStatus::Provisioning)
+                @if ($record->status === \App\Infrastructure\Entities\ServerStatus::Provisioning)
                     {{ __('The server is currently being provisioned.') }}
-                @elseif ($server->status === \App\Infrastructure\Entities\ServerStatus::Starting)
+                @elseif ($record->status === \App\Infrastructure\Entities\ServerStatus::Starting)
                     {{ __('The server is created at the provider and is currently starting up.') }}
                 @else
                     {{ __('The server is currently being created at the provider.') }}
@@ -59,10 +59,10 @@
 
                 {{ __('This page will automatically refresh on updates.') }}
 
-                @if ($server->provider === \App\Provider::CustomServer && ! $isProvisioning)
+                @if ($record->provider === \App\Provider::CustomServer && ! $isProvisioning)
                     <p class="mt-6">{{ __('Need to see the provisioning script again?') }}</p>
 
-                    <x-provision-modal :$server/>
+                    <x-provision-modal :$record/>
                 @endif
             </x-filament::section>
         </div>
@@ -73,17 +73,11 @@
                     Step {{ $currentStep }}/{{ $totalSteps }}
                 </x-slot>
 
-                <ul class="grid gap-4">
-                    @php
-                        $status = $isNew ? 'current' : 'completed';
-                    @endphp
-                    <x-status-list-item :statusClasses="$statusClasses" :status="$status"
+                <ul class="grid gap-2.5">
+                    <x-status-list-item :statusClasses="$statusClasses" :status="$statusForServerCreation"
                                         :description="__('Create the server at the provider')"/>
 
-                    @php
-                        $status = $isStarting ? 'current' : ($isNew ? 'upcoming' : 'completed');
-                    @endphp
-                    <x-status-list-item :statusClasses="$statusClasses" :status="$status"
+                    <x-status-list-item :statusClasses="$statusClasses" :status="$statusForServerStarting"
                                         :description="__('Wait for the server to start up')"/>
 
                     @foreach (\App\Server\ProvisionStep::forFreshServer() as $step)

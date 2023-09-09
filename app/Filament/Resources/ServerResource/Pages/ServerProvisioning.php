@@ -13,12 +13,12 @@ class ServerProvisioning extends Page
 
     protected static string $view = 'filament.resources.server-resource.pages.server-provisioning';
 
-    public Server $server;
+    public Server $record;
 
-    public function mount(Server $server): void
+    public function mount(Server $record): void
     {
-        $this->server = $server;
-        static::$view = static::getViewBasedOnServer($server);
+        $this->record = $record;
+        static::$view = static::getViewBasedOnServer($record);
     }
 
     public static function getViewBasedOnServer(Server $server): string
@@ -30,12 +30,7 @@ class ServerProvisioning extends Page
 
     public function getHeading(): string
     {
-        return $this->server->name;
-    }
-
-    public function getSubheading(): string
-    {
-        return $this->server->public_ipv4;
+        return $this->record->name;
     }
 
     protected function getHeaderActions(): array
@@ -45,10 +40,10 @@ class ServerProvisioning extends Page
                 ->label('Delete Server')
                 ->color('danger')
                 ->requiresConfirmation()
-                ->visible(fn () => $this->server->provisioned_at === null)
+                ->visible(fn () => $this->record->provisioned_at === null)
                 ->modalDescription('Deleting a server will remove all settings. We will delete it for you, but you might have to manually remove it from your provider.')
                 ->modalIcon('heroicon-o-trash')
-                ->action(fn () => $this->server->delete())
+                ->action(fn () => $this->record->delete())
                 ->after(fn () => $this->redirect(route('filament.admin.resources.servers.index'))),
         ];
     }

@@ -51,7 +51,7 @@ class ServerResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
-                    ->url(fn (Model $record): string => ServerResource::getUrl('custom', ['server' => $record])),
+                    ->url(fn (Model $record): string => ServerResource::getUrl('custom', ['record' => $record])),
                 //                    ->visible(fn (Model $record) => $record->provisioned_at !== null),
                 //                Tables\Actions\EditAction::make(),
             ])
@@ -64,7 +64,7 @@ class ServerResource extends Resource
                 Tables\Actions\CreateAction::make(),
             ])
             ->recordUrl(
-                fn (Model $record): string => ServerResource::getUrl('custom', ['server' => $record])
+                fn (Model $record): string => ServerResource::getUrl('custom', ['record' => $record])
                 //                fn (Model $record): string => ! $record->provisioned_at ? ServerResource::getUrl('custom', ['server' => $record]) : ServerResource::getUrl('edit', ['record' => $record])
             );
     }
@@ -82,7 +82,7 @@ class ServerResource extends Resource
             'index' => Pages\ListServers::route('/'),
             'create' => Pages\CreateServer::route('/create'),
             'edit' => Pages\EditServer::route('/{record}/edit'),
-            'custom' => Pages\ServerProvisioning::route('/{server}'),
+            'custom' => Pages\ServerProvisioning::route('/{record}'),
         ];
     }
 

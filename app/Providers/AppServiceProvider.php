@@ -2,13 +2,12 @@
 
 namespace App\Providers;
 
-use App\Models;
 use Illuminate\Contracts\Console\Kernel as ConsoleKernel;
 use Illuminate\Contracts\Http\Kernel as HttpKernel;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
@@ -17,8 +16,6 @@ use Illuminate\Support\Str;
 use Illuminate\Translation\Translator;
 use Illuminate\Validation\Factory;
 use Illuminate\Validation\Validator;
-use Laravel\Socialite\Facades\Socialite;
-use Laravel\Socialite\Two\GithubProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -36,6 +33,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->enableSafetyMechanisms();
+
+        Blade::anonymousComponentPath(__DIR__.'/../../resources/views/filament/components');
 
         //        $this->app->bind(GithubProvider::class, fn () => Socialite::driver('github'));
 

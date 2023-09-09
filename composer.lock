@@ -4,8 +4,56 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c56899f454a08812917981abcf4fde72",
+    "content-hash": "39c50460c9108db786477eed6c4fe11a",
     "packages": [
+        {
+            "name": "aymanalhattami/filament-page-with-sidebar",
+            "version": "2.0.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/aymanalhattami/filament-page-with-sidebar.git",
+                "reference": "34bd9d30733d881e42405f6aa8e7789d230a8c83"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/aymanalhattami/filament-page-with-sidebar/zipball/34bd9d30733d881e42405f6aa8e7789d230a8c83",
+                "reference": "34bd9d30733d881e42405f6aa8e7789d230a8c83",
+                "shasum": ""
+            },
+            "require": {
+                "filament/support": "^3.0",
+                "spatie/laravel-package-tools": "^1.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "AymanAlhattami\\FilamentPageWithSidebar\\FilamentPageWithSidebarServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AymanAlhattami\\FilamentPageWithSidebar\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ayman Alhattami",
+                    "email": "ayman.m.alhattami@gmail.com"
+                }
+            ],
+            "description": "Organize resource pages in sidebar instead of putting all the buttons and links elsewhere in order to make navigation between pages more comfortable.",
+            "support": {
+                "issues": "https://github.com/aymanalhattami/filament-page-with-sidebar/issues",
+                "source": "https://github.com/aymanalhattami/filament-page-with-sidebar/tree/2.0.4"
+            },
+            "time": "2023-09-05T06:18:22+00:00"
+        },
         {
             "name": "bacon/bacon-qr-code",
             "version": "2.0.8",
