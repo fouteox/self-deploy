@@ -30,13 +30,22 @@ class ServerResource extends Resource
             ->setNavigationItems([
                 PageNavigationItem::make('Overview')
                     ->url(static::getUrl('view', ['record' => $record]))
-                    ->icon('heroicon-s-eye'),
-                PageNavigationItem::make('Manage')
-                    ->url(static::getUrl('edit', ['record' => $record]))
-                    ->icon('heroicon-s-cog-6-tooth'),
+                    ->icon('heroicon-s-eye')
+                    ->isActiveWhen(function () {
+                        return request()->routeIs(static::getRouteBaseName().'.view');
+                    }),
                 PageNavigationItem::make('Sites')
                     ->url(static::getUrl('sites', ['record' => $record]))
-                    ->icon('heroicon-s-globe-alt'),
+                    ->icon('heroicon-s-globe-alt')
+                    ->isActiveWhen(function () {
+                        return request()->routeIs(static::getRouteBaseName().'.sites');
+                    }),
+                PageNavigationItem::make('Manage')
+                    ->url(static::getUrl('edit', ['record' => $record]))
+                    ->icon('heroicon-s-cog-6-tooth')
+                    ->isActiveWhen(function () {
+                        return request()->routeIs(static::getRouteBaseName().'.edit');
+                    }),
             ]);
     }
 
