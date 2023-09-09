@@ -100,9 +100,9 @@ class Server extends Model
             $server->installed_software ??= [];
         });
 
-        static::deleted(function ($server) {
-            event(new ServerDeleted($server->id, $server->team_id));
-        });
+        //        static::deleted(function ($server) {
+        //            event(new ServerDeleted($server->id, $server->team_id));
+        //        });
     }
 
     /**

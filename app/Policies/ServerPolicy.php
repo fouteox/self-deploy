@@ -44,7 +44,7 @@ class ServerPolicy
      */
     public function update(User $user, Server $server): bool
     {
-        return $user->currentTeam->id === $server->team_id && ! $server->uninstallation_requested_at;
+        return $user->currentTeam->id === $server->team_id && ! $server->uninstallation_requested_at && $server->provisioned_at;
     }
 
     /**
@@ -55,7 +55,7 @@ class ServerPolicy
         return $user->currentTeam->id === $server->team_id && ! $server->uninstallation_requested_at;
     }
 
-    public function deleteAny(User $user): bool
+    public function deleteAny(): bool
     {
         return false;
     }

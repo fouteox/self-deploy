@@ -52,4 +52,9 @@ class CreateServer extends CreateRecord
             'database_password' => $database_password,
         ];
     }
+
+    protected function getRedirectUrl(): string
+    {
+        return route('filament.admin.resources.servers.custom', ['server' => $this->record->id]);
+    }
 }

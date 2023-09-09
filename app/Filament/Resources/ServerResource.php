@@ -6,11 +6,6 @@ use App\Filament\Resources\ServerResource\Pages;
 use App\Models\Server;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Infolists\Components\Grid;
-use Filament\Infolists\Components\Section;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\ViewEntry;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -22,7 +17,7 @@ class ServerResource extends Resource
 {
     protected static ?string $model = Server::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-server';
 
     public static function form(Form $form): Form
     {
@@ -45,6 +40,7 @@ class ServerResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name'),
+                Tables\Columns\TextColumn::make('provider')->state(fn (Model $record) => $record->provider->getDisplayName()),
                 Tables\Columns\TextColumn::make('public_ipv4')
                     ->label('IP Address'),
                 Tables\Columns\TextColumn::make('status')
@@ -55,8 +51,9 @@ class ServerResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
-                    ->visible(fn (Model $record) => $record->provisioned_at !== null),
-                Tables\Actions\EditAction::make(),
+                    ->url(fn (Model $record): string => ServerResource::getUrl('custom', ['server' => $record])),
+                //                    ->visible(fn (Model $record) => $record->provisioned_at !== null),
+                //                Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -67,35 +64,9 @@ class ServerResource extends Resource
                 Tables\Actions\CreateAction::make(),
             ])
             ->recordUrl(
-                fn (Model $record): string => ! $record->provisioned_at ? ServerResource::getUrl('view', ['record' => $record]) : ServerResource::getUrl('edit', ['record' => $record])
+                fn (Model $record): string => ServerResource::getUrl('custom', ['server' => $record])
+                //                fn (Model $record): string => ! $record->provisioned_at ? ServerResource::getUrl('custom', ['server' => $record]) : ServerResource::getUrl('edit', ['record' => $record])
             );
-    }
-
-    public static function infolist(Infolist $infolist): Infolist
-    {
-        return $infolist
-            ->schema([
-                Grid::make([
-                    'default' => 1,
-                    'md' => 3,
-                ])
-                    ->schema([
-                        Section::make('Provision Command')
-                            ->schema([
-                                ViewEntry::make('provision_command')
-                                    ->helperText('Cliquez sur ce bouton pour afficher une fenêtre modale avec la commande à exécuter sur votre serveur pour le provisionner.')
-                                    ->view('filament.infolists.entries.provision-modal')
-                                    ->hiddenLabel(),
-                            ])
-                            ->columnSpan(['default' => 1, 'md' => 1]),
-                        Section::make([
-                            TextEntry::make('name'),
-                            TextEntry::make('public_ipv4')
-                                ->label('IP Address'),
-                        ])
-                            ->columnSpan(['default' => 1, 'md' => 2]),
-                    ]),
-            ]);
     }
 
     public static function getRelations(): array
@@ -111,8 +82,7 @@ class ServerResource extends Resource
             'index' => Pages\ListServers::route('/'),
             'create' => Pages\CreateServer::route('/create'),
             'edit' => Pages\EditServer::route('/{record}/edit'),
-            'view' => Pages\ViewServer::route('/{record}'),
-            'custom' => Pages\ServerProvisionning::route('/{record}/provision'),
+            'custom' => Pages\ServerProvisioning::route('/{server}'),
         ];
     }
 
