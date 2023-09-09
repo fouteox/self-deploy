@@ -3,13 +3,18 @@
 namespace App\Filament\Resources\ServerResource\Pages;
 
 use App\Filament\Resources\ServerResource;
+use App\Models\Server;
 use App\Traits\RedirectsIfProvisioned;
 use AymanAlhattami\FilamentPageWithSidebar\Traits\HasPageSidebar;
-use Filament\Resources\Pages\ViewRecord;
+use Filament\Resources\Pages\Page;
 
-class ViewServer extends ViewRecord
+class ListSitesServer extends Page
 {
     use HasPageSidebar, RedirectsIfProvisioned;
 
     protected static string $resource = ServerResource::class;
+
+    protected static string $view = 'filament.resources.server-resource.pages.list-sites-server';
+
+    public Server $record;
 }

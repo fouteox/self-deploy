@@ -32,7 +32,7 @@ class AdminPanelProvider extends PanelProvider
             ->topNavigation()
             ->navigationItems([
                 NavigationItem::make('Sites')
-                    ->icon('heroicon-o-globe-alt')
+                    ->icon('heroicon-s-globe-alt')
                     ->sort(3),
             ])
             ->profile()

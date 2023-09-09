@@ -3,8 +3,8 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ServerResource\Pages;
+use App\FilamentPageSidebar\FilamentPageSideBar;
 use App\Models\Server;
-use AymanAlhattami\FilamentPageWithSidebar\FilamentPageSidebar;
 use AymanAlhattami\FilamentPageWithSidebar\PageNavigationItem;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -19,16 +19,24 @@ class ServerResource extends Resource
 {
     protected static ?string $model = Server::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-server';
+    protected static ?string $navigationIcon = 'heroicon-s-server';
 
     public static function sidebar(Model $record): FilamentPageSidebar
     {
         return FilamentPageSidebar::make()
+            ->setTitle($record->name)
+            ->setDescription($record->public_ipv4)
+            ->setDescriptionCopyable(true)
             ->setNavigationItems([
-                PageNavigationItem::make('Dashboard')
-                    ->url(static::getUrl('view', ['record' => $record])),
-                PageNavigationItem::make('Edit')
-                    ->url(static::getUrl('edit', ['record' => $record])),
+                PageNavigationItem::make('Overview')
+                    ->url(static::getUrl('view', ['record' => $record]))
+                    ->icon('heroicon-s-eye'),
+                PageNavigationItem::make('Manage')
+                    ->url(static::getUrl('edit', ['record' => $record]))
+                    ->icon('heroicon-s-cog-6-tooth'),
+                PageNavigationItem::make('Sites')
+                    ->url(static::getUrl('sites', ['record' => $record]))
+                    ->icon('heroicon-s-globe-alt'),
             ]);
     }
 
@@ -97,6 +105,7 @@ class ServerResource extends Resource
             'edit' => Pages\EditServer::route('/{record}/edit'),
             'provisioning' => Pages\ServerProvisioning::route('/{record}/provisioning'),
             'dashboard' => Pages\DashboardServer::route('/{record}/dashboard'),
+            'sites' => Pages\ListSitesServer::route('/{record}/sites'),
         ];
     }
 
