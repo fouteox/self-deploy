@@ -41,6 +41,54 @@ class ServerResource extends Resource
                     ->isActiveWhen(function () {
                         return request()->routeIs(static::getRouteBaseName().'.sites');
                     }),
+                PageNavigationItem::make('Databases')
+                    ->url(static::getUrl('databases', ['record' => $record]))
+                    ->icon('heroicon-s-circle-stack')
+                    ->isActiveWhen(function () {
+                        return request()->routeIs(static::getRouteBaseName().'.databases');
+                    }),
+                PageNavigationItem::make('Cronjobs')
+                    ->url(static::getUrl('cronjobs', ['record' => $record]))
+                    ->icon('heroicon-s-clock')
+                    ->isActiveWhen(function () {
+                        return request()->routeIs(static::getRouteBaseName().'.cronjobs');
+                    }),
+                PageNavigationItem::make('Daemons')
+                    ->url(static::getUrl('daemons', ['record' => $record]))
+                    ->icon('heroicon-s-wrench-screwdriver')
+                    ->isActiveWhen(function () {
+                        return request()->routeIs(static::getRouteBaseName().'.daemons');
+                    }),
+                PageNavigationItem::make('Firewall Rules')
+                    ->url(static::getUrl('firewall-rules', ['record' => $record]))
+                    ->icon('heroicon-s-shield-check')
+                    ->isActiveWhen(function () {
+                        return request()->routeIs(static::getRouteBaseName().'.firewall-rules');
+                    }),
+                PageNavigationItem::make('Backups')
+                    ->url(static::getUrl('backups', ['record' => $record]))
+                    ->icon('heroicon-s-rectangle-stack')
+                    ->isActiveWhen(function () {
+                        return request()->routeIs(static::getRouteBaseName().'.backups');
+                    }),
+                PageNavigationItem::make('Software')
+                    ->url(static::getUrl('software', ['record' => $record]))
+                    ->icon('heroicon-s-code-bracket')
+                    ->isActiveWhen(function () {
+                        return request()->routeIs(static::getRouteBaseName().'.software');
+                    }),
+                PageNavigationItem::make('Files')
+                    ->url(static::getUrl('files', ['record' => $record]))
+                    ->icon('heroicon-s-document-text')
+                    ->isActiveWhen(function () {
+                        return request()->routeIs(static::getRouteBaseName().'.files');
+                    }),
+                PageNavigationItem::make('Logs')
+                    ->url(static::getUrl('logs', ['record' => $record]))
+                    ->icon('heroicon-s-book-open')
+                    ->isActiveWhen(function () {
+                        return request()->routeIs(static::getRouteBaseName().'.logs');
+                    }),
                 PageNavigationItem::make('Manage')
                     ->url(static::getUrl('edit', ['record' => $record]))
                     ->icon('heroicon-s-cog-6-tooth')
@@ -124,6 +172,14 @@ class ServerResource extends Resource
             'edit' => Pages\EditServer::route('/{record}/edit'),
             'provisioning' => Pages\ServerProvisioning::route('/{record}/provisioning'),
             'sites' => Pages\ListSitesServer::route('/{record}/sites'),
+            'databases' => Pages\DatabaseServer::route('/{record}/databases'),
+            'cronjobs' => Pages\CronServer::route('/{record}/cronjobs'),
+            'daemons' => Pages\DaemonServer::route('/{record}/daemons'),
+            'firewall-rules' => Pages\FirewallRulesServer::route('/{record}/firewall-rules'),
+            'backups' => Pages\BackupServer::route('/{record}/backups'),
+            'software' => Pages\SoftwareServer::route('/{record}/software'),
+            'files' => Pages\FileServer::route('/{record}/files'),
+            'logs' => Pages\LogServer::route('/{record}/logs'),
         ];
     }
 
