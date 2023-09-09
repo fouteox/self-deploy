@@ -104,7 +104,6 @@ class ServerResource extends Resource
             'create' => Pages\CreateServer::route('/create'),
             'edit' => Pages\EditServer::route('/{record}/edit'),
             'provisioning' => Pages\ServerProvisioning::route('/{record}/provisioning'),
-            'dashboard' => Pages\DashboardServer::route('/{record}/dashboard'),
             'sites' => Pages\ListSitesServer::route('/{record}/sites'),
         ];
     }
