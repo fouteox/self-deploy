@@ -15,7 +15,6 @@ class CreateServer extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $customServer = true;
 
         //        $credentials = $customServer ? null : $this->user()->credentials()
         //            ->canBeUsedByTeam($this->team())
@@ -55,6 +54,6 @@ class CreateServer extends CreateRecord
 
     protected function getRedirectUrl(): string
     {
-        return route('filament.admin.resources.servers.custom', ['server' => $this->record->id]);
+        return route('filament.admin.resources.servers.provisioning', ['record' => $this->record->id]);
     }
 }

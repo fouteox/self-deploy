@@ -15,6 +15,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class ServerResource extends Resource
 {
@@ -39,7 +40,7 @@ class ServerResource extends Resource
                     ->url(static::getUrl('sites', ['record' => $record]))
                     ->icon('heroicon-s-globe-alt')
                     ->isActiveWhen(function () {
-                        return request()->routeIs(static::getRouteBaseName().'.sites');
+                        return Str::startsWith(request()->route()->getName(), static::getRouteBaseName().'.sites');
                     }),
                 PageNavigationItem::make('Databases')
                     ->url(static::getUrl('databases', ['record' => $record]))
@@ -167,11 +168,12 @@ class ServerResource extends Resource
     {
         return [
             'index' => Pages\ListServers::route('/'),
-            'view' => Pages\ViewServer::route('/{record}'),
             'create' => Pages\CreateServer::route('/create'),
+            'view' => Pages\ViewServer::route('/{record}'),
             'edit' => Pages\EditServer::route('/{record}/edit'),
             'provisioning' => Pages\ServerProvisioning::route('/{record}/provisioning'),
             'sites' => Pages\ListSitesServer::route('/{record}/sites'),
+            'sites/create' => Pages\CreateSiteServer::route('/{record}/sites/create'),
             'databases' => Pages\DatabaseServer::route('/{record}/databases'),
             'cronjobs' => Pages\CronServer::route('/{record}/cronjobs'),
             'daemons' => Pages\DaemonServer::route('/{record}/daemons'),
