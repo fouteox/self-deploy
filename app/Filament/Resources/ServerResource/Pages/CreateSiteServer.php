@@ -20,22 +20,18 @@ class CreateSiteServer extends Page
 
     public Server $record;
 
-    //    public function getBreadcrumbs(): array
-    //    {
-    //        $parentBreadcrumbs = parent::getBreadcrumbs();
-    //
-    //        // Utilisation de end() pour obtenir la dernière clé du tableau
-    //        $lastKey = key(end($parentBreadcrumbs));
-    //
-    //        // Retirer le dernier élément et le stocker
-    //        $lastBreadcrumbValue = array_pop($parentBreadcrumbs);
-    //
-    //        // Ajouter votre élément personnalisé
-    //        $parentBreadcrumbs['your_custom_url'] = 'Your Custom Breadcrumb';
-    //
-    //        // Ajouter à nouveau le dernier élément du parent
-    //        $parentBreadcrumbs[$lastKey] = $lastBreadcrumbValue;
-    //
-    //        return $parentBreadcrumbs;
-    //    }
+    public function getBreadcrumbs(): array
+    {
+        $parentBreadcrumbs = parent::getBreadcrumbs();
+
+        $lastElement = array_splice($parentBreadcrumbs, -1);
+        $lastKey = key($lastElement);
+        $lastValue = reset($lastElement);
+
+        $parentBreadcrumbs[$this->getResource()::getUrl('sites', ['record' => $this->record])] = 'Sites';
+
+        $parentBreadcrumbs[$lastKey] = $lastValue;
+
+        return $parentBreadcrumbs;
+    }
 }
