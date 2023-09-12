@@ -23,6 +23,8 @@ class ListSitesServer extends Page implements HasTable
 
     protected static string $view = 'filament.resources.server-resource.pages.list-sites-server';
 
+    protected static ?string $title = 'Sites';
+
     public Server $record;
 
     public function table(Table $table): Table
