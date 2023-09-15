@@ -33,7 +33,9 @@ class ListSitesServer extends Page implements HasTable
             ->relationship(fn (): HasMany => $this->record->sites())
             ->inverseRelationship('server')
             ->columns([
-                TextColumn::make('repository_url'),
+                TextColumn::make('address'),
+                TextColumn::make('php_version'),
+                TextColumn::make('created_at'),
             ])
             ->filters([
                 // ...
