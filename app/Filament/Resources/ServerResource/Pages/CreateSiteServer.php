@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\ServerResource\Pages;
 
-use App\Enum;
 use App\Filament\Resources\ServerResource;
 use App\Models\PendingDeploymentException;
 use App\Models\Server;
@@ -21,13 +20,11 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Validation\Rule;
-use ProtoneMedia\Splade\Facades\Toast;
+use Illuminate\Validation\Rules\Unique;
 
 class CreateSiteServer extends Page
 {
@@ -60,14 +57,21 @@ class CreateSiteServer extends Page
                             ->label('Hostname')
                             ->prefix('https://')
                             ->placeholder('example.com')
-                            ->required(),
+                            ->required()
+                            ->maxValue(255)
+                            ->unique(modifyRuleUsing: function (Unique $rule) {
+                                return $rule->where('server_id', $this->record->id);
+                            }),
                         Grid::make()
                             ->schema([
                                 Select::make('php_version')
                                     ->label('PHP Version')
                                     ->options($this->record->installedPhpVersions())
                                     ->default(array_keys($this->record->installedPhpVersions())[0])
+                                    ->selectablePlaceholder(false)
                                     ->required()
+                                    ->enum(PhpVersion::class)
+                                    ->in(array_keys($this->record->installedPhpVersions()))
                                     ->native(false),
                                 Select::make('type')
                                     ->label('Project type')
@@ -78,22 +82,25 @@ class CreateSiteServer extends Page
                                     ])
                                     ->default('laravel')
                                     ->selectablePlaceholder(false)
-                                    ->required(),
+                                    ->required()
+                                    ->enum(SiteType::class),
                             ]),
                         TextInput::make('web_folder')
                             ->label('Web folder')
                             ->default('/public')
-                            ->required(),
+                            ->requiredUnless('type', SiteType::Wordpress->value)
+                            ->maxValue(255),
                         Checkbox::make('zero_downtime_deployment')
                             ->label('Enable zero downtime deployment')
-                            ->default(true),
+                            ->default(true)
+                            ->rules(['boolean']),
                         TextInput::make('repository_url')
                             ->label('Repository URL')
-                            ->required(),
+                            ->maxValue(255),
                         TextInput::make('repository_branch')
                             ->label('Repository branch')
                             ->default('main')
-                            ->required(),
+                            ->maxValue(255),
                         $this->createTextInput(
                             name: 'server_public_key',
                             label: 'Public Key Server',
@@ -102,32 +109,33 @@ class CreateSiteServer extends Page
                             switchAction: fn () => $this->type_key = 'deploy_key_uuid',
                             switchLabel: 'Switch to deploy key'
                         ),
-
                         $this->createTextInput(
                             name: 'deploy_key_uuid',
                             label: 'Deploy key UUID',
                             default: 'test',
                             helperText: 'Instead of adding the public key of the server, you can add this deploy key to Github or other repository provider.',
                             switchAction: fn () => $this->type_key = 'server_public_key',
-                            switchLabel: 'Switch to server\'s public key'
+                            switchLabel: 'Switch to server\'s public key',
+                            rules: ['uuid']
                         ),
                     ]),
                 Actions::make([
                     Action::make('create')
-                        ->action(fn () => dd($this->form->getModel(), $this->form->getState())),
+                        ->action(fn () => $this->store()),
                 ]),
             ])
             ->model(Site::class)
             ->statePath('data');
     }
 
-    protected function createTextInput(string $name, string $label, string $default, string $helperText, callable $switchAction, string $switchLabel): TextInput
+    protected function createTextInput(string $name, string $label, string $default, string $helperText, callable $switchAction, string $switchLabel, array $rules = []): TextInput
     {
         return TextInput::make($name)
             ->label($label)
             ->helperText($helperText)
             ->default($default)
             ->disabled()
+            ->dehydrated()
             ->hidden(fn ($get) => $this->type_key !== $name)
             ->extraAttributes(function ($state) {
                 return [
@@ -142,7 +150,53 @@ class CreateSiteServer extends Page
                 Action::make('switchAction')
                     ->label($switchLabel)
                     ->action($switchAction)
-            );
+            )
+            ->rules($rules);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @throws PendingDeploymentException
+     */
+    public function store()
+    {
+        //        abort_unless($this->team()->subscriptionOptions()->canCreateSiteOnServer($server), 403);
+
+        $site = $this->record->sites()->make(Arr::except($this->form->getState(), ['deploy_key_uuid', 'server_public_key']));
+
+        $site->tls_setting = TlsSetting::Auto;
+        $site->user = $this->record->username;
+        $site->path = "/home/$site->user/$site->address";
+        $site->forceFill($site->type->defaultAttributes($site->zero_downtime_deployment));
+
+        if ($this->form->getState()['deploy_key_uuid']) {
+            $deployKey = Cache::get("deploy-key-$this->record->id-{$this->form->getState()['deploy_key_uuid']}");
+
+            if (! $deployKey) {
+                Notification::make()
+                    ->title(__('The deploy key has expired. Please try again.'))
+                    ->danger()
+                    ->send();
+
+                return back();
+            }
+
+            $site->deploy_key_public = $deployKey->publicKey;
+            $site->deploy_key_private = $deployKey->privateKey;
+        }
+
+        $site->save();
+
+        $this->logActivity(__("Created site ':address' on server ':server'", ['address' => $site->address, 'server' => $this->record->name]), $site);
+
+        $deployment = $site->deploy(user: $this->user());
+
+        if ($this->form->getState()['deploy_key_uuid']) {
+            Cache::forget($this->form->getState()['deploy_key_uuid']);
+        }
+        // TODO: gerer la redirection sur une nouvelle route et créer une clé uuid
+        //        return to_route('servers.sites.deployments.show', [$server, $site, $deployment]);
     }
 
     public function getBreadcrumbs(): array
@@ -158,57 +212,5 @@ class CreateSiteServer extends Page
         $parentBreadcrumbs[$lastKey] = $lastValue;
 
         return $parentBreadcrumbs;
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @throws PendingDeploymentException
-     */
-    public function store(Server $server, Request $request): RedirectResponse
-    {
-        abort_unless($this->team()->subscriptionOptions()->canCreateSiteOnServer($server), 403);
-
-        $data = $request->validate([
-            'address' => ['required', 'string', 'max:255', Rule::unique('sites', 'address')->where('server_id', $server->id)],
-            'php_version' => ['required', Enum::rule(PhpVersion::class), Rule::in(array_keys($server->installedPhpVersions()))],
-            'type' => ['required', Enum::rule(SiteType::class)],
-            'web_folder' => [Enum::requiredUnless(SiteType::Wordpress, 'type'), 'string', 'max:255'],
-            'zero_downtime_deployment' => ['boolean'],
-            'repository_url' => ['nullable', 'string', 'max:255'],
-            'repository_branch' => ['nullable', 'string', 'max:255'],
-            'deploy_key_uuid' => ['nullable', 'string', 'uuid'],
-        ]);
-
-        $site = $server->sites()->make(Arr::except($data, 'deploy_key_uuid'));
-        $site->tls_setting = TlsSetting::Auto;
-        $site->user = $server->username;
-        $site->path = "/home/$site->user/$site->address";
-        $site->forceFill($site->type->defaultAttributes($site->zero_downtime_deployment));
-
-        if ($data['deploy_key_uuid']) {
-            $deployKey = Cache::get("deploy-key-$server->id-{$data['deploy_key_uuid']}");
-
-            if (! $deployKey) {
-                //                Toast::danger(__('The deploy key has expired. Please try again.'));
-
-                return back();
-            }
-
-            $site->deploy_key_public = $deployKey->publicKey;
-            $site->deploy_key_private = $deployKey->privateKey;
-        }
-
-        $site->save();
-
-        $this->logActivity(__("Created site ':address' on server ':server'", ['address' => $site->address, 'server' => $server->name]), $site);
-
-        $deployment = $site->deploy(user: $this->user());
-
-        if ($data['deploy_key_uuid']) {
-            Cache::forget($data['deploy_key_uuid']);
-        }
-
-        return to_route('servers.sites.deployments.show', [$server, $site, $deployment]);
     }
 }
