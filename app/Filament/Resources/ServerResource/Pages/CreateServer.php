@@ -5,12 +5,14 @@ namespace App\Filament\Resources\ServerResource\Pages;
 use App\Filament\Resources\ServerResource;
 use App\KeyPairGenerator;
 use App\Provider;
+use App\Traits\HandlesUserContext;
 use Filament\Resources\Pages\CreateRecord;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class CreateServer extends CreateRecord
 {
+    use HandlesUserContext;
+
     protected static string $resource = ServerResource::class;
 
     protected function mutateFormDataBeforeCreate(array $data): array
@@ -40,8 +42,8 @@ class CreateServer extends CreateRecord
 
         return [
             ...$data,
-            'team_id' => Auth::user()->currentTeam->id,
-            'created_by_user_id' => Auth::user()->id,
+            'team_id' => $this->team()->id,
+            'created_by_user_id' => $this->user()->id,
             'provider' => $provider,
             'public_key' => $publicKey,
             'private_key' => $private_key,

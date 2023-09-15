@@ -5,18 +5,14 @@ namespace App\Http\Controllers;
 use App\Enum;
 use App\Http\Requests\UpdateSiteRequest;
 use App\Jobs\UninstallSite;
-use App\KeyPair;
 use App\KeyPairGenerator;
 use App\Models\Server;
 use App\Models\Site;
 use App\Models\SiteType;
-use App\Models\TlsSetting;
 use App\Server\PhpVersion;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 use ProtoneMedia\Splade\Facades\Toast;
 use ProtoneMedia\Splade\SpladeTable;
 
@@ -83,58 +79,6 @@ class SiteController extends Controller
             'types' => Enum::options(SiteType::class),
             'hasGithubCredentials' => $this->user()->hasGithubCredentials(),
         ]);
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Server $server, Request $request)
-    {
-        abort_unless($this->team()->subscriptionOptions()->canCreateSiteOnServer($server), 403);
-
-        $data = $request->validate([
-            'address' => ['required', 'string', 'max:255', Rule::unique('sites', 'address')->where('server_id', $server->id)],
-            'php_version' => ['required', Enum::rule(PhpVersion::class), Rule::in(array_keys($server->installedPhpVersions()))],
-            'type' => ['required', Enum::rule(SiteType::class)],
-            'web_folder' => [Enum::requiredUnless(SiteType::Wordpress, 'type'), 'string', 'max:255'],
-            'zero_downtime_deployment' => ['boolean'],
-            'repository_url' => ['nullable', 'string', 'max:255'],
-            'repository_branch' => ['nullable', 'string', 'max:255'],
-            'deploy_key_uuid' => ['nullable', 'string', 'uuid'],
-        ]);
-
-        /** @var Site */
-        $site = $server->sites()->make(Arr::except($data, 'deploy_key_uuid'));
-        $site->tls_setting = TlsSetting::Auto;
-        $site->user = $server->username;
-        $site->path = "/home/{$site->user}/{$site->address}";
-        $site->forceFill($site->type->defaultAttributes($site->zero_downtime_deployment));
-
-        if ($data['deploy_key_uuid']) {
-            /** @var KeyPair|null */
-            $deployKey = Cache::get("deploy-key-{$server->id}-{$data['deploy_key_uuid']}");
-
-            if (! $deployKey) {
-                Toast::danger(__('The deploy key has expired. Please try again.'));
-
-                return back();
-            }
-
-            $site->deploy_key_public = $deployKey->publicKey;
-            $site->deploy_key_private = $deployKey->privateKey;
-        }
-
-        $site->save();
-
-        $this->logActivity(__("Created site ':address' on server ':server'", ['address' => $site->address, 'server' => $server->name]), $site);
-
-        $deployment = $site->deploy(user: $this->user());
-
-        if ($data['deploy_key_uuid']) {
-            Cache::forget($data['deploy_key_uuid']);
-        }
-
-        return to_route('servers.sites.deployments.show', [$server, $site, $deployment]);
     }
 
     /**
