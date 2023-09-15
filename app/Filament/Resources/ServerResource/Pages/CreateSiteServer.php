@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\ServerResource\Pages;
 
 use App\Filament\Resources\ServerResource;
+use App\KeyPair;
+use App\KeyPairGenerator;
 use App\Models\PendingDeploymentException;
 use App\Models\Server;
 use App\Models\Site;
@@ -24,6 +26,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Unique;
 
 class CreateSiteServer extends Page
@@ -42,8 +45,27 @@ class CreateSiteServer extends Page
 
     public string $type_key = 'server_public_key';
 
-    public function mount(): void
+    public KeyPair $key_pair;
+
+    public ?string $deploy_key_uuid = null;
+
+    public function mount(KeyPairGenerator $key_pair_generator): void
     {
+        $this->deploy_key_uuid = Cache::get("deploy-key-uuid-{$this->record->id}");
+
+        if (! $this->deploy_key_uuid) {
+            $this->deploy_key_uuid = Str::uuid()->toString();
+            Cache::put("deploy-key-uuid-{$this->record->id}", $this->deploy_key_uuid, config('session.lifetime') * 60);
+        }
+
+        $key_pair = Cache::remember(
+            key: "deploy-key-{$this->record->id}-{$this->deploy_key_uuid}",
+            ttl: config('session.lifetime') * 60,
+            callback: fn () => $key_pair_generator->ed25519()
+        );
+
+        $this->key_pair = new KeyPair($key_pair->privateKey, $key_pair->publicKey, $key_pair->type);
+
         $this->form->fill();
     }
 
@@ -106,13 +128,13 @@ class CreateSiteServer extends Page
                             label: 'Public Key Server',
                             default: $this->record->user_public_key ?? 'default',
                             helperText: 'Make sure this key is added to Github or other repository provider.',
-                            switchAction: fn () => $this->type_key = 'deploy_key_uuid',
+                            switchAction: fn () => $this->type_key = 'deploy_key',
                             switchLabel: 'Switch to deploy key'
                         ),
                         $this->createTextInput(
-                            name: 'deploy_key_uuid',
+                            name: 'deploy_key',
                             label: 'Deploy key UUID',
-                            default: 'test',
+                            default: trim($this->key_pair->publicKey),
                             helperText: 'Instead of adding the public key of the server, you can add this deploy key to Github or other repository provider.',
                             switchAction: fn () => $this->type_key = 'server_public_key',
                             switchLabel: 'Switch to server\'s public key',
@@ -161,6 +183,7 @@ class CreateSiteServer extends Page
      */
     public function store()
     {
+        dd();
         //        abort_unless($this->team()->subscriptionOptions()->canCreateSiteOnServer($server), 403);
 
         $site = $this->record->sites()->make(Arr::except($this->form->getState(), ['deploy_key_uuid', 'server_public_key']));
