@@ -59,7 +59,7 @@ class CreateSiteServer extends Page
         }
 
         $key_pair = Cache::remember(
-            key: "deploy-key-{$this->record->id}-{$this->deploy_key_uuid}",
+            key: "deploy-key-{$this->record->id}-$this->deploy_key_uuid",
             ttl: config('session.lifetime') * 60,
             callback: fn () => $key_pair_generator->ed25519()
         );
@@ -138,7 +138,6 @@ class CreateSiteServer extends Page
                             helperText: 'Instead of adding the public key of the server, you can add this deploy key to Github or other repository provider.',
                             switchAction: fn () => $this->type_key = 'server_public_key',
                             switchLabel: 'Switch to server\'s public key',
-                            rules: ['uuid']
                         ),
                     ]),
                 Actions::make([
@@ -181,20 +180,19 @@ class CreateSiteServer extends Page
      *
      * @throws PendingDeploymentException
      */
-    public function store()
+    public function store(): void
     {
-        dd();
         //        abort_unless($this->team()->subscriptionOptions()->canCreateSiteOnServer($server), 403);
 
-        $site = $this->record->sites()->make(Arr::except($this->form->getState(), ['deploy_key_uuid', 'server_public_key']));
+        $site = $this->record->sites()->make(Arr::except($this->form->getState(), ['deploy_key', 'server_public_key']));
 
         $site->tls_setting = TlsSetting::Auto;
         $site->user = $this->record->username;
         $site->path = "/home/$site->user/$site->address";
         $site->forceFill($site->type->defaultAttributes($site->zero_downtime_deployment));
 
-        if ($this->form->getState()['deploy_key_uuid']) {
-            $deployKey = Cache::get("deploy-key-$this->record->id-{$this->form->getState()['deploy_key_uuid']}");
+        if ($this->form->getState()['deploy_key']) {
+            $deployKey = Cache::get("deploy-key-{$this->record->id}-$this->deploy_key_uuid");
 
             if (! $deployKey) {
                 Notification::make()
@@ -202,7 +200,7 @@ class CreateSiteServer extends Page
                     ->danger()
                     ->send();
 
-                return back();
+                return;
             }
 
             $site->deploy_key_public = $deployKey->publicKey;
@@ -215,10 +213,10 @@ class CreateSiteServer extends Page
 
         $deployment = $site->deploy(user: $this->user());
 
-        if ($this->form->getState()['deploy_key_uuid']) {
-            Cache::forget($this->form->getState()['deploy_key_uuid']);
-        }
-        // TODO: gerer la redirection sur une nouvelle route et créer une clé uuid
+        Cache::forget("deploy-key-{$this->record->id}-$this->deploy_key_uuid");
+        Cache::forget("deploy-key-uuid-{$this->record->id}");
+
+        // TODO: gerer la redirection sur une nouvelle route
         //        return to_route('servers.sites.deployments.show', [$server, $site, $deployment]);
     }
 
