@@ -61,7 +61,7 @@ class SiteResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('address'),
-                TextColumn::make('php_version'),
+                TextColumn::make('server.name'),
                 TextColumn::make('created_at'),
             ])
             ->filters([
