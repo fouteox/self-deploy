@@ -8,20 +8,20 @@
     "packages": [
         {
             "name": "aymanalhattami/filament-page-with-sidebar",
-            "version": "2.0.5",
+            "version": "2.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aymanalhattami/filament-page-with-sidebar.git",
-                "reference": "05fc664083a5d2d9ff1dbf31b51d3ac116ade6ff"
+                "reference": "2e9d87bac5f8ce16cd87a7be2d719d4044262473"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aymanalhattami/filament-page-with-sidebar/zipball/05fc664083a5d2d9ff1dbf31b51d3ac116ade6ff",
-                "reference": "05fc664083a5d2d9ff1dbf31b51d3ac116ade6ff",
+                "url": "https://api.github.com/repos/aymanalhattami/filament-page-with-sidebar/zipball/2e9d87bac5f8ce16cd87a7be2d719d4044262473",
+                "reference": "2e9d87bac5f8ce16cd87a7be2d719d4044262473",
                 "shasum": ""
             },
             "require": {
-                "filament/support": "^3.0",
+                "filament/filament": "^3.0",
                 "spatie/laravel-package-tools": "^1.0"
             },
             "type": "library",
@@ -50,9 +50,9 @@
             "description": "Organize resource pages in sidebar instead of putting all the buttons and links elsewhere in order to make navigation between pages more comfortable.",
             "support": {
                 "issues": "https://github.com/aymanalhattami/filament-page-with-sidebar/issues",
-                "source": "https://github.com/aymanalhattami/filament-page-with-sidebar/tree/2.0.5"
+                "source": "https://github.com/aymanalhattami/filament-page-with-sidebar/tree/2.1.0"
             },
-            "time": "2023-09-09T16:05:38+00:00"
+            "time": "2023-09-17T05:39:46+00:00"
         },
         {
             "name": "bacon/bacon-qr-code",
@@ -3633,16 +3633,16 @@
         },
         {
             "name": "livewire/livewire",
-            "version": "v3.0.4",
+            "version": "v3.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/livewire/livewire.git",
-                "reference": "23d035b6353c6dfe7ea9c8d288295dbbb46ef84a"
+                "reference": "37f11583c61a75d51b2146c2fe38f506ad36014b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/livewire/livewire/zipball/23d035b6353c6dfe7ea9c8d288295dbbb46ef84a",
-                "reference": "23d035b6353c6dfe7ea9c8d288295dbbb46ef84a",
+                "url": "https://api.github.com/repos/livewire/livewire/zipball/37f11583c61a75d51b2146c2fe38f506ad36014b",
+                "reference": "37f11583c61a75d51b2146c2fe38f506ad36014b",
                 "shasum": ""
             },
             "require": {
@@ -3695,7 +3695,7 @@
             "description": "A front-end framework for Laravel.",
             "support": {
                 "issues": "https://github.com/livewire/livewire/issues",
-                "source": "https://github.com/livewire/livewire/tree/v3.0.4"
+                "source": "https://github.com/livewire/livewire/tree/v3.0.5"
             },
             "funding": [
                 {
@@ -3703,7 +3703,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-09-14T22:57:11+00:00"
+            "time": "2023-09-16T11:51:32+00:00"
         },
         {
             "name": "masterminds/html5",

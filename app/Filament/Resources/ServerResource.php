@@ -29,6 +29,7 @@ class ServerResource extends Resource
             ->setTitle($record->name)
             ->setDescription($record->public_ipv4)
             ->setDescriptionCopyable(true)
+            ->wireNavigate()
             ->setNavigationItems([
                 PageNavigationItem::make('Overview')
                     ->url(static::getUrl('view', ['record' => $record]))
