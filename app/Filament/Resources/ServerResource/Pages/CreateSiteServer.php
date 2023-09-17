@@ -22,6 +22,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Arr;
@@ -51,6 +52,13 @@ class CreateSiteServer extends Page
 
     public function mount(KeyPairGenerator $key_pair_generator): void
     {
+        $this->extracted($key_pair_generator);
+
+        $this->form->fill();
+    }
+
+    public function extracted(KeyPairGenerator $key_pair_generator): void
+    {
         $this->deploy_key_uuid = Cache::get("deploy-key-uuid-{$this->record->id}");
 
         if (! $this->deploy_key_uuid) {
@@ -65,8 +73,6 @@ class CreateSiteServer extends Page
         );
 
         $this->key_pair = new KeyPair($key_pair->privateKey, $key_pair->publicKey, $key_pair->type);
-
-        $this->form->fill();
     }
 
     public function form(Form $form): Form
@@ -142,7 +148,7 @@ class CreateSiteServer extends Page
                     ]),
                 Actions::make([
                     Action::make('create')
-                        ->action(fn () => $this->store()),
+                        ->action(fn (Set $set) => $this->store($set)),
                 ]),
             ])
             ->model(Site::class)
@@ -180,7 +186,7 @@ class CreateSiteServer extends Page
      *
      * @throws PendingDeploymentException
      */
-    public function store(): void
+    public function store(Set $set)
     {
         //        abort_unless($this->team()->subscriptionOptions()->canCreateSiteOnServer($server), 403);
 
@@ -200,7 +206,11 @@ class CreateSiteServer extends Page
                     ->danger()
                     ->send();
 
-                return;
+                $key_pair_generator = new KeyPairGenerator();
+                $this->extracted($key_pair_generator);
+                $set('deploy_key', trim($this->key_pair->publicKey));
+
+                return null;
             }
 
             $site->deploy_key_public = $deployKey->publicKey;
@@ -216,8 +226,9 @@ class CreateSiteServer extends Page
         Cache::forget("deploy-key-{$this->record->id}-$this->deploy_key_uuid");
         Cache::forget("deploy-key-uuid-{$this->record->id}");
 
-        // TODO: gerer la redirection sur une nouvelle route
-        //        return to_route('servers.sites.deployments.show', [$server, $site, $deployment]);
+        return to_route('filament.admin.resources.servers.sites', $this->record);
+        // TODO: modifier la redirection et le type de retour de la fonction
+        //        return to_route('servers.sites.deployments.show', [$this->record, $site, $deployment]);
     }
 
     public function getBreadcrumbs(): array
