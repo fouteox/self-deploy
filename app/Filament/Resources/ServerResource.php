@@ -197,8 +197,7 @@ class ServerResource extends Resource
 
         return [
             self::getUrl() => $parentBreadcrumb,
-            ServerResource::getUrl('sites', ['record' => $record]) => $record->name,
-            //            ...$parentBreadcrumbs,
+            self::getUrl('sites', ['record' => $record]) => $record->name,
         ];
     }
 }

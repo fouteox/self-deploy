@@ -8,9 +8,8 @@ trait BreadcrumbTrait
     {
         $breadcrumb = $this->getBreadcrumb();
 
-        return [
-            ...self::getResource()::getBreadcrumbs($this->record),
+        return array_merge(self::getResource()::getBreadcrumbs($this->record), [
             0 => $breadcrumb,
-        ];
+        ]);
     }
 }

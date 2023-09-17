@@ -39,6 +39,12 @@ class SiteResource extends Resource
                     ->isActiveWhen(function () {
                         return Str::startsWith(request()->route()->getName(), static::getRouteBaseName().'.edit');
                     }),
+                PageNavigationItem::make('Deployments')
+                    ->url(static::getUrl('deployments_site', ['record' => $record]))
+                    ->icon('heroicon-s-globe-alt')
+                    ->isActiveWhen(function () {
+                        return Str::startsWith(request()->route()->getName(), static::getRouteBaseName().'.deployments_site');
+                    }),
             ]);
     }
 
@@ -80,6 +86,7 @@ class SiteResource extends Resource
             'view' => Pages\ViewSite::route('/{record}'),
             'create' => Pages\CreateSite::route('/create'),
             'edit' => Pages\EditSite::route('/{record}/edit'),
+            'deployments_site' => Pages\DeploymentsSite::route('/{record}/deployments'),
         ];
     }
 
@@ -95,5 +102,14 @@ class SiteResource extends Resource
         return parent::getEloquentQuery()
             ->with('server')
             ->whereRelation('server', 'team_id', auth()->user()->currentTeam->id);
+    }
+
+    public static function getBreadcrumbs(Model $record): array
+    {
+        return [
+            ServerResource::getUrl() => 'Servers',
+            ServerResource::getUrl('sites', ['record' => $record->server]) => $record->server->name,
+            self::getUrl('view', ['record' => $record]) => $record->address,
+        ];
     }
 }
