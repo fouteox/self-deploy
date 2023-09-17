@@ -65,6 +65,8 @@ class SiteResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with('server');
+        return parent::getEloquentQuery()
+            ->with('server')
+            ->whereRelation('server', 'team_id', auth()->user()->currentTeam->id);
     }
 }
