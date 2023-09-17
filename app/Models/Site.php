@@ -75,7 +75,7 @@ class Site extends Model
         'updated' => SiteUpdated::class,
     ];
 
-    protected static function booted()
+    protected static function booted(): void
     {
         static::creating(function (Site $site) {
             $site->deploy_token = Str::random(32);
@@ -140,6 +140,14 @@ class Site extends Model
     }
 
     /**
+     * Returns the path to the site's web folder.
+     */
+    public function getWebDirectory(): string
+    {
+        return $this->generateWebDirectory($this->web_folder);
+    }
+
+    /**
      * Generates a path to the site's web folder.
      */
     public function generateWebDirectory(string $folder): string
@@ -151,14 +159,6 @@ class Site extends Model
             : "{$this->path}/repository/{$folder}";
 
         return rtrim($path, '/');
-    }
-
-    /**
-     * Returns the path to the site's web folder.
-     */
-    public function getWebDirectory(): string
-    {
-        return $this->generateWebDirectory($this->web_folder);
     }
 
     /**
@@ -236,6 +236,11 @@ class Site extends Model
         return $deployment;
     }
 
+    public function deployments(): HasMany
+    {
+        return $this->hasMany(Deployment::class);
+    }
+
     /**
      * Updates the site's Caddyfile with the given PHP version and web folder.
      */
@@ -271,6 +276,8 @@ class Site extends Model
             ?: Notification::route('mail', $this->deploy_notification_email);
     }
 
+    //
+
     /**
      * Returns an instance of SiteFiles to manage the site's files.
      */
@@ -278,8 +285,6 @@ class Site extends Model
     {
         return new SiteFiles($this);
     }
-
-    //
 
     public function server(): BelongsTo
     {
@@ -296,11 +301,6 @@ class Site extends Model
         return $this->hasOne(Certificate::class)
             ->where((new Certificate)->qualifyColumn('is_active'), true)
             ->ofMany();
-    }
-
-    public function deployments(): HasMany
-    {
-        return $this->hasMany(Deployment::class);
     }
 
     public function latestDeployment(): HasOne
