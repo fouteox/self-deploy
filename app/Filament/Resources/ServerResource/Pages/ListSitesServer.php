@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ServerResource\Pages;
 
 use App\Filament\Resources\ServerResource;
+use App\Filament\Resources\SiteResource;
 use App\Models\Server;
 use App\Traits\RedirectsIfProvisioned;
 use AymanAlhattami\FilamentPageWithSidebar\Traits\HasPageSidebar;
@@ -13,6 +14,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ListSitesServer extends Page implements HasTable
@@ -49,7 +51,8 @@ class ListSitesServer extends Page implements HasTable
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make()
                     ->url(fn (): string => ServerResource::getUrl('sites/create', ['record' => $this->record])),
-            ]);
+            ])
+            ->recordUrl(fn (Model $site) => SiteResource::getUrl('view', ['record' => $site]));
     }
 
     protected function getHeaderActions(): array
