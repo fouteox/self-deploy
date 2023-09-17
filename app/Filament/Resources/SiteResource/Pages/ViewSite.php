@@ -20,10 +20,10 @@ class ViewSite extends ViewRecord
         reset($parentBreadcrumbs);
         $sitesName = array_shift($parentBreadcrumbs);
 
-        $newSitesUrl = ServerResource::getUrl('sites', ['record' => static::getRecord()->server]);
+        $newSitesUrl = SiteResource::getUrl('view', ['record' => static::getRecord()->id]);
 
         $breadcrumbs = [
-            ServerResource::getUrl('view', ['record' => static::getRecord()->server]) => static::getRecord()->server->name,
+            ServerResource::getUrl('sites', ['record' => static::getRecord()->server]) => static::getRecord()->server->name,
             $newSitesUrl => $sitesName,
         ] + $parentBreadcrumbs;
 

@@ -5,6 +5,7 @@ namespace App\Filament\Resources\ServerResource\Pages;
 use App\Filament\Resources\ServerResource;
 use App\Filament\Resources\SiteResource;
 use App\Models\Server;
+use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
 use AymanAlhattami\FilamentPageWithSidebar\Traits\HasPageSidebar;
 use Filament\Actions\CreateAction;
@@ -19,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ListSitesServer extends Page implements HasTable
 {
-    use HasPageSidebar, InteractsWithTable, RedirectsIfProvisioned;
+    use BreadcrumbTrait, HasPageSidebar, InteractsWithTable, RedirectsIfProvisioned;
 
     protected static string $resource = ServerResource::class;
 

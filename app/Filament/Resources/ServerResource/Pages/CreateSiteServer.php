@@ -11,6 +11,7 @@ use App\Models\Site;
 use App\Models\SiteType;
 use App\Models\TlsSetting;
 use App\Server\PhpVersion;
+use App\Traits\BreadcrumbTrait;
 use App\Traits\HandlesUserContext;
 use App\Traits\RedirectsIfProvisioned;
 use AymanAlhattami\FilamentPageWithSidebar\Traits\HasPageSidebar;
@@ -32,7 +33,7 @@ use Illuminate\Validation\Rules\Unique;
 
 class CreateSiteServer extends Page
 {
-    use HandlesUserContext, HasPageSidebar, RedirectsIfProvisioned;
+    use BreadcrumbTrait, HandlesUserContext, HasPageSidebar, RedirectsIfProvisioned;
 
     protected static string $resource = ServerResource::class;
 
@@ -229,20 +230,5 @@ class CreateSiteServer extends Page
         return to_route('filament.admin.resources.servers.sites', $this->record);
         // TODO: modifier la redirection et le type de retour de la fonction
         //        return to_route('servers.sites.deployments.show', [$this->record, $site, $deployment]);
-    }
-
-    public function getBreadcrumbs(): array
-    {
-        $parentBreadcrumbs = parent::getBreadcrumbs();
-
-        $lastElement = array_splice($parentBreadcrumbs, -1);
-        $lastKey = key($lastElement);
-        $lastValue = reset($lastElement);
-
-        $parentBreadcrumbs[$this->getResource()::getUrl('sites', ['record' => $this->record])] = 'Sites';
-
-        $parentBreadcrumbs[$lastKey] = $lastValue;
-
-        return $parentBreadcrumbs;
     }
 }

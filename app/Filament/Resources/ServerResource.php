@@ -31,12 +31,12 @@ class ServerResource extends Resource
             ->setDescriptionCopyable(true)
             ->wireNavigate()
             ->setNavigationItems([
-                PageNavigationItem::make('Overview')
-                    ->url(static::getUrl('view', ['record' => $record]))
-                    ->icon('heroicon-s-eye')
-                    ->isActiveWhen(function () {
-                        return request()->routeIs(static::getRouteBaseName().'.view');
-                    }),
+                //                PageNavigationItem::make('Overview')
+                //                    ->url(static::getUrl('view', ['record' => $record]))
+                //                    ->icon('heroicon-s-eye')
+                //                    ->isActiveWhen(function () {
+                //                        return request()->routeIs(static::getRouteBaseName().'.view');
+                //                    }),
                 PageNavigationItem::make('Sites')
                     ->url(static::getUrl('sites', ['record' => $record]))
                     ->icon('heroicon-s-globe-alt')
@@ -154,7 +154,7 @@ class ServerResource extends Resource
                 Tables\Actions\CreateAction::make(),
             ])
             ->recordUrl(
-                fn (Model $record): string => ! $record->provisioned_at ? static::getUrl('provisioning', ['record' => $record]) : static::getUrl('view', ['record' => $record])
+                fn (Model $record): string => ! $record->provisioned_at ? static::getUrl('provisioning', ['record' => $record]) : static::getUrl('sites', ['record' => $record])
             );
     }
 
@@ -170,7 +170,7 @@ class ServerResource extends Resource
         return [
             'index' => Pages\ListServers::route('/'),
             'create' => Pages\CreateServer::route('/create'),
-            'view' => Pages\ViewServer::route('/{record}'),
+            //            'view' => Pages\ViewServer::route('/{record}'),
             'edit' => Pages\EditServer::route('/{record}/edit'),
             'provisioning' => Pages\ServerProvisioning::route('/{record}/provisioning'),
             'sites' => Pages\ListSitesServer::route('/{record}/sites'),
@@ -189,5 +189,16 @@ class ServerResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return Auth::user()->currentTeam->servers()->getQuery();
+    }
+
+    public static function getBreadcrumbs(Model $record): array
+    {
+        $parentBreadcrumb = parent::getBreadcrumb();
+
+        return [
+            self::getUrl() => $parentBreadcrumb,
+            ServerResource::getUrl('sites', ['record' => $record]) => $record->name,
+            //            ...$parentBreadcrumbs,
+        ];
     }
 }
