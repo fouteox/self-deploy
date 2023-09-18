@@ -3,8 +3,8 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\SiteResource\Pages;
-use App\FilamentPageSidebar\FilamentPageSideBar;
 use App\Models\Site;
+use AymanAlhattami\FilamentPageWithSidebar\FilamentPageSidebar;
 use AymanAlhattami\FilamentPageWithSidebar\PageNavigationItem;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -25,7 +25,6 @@ class SiteResource extends Resource
     {
         return FilamentPageSidebar::make()
             ->setTitle($record->address)
-            ->wireNavigate()
             ->setNavigationItems([
                 PageNavigationItem::make('Overview')
                     ->url(static::getUrl('view', ['record' => $record]))

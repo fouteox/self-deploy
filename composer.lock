@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aymanalhattami/filament-page-with-sidebar",
-            "version": "2.1.0",
+            "version": "2.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aymanalhattami/filament-page-with-sidebar.git",
-                "reference": "2e9d87bac5f8ce16cd87a7be2d719d4044262473"
+                "reference": "b8e1bf55e3c8590c1811cdaf929bc0deb8d5d3c7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aymanalhattami/filament-page-with-sidebar/zipball/2e9d87bac5f8ce16cd87a7be2d719d4044262473",
-                "reference": "2e9d87bac5f8ce16cd87a7be2d719d4044262473",
+                "url": "https://api.github.com/repos/aymanalhattami/filament-page-with-sidebar/zipball/b8e1bf55e3c8590c1811cdaf929bc0deb8d5d3c7",
+                "reference": "b8e1bf55e3c8590c1811cdaf929bc0deb8d5d3c7",
                 "shasum": ""
             },
             "require": {
@@ -50,9 +50,9 @@
             "description": "Organize resource pages in sidebar instead of putting all the buttons and links elsewhere in order to make navigation between pages more comfortable.",
             "support": {
                 "issues": "https://github.com/aymanalhattami/filament-page-with-sidebar/issues",
-                "source": "https://github.com/aymanalhattami/filament-page-with-sidebar/tree/2.1.0"
+                "source": "https://github.com/aymanalhattami/filament-page-with-sidebar/tree/2.1.1"
             },
-            "time": "2023-09-17T05:39:46+00:00"
+            "time": "2023-09-17T19:52:40+00:00"
         },
         {
             "name": "bacon/bacon-qr-code",
@@ -5054,16 +5054,16 @@
         },
         {
             "name": "psy/psysh",
-            "version": "v0.11.20",
+            "version": "v0.11.21",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bobthecow/psysh.git",
-                "reference": "0fa27040553d1d280a67a4393194df5228afea5b"
+                "reference": "bcb22101107f3bf770523b65630c9d547f60c540"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bobthecow/psysh/zipball/0fa27040553d1d280a67a4393194df5228afea5b",
-                "reference": "0fa27040553d1d280a67a4393194df5228afea5b",
+                "url": "https://api.github.com/repos/bobthecow/psysh/zipball/bcb22101107f3bf770523b65630c9d547f60c540",
+                "reference": "bcb22101107f3bf770523b65630c9d547f60c540",
                 "shasum": ""
             },
             "require": {
@@ -5093,6 +5093,10 @@
             "extra": {
                 "branch-alias": {
                     "dev-main": "0.11.x-dev"
+                },
+                "bamarni-bin": {
+                    "bin-links": false,
+                    "forward-command": false
                 }
             },
             "autoload": {
@@ -5124,9 +5128,9 @@
             ],
             "support": {
                 "issues": "https://github.com/bobthecow/psysh/issues",
-                "source": "https://github.com/bobthecow/psysh/tree/v0.11.20"
+                "source": "https://github.com/bobthecow/psysh/tree/v0.11.21"
             },
-            "time": "2023-07-31T14:32:22+00:00"
+            "time": "2023-09-17T21:15:54+00:00"
         },
         {
             "name": "ralouphie/getallheaders",

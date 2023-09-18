@@ -3,9 +3,9 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ServerResource\Pages;
-use App\FilamentPageSidebar\FilamentPageSideBar;
 use App\Infrastructure\Entities\ServerStatus;
 use App\Models\Server;
+use AymanAlhattami\FilamentPageWithSidebar\FilamentPageSidebar;
 use AymanAlhattami\FilamentPageWithSidebar\PageNavigationItem;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -29,14 +29,7 @@ class ServerResource extends Resource
             ->setTitle($record->name)
             ->setDescription($record->public_ipv4)
             ->setDescriptionCopyable(true)
-            ->wireNavigate()
             ->setNavigationItems([
-                //                PageNavigationItem::make('Overview')
-                //                    ->url(static::getUrl('view', ['record' => $record]))
-                //                    ->icon('heroicon-s-eye')
-                //                    ->isActiveWhen(function () {
-                //                        return request()->routeIs(static::getRouteBaseName().'.view');
-                //                    }),
                 PageNavigationItem::make('Sites')
                     ->url(static::getUrl('sites', ['record' => $record]))
                     ->icon('heroicon-s-globe-alt')
