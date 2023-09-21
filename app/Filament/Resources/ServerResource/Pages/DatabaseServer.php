@@ -17,5 +17,7 @@ class DatabaseServer extends Page
 
     protected static string $view = 'filament.resources.server-resource.pages.database-server';
 
+    protected static ?string $title = 'Databases';
+
     public Server $record;
 }
