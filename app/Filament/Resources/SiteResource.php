@@ -4,16 +4,14 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SiteResource\Pages;
 use App\Models\Site;
-use AymanAlhattami\FilamentPageWithSidebar\FilamentPageSidebar;
-use AymanAlhattami\FilamentPageWithSidebar\PageNavigationItem;
 use Filament\Forms\Form;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 
 class SiteResource extends Resource
 {
@@ -21,31 +19,40 @@ class SiteResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-s-globe-alt';
 
-    public static function sidebar(Model $record): FilamentPageSidebar
+    public static function getRecordSubNavigation(Page $page): array
     {
-        return FilamentPageSidebar::make()
-            ->setTitle($record->address)
-            ->setNavigationItems([
-                PageNavigationItem::make('Overview')
-                    ->url(static::getUrl('view', ['record' => $record]))
-                    ->icon('heroicon-s-eye')
-                    ->isActiveWhen(function () {
-                        return request()->routeIs(static::getRouteBaseName().'.view');
-                    }),
-                PageNavigationItem::make('Edit')
-                    ->url(static::getUrl('edit', ['record' => $record]))
-                    ->icon('heroicon-s-globe-alt')
-                    ->isActiveWhen(function () {
-                        return Str::startsWith(request()->route()->getName(), static::getRouteBaseName().'.edit');
-                    }),
-                PageNavigationItem::make('Deployments')
-                    ->url(static::getUrl('deployments_site', ['record' => $record]))
-                    ->icon('heroicon-s-globe-alt')
-                    ->isActiveWhen(function () {
-                        return Str::startsWith(request()->route()->getName(), static::getRouteBaseName().'.deployments_site');
-                    }),
-            ]);
+        return $page->generateNavigationItems([
+            Pages\ViewSite::class,
+            Pages\EditSite::class,
+            Pages\DeploymentsSite::class,
+        ]);
     }
+
+    /*    public static function sidebar(Model $record): FilamentPageSidebar
+        {
+            return FilamentPageSidebar::make()
+                ->setTitle($record->address)
+                ->setNavigationItems([
+                    PageNavigationItem::make('Overview')
+                        ->url(static::getUrl('view', ['record' => $record]))
+                        ->icon('heroicon-s-eye')
+                        ->isActiveWhen(function () {
+                            return request()->routeIs(static::getRouteBaseName().'.view');
+                        }),
+                    PageNavigationItem::make('Edit')
+                        ->url(static::getUrl('edit', ['record' => $record]))
+                        ->icon('heroicon-s-globe-alt')
+                        ->isActiveWhen(function () {
+                            return Str::startsWith(request()->route()->getName(), static::getRouteBaseName().'.edit');
+                        }),
+                    PageNavigationItem::make('Deployments')
+                        ->url(static::getUrl('deployments_site', ['record' => $record]))
+                        ->icon('heroicon-s-globe-alt')
+                        ->isActiveWhen(function () {
+                            return Str::startsWith(request()->route()->getName(), static::getRouteBaseName().'.deployments_site');
+                        }),
+                ]);
+        }*/
 
     public static function form(Form $form): Form
     {
@@ -107,8 +114,8 @@ class SiteResource extends Resource
     {
         return [
             ServerResource::getUrl() => 'Servers',
-            ServerResource::getUrl('sites', ['record' => $record->server]) => $record->server->name,
-            self::getUrl('view', ['record' => $record]) => $record->address,
+            //            ServerResource::getUrl('sites', ['record' => $record->server]) => $record->server->name,
+            //            self::getUrl('view', ['record' => $record]) => $record->address,
         ];
     }
 }

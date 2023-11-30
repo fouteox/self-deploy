@@ -14,7 +14,6 @@ use App\Server\PhpVersion;
 use App\Traits\BreadcrumbTrait;
 use App\Traits\HandlesUserContext;
 use App\Traits\RedirectsIfProvisioned;
-use AymanAlhattami\FilamentPageWithSidebar\Traits\HasPageSidebar;
 use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Checkbox;
@@ -33,7 +32,7 @@ use Illuminate\Validation\Rules\Unique;
 
 class CreateSiteServer extends Page
 {
-    use BreadcrumbTrait, HandlesUserContext, HasPageSidebar, RedirectsIfProvisioned;
+    use BreadcrumbTrait, HandlesUserContext, RedirectsIfProvisioned;
 
     protected static string $resource = ServerResource::class;
 

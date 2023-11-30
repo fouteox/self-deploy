@@ -4,15 +4,16 @@ namespace App\Filament\Resources\ServerResource\Pages;
 
 use App\Filament\Resources\ServerResource;
 use App\Traits\BreadcrumbTrait;
-use AymanAlhattami\FilamentPageWithSidebar\Traits\HasPageSidebar;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
 class EditServer extends EditRecord
 {
-    use BreadcrumbTrait, HasPageSidebar;
+    use BreadcrumbTrait;
 
     protected static string $resource = ServerResource::class;
+
+    protected static ?string $navigationIcon = 'heroicon-s-cog-6-tooth';
 
     protected function getHeaderActions(): array
     {

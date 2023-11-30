@@ -3,19 +3,19 @@
 namespace App\Filament\Resources\ServerResource\Pages;
 
 use App\Filament\Resources\ServerResource;
-use App\Models\Server;
 use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
-use AymanAlhattami\FilamentPageWithSidebar\Traits\HasPageSidebar;
-use Filament\Resources\Pages\Page;
+use Filament\Resources\Pages\ManageRelatedRecords;
 
-class DaemonServer extends Page
+class DaemonServer extends ManageRelatedRecords
 {
-    use BreadcrumbTrait, HasPageSidebar, RedirectsIfProvisioned;
+    use BreadcrumbTrait, RedirectsIfProvisioned;
 
     protected static string $resource = ServerResource::class;
 
-    protected static string $view = 'filament.resources.server-resource.pages.daemon-server';
+    protected static string $relationship = 'daemons';
 
-    public Server $record;
+    protected static ?string $title = 'Daemons';
+
+    protected static ?string $navigationIcon = 'heroicon-s-wrench-screwdriver';
 }

@@ -3,14 +3,15 @@
 namespace App\Filament\Resources\SiteResource\Pages;
 
 use App\Filament\Resources\SiteResource;
-use App\Models\Site;
 use App\Traits\BreadcrumbTrait;
-use AymanAlhattami\FilamentPageWithSidebar\Traits\HasPageSidebar;
+use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
 
 class DeploymentsSite extends Page
 {
-    use BreadcrumbTrait, HasPageSidebar;
+    use BreadcrumbTrait, InteractsWithRecord {
+        BreadcrumbTrait::getBreadcrumbs insteadof InteractsWithRecord;
+    }
 
     protected static string $resource = SiteResource::class;
 
@@ -18,5 +19,12 @@ class DeploymentsSite extends Page
 
     protected static ?string $title = 'Deployments';
 
-    public Site $record;
+    protected static ?string $navigationIcon = 'heroicon-s-globe-alt';
+
+    public function mount(int|string $record): void
+    {
+        $this->record = $this->resolveRecord($record);
+
+        static::authorizeResourceAccess();
+    }
 }

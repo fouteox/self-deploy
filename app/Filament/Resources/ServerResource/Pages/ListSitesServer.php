@@ -4,31 +4,27 @@ namespace App\Filament\Resources\ServerResource\Pages;
 
 use App\Filament\Resources\ServerResource;
 use App\Filament\Resources\SiteResource;
-use App\Models\Server;
 use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
-use AymanAlhattami\FilamentPageWithSidebar\Traits\HasPageSidebar;
 use Filament\Actions\CreateAction;
-use Filament\Resources\Pages\Page;
+use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Concerns\InteractsWithTable;
-use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class ListSitesServer extends Page implements HasTable
+class ListSitesServer extends ManageRelatedRecords
 {
-    use BreadcrumbTrait, HasPageSidebar, InteractsWithTable, RedirectsIfProvisioned;
+    use BreadcrumbTrait, RedirectsIfProvisioned;
 
     protected static string $resource = ServerResource::class;
 
-    protected static string $view = 'filament.resources.server-resource.pages.list-sites-server';
+    protected static string $relationship = 'sites';
 
     protected static ?string $title = 'Sites';
 
-    public Server $record;
+    protected static ?string $navigationIcon = 'heroicon-s-globe-alt';
 
     public function table(Table $table): Table
     {

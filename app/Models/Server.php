@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Events\ServerDeleted;
 use App\Events\ServerUpdated;
 use App\Exceptions\ServerHandler;
 use App\Infrastructure\Entities\ServerStatus;

@@ -5,17 +5,15 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ServerResource\Pages;
 use App\Infrastructure\Entities\ServerStatus;
 use App\Models\Server;
-use AymanAlhattami\FilamentPageWithSidebar\FilamentPageSidebar;
-use AymanAlhattami\FilamentPageWithSidebar\PageNavigationItem;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 
 class ServerResource extends Resource
 {
@@ -23,74 +21,20 @@ class ServerResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-s-server';
 
-    public static function sidebar(Model $record): FilamentPageSidebar
+    public static function getRecordSubNavigation(Page $page): array
     {
-        return FilamentPageSidebar::make()
-            ->setTitle($record->name)
-            ->setDescription($record->public_ipv4)
-            ->setDescriptionCopyable(true)
-            ->setNavigationItems([
-                PageNavigationItem::make('Sites')
-                    ->url(static::getUrl('sites', ['record' => $record]))
-                    ->icon('heroicon-s-globe-alt')
-                    ->isActiveWhen(function () {
-                        return Str::startsWith(request()->route()->getName(), static::getRouteBaseName().'.sites');
-                    }),
-                PageNavigationItem::make('Databases')
-                    ->url(static::getUrl('databases', ['record' => $record]))
-                    ->icon('heroicon-s-circle-stack')
-                    ->isActiveWhen(function () {
-                        return request()->routeIs(static::getRouteBaseName().'.databases');
-                    }),
-                PageNavigationItem::make('Cronjobs')
-                    ->url(static::getUrl('cronjobs', ['record' => $record]))
-                    ->icon('heroicon-s-clock')
-                    ->isActiveWhen(function () {
-                        return request()->routeIs(static::getRouteBaseName().'.cronjobs');
-                    }),
-                PageNavigationItem::make('Daemons')
-                    ->url(static::getUrl('daemons', ['record' => $record]))
-                    ->icon('heroicon-s-wrench-screwdriver')
-                    ->isActiveWhen(function () {
-                        return request()->routeIs(static::getRouteBaseName().'.daemons');
-                    }),
-                PageNavigationItem::make('Firewall Rules')
-                    ->url(static::getUrl('firewall-rules', ['record' => $record]))
-                    ->icon('heroicon-s-shield-check')
-                    ->isActiveWhen(function () {
-                        return request()->routeIs(static::getRouteBaseName().'.firewall-rules');
-                    }),
-                PageNavigationItem::make('Backups')
-                    ->url(static::getUrl('backups', ['record' => $record]))
-                    ->icon('heroicon-s-rectangle-stack')
-                    ->isActiveWhen(function () {
-                        return request()->routeIs(static::getRouteBaseName().'.backups');
-                    }),
-                PageNavigationItem::make('Software')
-                    ->url(static::getUrl('software', ['record' => $record]))
-                    ->icon('heroicon-s-code-bracket')
-                    ->isActiveWhen(function () {
-                        return request()->routeIs(static::getRouteBaseName().'.software');
-                    }),
-                PageNavigationItem::make('Files')
-                    ->url(static::getUrl('files', ['record' => $record]))
-                    ->icon('heroicon-s-document-text')
-                    ->isActiveWhen(function () {
-                        return request()->routeIs(static::getRouteBaseName().'.files');
-                    }),
-                PageNavigationItem::make('Logs')
-                    ->url(static::getUrl('logs', ['record' => $record]))
-                    ->icon('heroicon-s-book-open')
-                    ->isActiveWhen(function () {
-                        return request()->routeIs(static::getRouteBaseName().'.logs');
-                    }),
-                PageNavigationItem::make('Manage')
-                    ->url(static::getUrl('edit', ['record' => $record]))
-                    ->icon('heroicon-s-cog-6-tooth')
-                    ->isActiveWhen(function () {
-                        return request()->routeIs(static::getRouteBaseName().'.edit');
-                    }),
-            ]);
+        return $page->generateNavigationItems([
+            Pages\ListSitesServer::class,
+            Pages\DatabaseServer::class,
+            Pages\CronServer::class,
+            Pages\DaemonServer::class,
+            Pages\FirewallRulesServer::class,
+            Pages\BackupServer::class,
+            Pages\SoftwareServer::class,
+            Pages\FileServer::class,
+            Pages\LogServer::class,
+            Pages\EditServer::class,
+        ]);
     }
 
     public static function form(Form $form): Form
@@ -163,7 +107,6 @@ class ServerResource extends Resource
         return [
             'index' => Pages\ListServers::route('/'),
             'create' => Pages\CreateServer::route('/create'),
-            //            'view' => Pages\ViewServer::route('/{record}'),
             'edit' => Pages\EditServer::route('/{record}/edit'),
             'provisioning' => Pages\ServerProvisioning::route('/{record}/provisioning'),
             'sites' => Pages\ListSitesServer::route('/{record}/sites'),

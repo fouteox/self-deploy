@@ -3,19 +3,29 @@
 namespace App\Filament\Resources\ServerResource\Pages;
 
 use App\Filament\Resources\ServerResource;
-use App\Models\Server;
 use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
-use AymanAlhattami\FilamentPageWithSidebar\Traits\HasPageSidebar;
+use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
 
 class SoftwareServer extends Page
 {
-    use BreadcrumbTrait, HasPageSidebar, RedirectsIfProvisioned;
+    use BreadcrumbTrait, InteractsWithRecord, RedirectsIfProvisioned {
+        BreadcrumbTrait::getBreadcrumbs insteadof InteractsWithRecord;
+    }
 
     protected static string $resource = ServerResource::class;
 
     protected static string $view = 'filament.resources.server-resource.pages.software-server';
 
-    public Server $record;
+    protected static ?string $title = 'Softwares';
+
+    protected static ?string $navigationIcon = 'heroicon-s-code-bracket';
+
+    public function mount(int|string $record): void
+    {
+        $this->record = $this->resolveRecord($record);
+
+        static::authorizeResourceAccess();
+    }
 }
