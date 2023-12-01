@@ -46,33 +46,33 @@ class CronServer extends ManageRelatedRecords
                 // ...
             ])
             ->headerActions([
-                $this->customCreateProcess(),
+                Tables\Actions\CreateAction::make()
+                    ->mutateFormDataUsing(function (array $data) {
+                        return $this->mutateCronFormData($data);
+                    })
+                    ->successNotificationTitle(__('The Cron has been created and will be installed on the server.')),
                 //                    ->visible(fn (): bool => $this->getRelationship()->getResults()->count()),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->mutateFormDataUsing(function (array $data) {
+                        return $this->mutateCronFormData($data);
+                    })
+                    ->successNotificationTitle(__('The Cron has been updated.')),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
-            ])
-            ->emptyStateActions([
-                $this->customCreateProcess(),
             ]);
     }
 
-    private function customCreateProcess(): Tables\Actions\CreateAction
+    private function mutateCronFormData(array $data): array
     {
-        return Tables\Actions\CreateAction::make()
-            ->mutateFormDataUsing(function (array $data): array {
-                $data['expression'] = $data['expression'] ?? $data['frequency'] ?? null;
+        $data['expression'] = $data['expression'] ?? $data['frequency'] ?? null;
+        unset($data['frequency']);
 
-                unset($data['frequency']);
+        return $data;
 
-                return $data;
-            })
-            ->successNotificationTitle(__('The Cron has been created and will be installed on the server.'));
-        //            ->successNotification(null)
         //            ->after(fn () => Notification::make()
         //                ->success()
         //                ->title(__('The Cron has been created and will be installed on the server.'))
