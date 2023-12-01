@@ -26,6 +26,9 @@ class FileServer extends Page
     {
         $this->record = $this->resolveRecord($record);
 
+        //        $user = auth()->user();
+        //        $user->notify(Notification::make()->warning()->title('Test de notification')->toBroadcast());
+
         static::authorizeResourceAccess();
     }
 }
