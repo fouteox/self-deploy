@@ -114,8 +114,8 @@ class SiteResource extends Resource
     {
         return [
             ServerResource::getUrl() => 'Servers',
-            //            ServerResource::getUrl('sites', ['record' => $record->server]) => $record->server->name,
-            //            self::getUrl('view', ['record' => $record]) => $record->address,
+            ServerResource::getUrl('sites', ['record' => $record->server]) => $record->server->name,
+            self::getUrl('view', ['record' => $record]) => $record->address,
         ];
     }
 }

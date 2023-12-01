@@ -6,13 +6,11 @@ use App\Filament\Resources\ServerResource;
 use App\Filament\Resources\SiteResource;
 use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
-use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class DatabaseServer extends ManageRelatedRecords
 {
@@ -29,8 +27,6 @@ class DatabaseServer extends ManageRelatedRecords
     public function table(Table $table): Table
     {
         return $table
-            ->relationship(fn (): HasMany => $this->record->databases())
-            ->inverseRelationship('server')
             ->columns([
                 TextColumn::make('name'),
                 TextColumn::make('status'),
@@ -38,6 +34,9 @@ class DatabaseServer extends ManageRelatedRecords
             ])
             ->filters([
                 // ...
+            ])
+            ->headerActions([
+                Tables\Actions\CreateAction::make(),
             ])
             ->actions([
                 // ...
@@ -50,13 +49,5 @@ class DatabaseServer extends ManageRelatedRecords
                     ->url(fn (): string => ServerResource::getUrl('sites/create', ['record' => $this->record])),
             ])
             ->recordUrl(fn (Model $site) => SiteResource::getUrl('view', ['record' => $site]));
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            CreateAction::make()
-                ->url(fn (): string => ServerResource::getUrl('sites/create', ['record' => $this->record])),
-        ];
     }
 }

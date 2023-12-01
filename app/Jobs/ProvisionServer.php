@@ -33,10 +33,8 @@ class ProvisionServer implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return \App\Models\Task
      */
-    public function handle()
+    public function handle(): Task
     {
         $this->server->forceFill(['status' => ServerStatus::Provisioning])->save();
 
@@ -51,10 +49,8 @@ class ProvisionServer implements ShouldQueue
 
     /**
      * Handle a job failure.
-     *
-     * @return void
      */
-    public function failed(Throwable $exception)
+    public function failed(Throwable $exception): void
     {
         dispatch(new CleanupFailedServerProvisioning($this->server));
     }

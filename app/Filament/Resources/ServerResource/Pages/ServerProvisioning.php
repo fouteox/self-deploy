@@ -18,7 +18,7 @@ class ServerProvisioning extends Page
     public function mount(): void
     {
         if ($this->record->provisioned_at !== null) {
-            $this->redirect(ServerResource::getUrl('view', ['record' => $this->record]));
+            $this->redirect(ServerResource::getUrl('sites', ['record' => $this->record]));
         }
     }
 
@@ -38,7 +38,7 @@ class ServerProvisioning extends Page
                 ->modalDescription('Deleting a server will remove all settings. We will delete it for you, but you might have to manually remove it from your provider.')
                 ->modalIcon('heroicon-o-trash')
                 ->action(fn () => $this->record->delete())
-                ->after(fn () => $this->redirect(route('filament.admin.resources.servers.index'))),
+                ->after(fn () => $this->redirect(ServerResource::getUrl())),
         ];
     }
 }

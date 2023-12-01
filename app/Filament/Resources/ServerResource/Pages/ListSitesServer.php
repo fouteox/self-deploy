@@ -6,7 +6,6 @@ use App\Filament\Resources\ServerResource;
 use App\Filament\Resources\SiteResource;
 use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
-use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -39,6 +38,9 @@ class ListSitesServer extends ManageRelatedRecords
             ->filters([
                 // ...
             ])
+            ->headerActions([
+                Tables\Actions\CreateAction::make(),
+            ])
             ->actions([
                 // ...
             ])
@@ -50,13 +52,5 @@ class ListSitesServer extends ManageRelatedRecords
                     ->url(fn (): string => ServerResource::getUrl('sites/create', ['record' => $this->record])),
             ])
             ->recordUrl(fn (Model $site) => SiteResource::getUrl('view', ['record' => $site]));
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            CreateAction::make()
-                ->url(fn (): string => ServerResource::getUrl('sites/create', ['record' => $this->record])),
-        ];
     }
 }
