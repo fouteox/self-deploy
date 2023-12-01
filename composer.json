@@ -16,7 +16,8 @@
         "laravel/sanctum": "^v3.3.2",
         "laravel/socialite": "^v5.10.0",
         "laravel/tinker": "^v2.8.2",
-        "protonemedia/laravel-task-runner": "^1.1"
+        "protonemedia/laravel-task-runner": "^1.1",
+        "pusher/pusher-php-server": "^7.2"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.9",
@@ -47,7 +48,8 @@
             "@php artisan filament:upgrade"
         ],
         "post-update-cmd": [
-            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
+            "@php artisan filament:upgrade"
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
