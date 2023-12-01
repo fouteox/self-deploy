@@ -57,6 +57,5 @@ class CreateServer extends CreateRecord
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('provisioning', ['record' => $this->record]);
-        //        return route('filament.admin.resources.servers.provisioning', ['record' => $this->record->id]);
     }
 }
