@@ -9,6 +9,7 @@ use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -32,7 +33,11 @@ class CronServer extends ManageRelatedRecords
         return $table->modifyQueryUsing(fn (Builder $query) => $query->with('server'))
             ->columns([
                 TextColumn::make('user'),
-                TextColumn::make('expression'),
+                TextColumn::make('expression')->description(function (string $state): string {
+                    $options = Cron::predefinedFrequencyOptions();
+
+                    return $options[$state] ?? __('Custom expression');
+                }),
                 TextColumn::make('command'),
             ])
             ->filters([
@@ -58,9 +63,7 @@ class CronServer extends ManageRelatedRecords
     {
         return Tables\Actions\CreateAction::make()
             ->mutateFormDataUsing(function (array $data): array {
-                if (is_null($data['expression'])) {
-                    $data['expression'] = $data['frequency'];
-                }
+                $data['expression'] = $data['expression'] ?? $data['frequency'] ?? null;
 
                 unset($data['frequency']);
 
@@ -90,8 +93,10 @@ class CronServer extends ManageRelatedRecords
                     ->default($this->getRecord()->username),
                 Forms\Components\Radio::make('frequency')
                     ->options(Cron::predefinedFrequencyOptions())
-                    ->required(),
+                    ->required()
+                    ->live(),
                 Forms\Components\TextInput::make('expression')
+                    ->visible(fn (Get $get): bool => $get('frequency') === 'custom')
                     ->requiredIf('frequency', 'custom')
                     ->rule(new CronExpression)
                     ->maxLength(255),
