@@ -11,7 +11,6 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ListSitesServer extends ManageRelatedRecords
 {
@@ -28,8 +27,7 @@ class ListSitesServer extends ManageRelatedRecords
     public function table(Table $table): Table
     {
         return $table
-            ->relationship(fn (): HasMany => $this->record->sites())
-            ->inverseRelationship('server')
+            ->recordTitleAttribute('address')
             ->columns([
                 TextColumn::make('address'),
                 TextColumn::make('php_version'),

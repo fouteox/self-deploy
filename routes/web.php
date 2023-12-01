@@ -15,10 +15,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
 Route::middleware('signed:relative')->group(function () {
     // Backups...
     //    Route::get('/backup-job/{backup_job}', [BackupJobController::class, 'show'])->name('backup-job.show');
@@ -32,18 +28,4 @@ Route::middleware('signed:relative')->group(function () {
     Route::post('/webhook/task/{task}/failed', [TaskWebhookController::class, 'markAsFailed'])->name('webhook.task.mark-as-failed');
     Route::post('/webhook/task/{task}/finished', [TaskWebhookController::class, 'markAsFinished'])->name('webhook.task.mark-as-finished');
     Route::post('/webhook/task/{task}/callback', [TaskWebhookController::class, 'callback'])->name('webhook.task.callback');
-});
-
-Route::middleware([
-    'auth:sanctum',
-    config('jetstream.auth_session'),
-    'verified',
-])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-
-    Route::get('/filament', function () {
-        return redirect('/admin');
-    })->name('filament');
 });

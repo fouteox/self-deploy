@@ -26,7 +26,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->id('admin')
-            ->path('admin')
+            ->path('')
             ->login()
             ->topNavigation()
             ->profile()

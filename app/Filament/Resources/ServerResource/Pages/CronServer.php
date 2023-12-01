@@ -9,11 +9,11 @@ use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class CronServer extends ManageRelatedRecords
 {
@@ -29,7 +29,7 @@ class CronServer extends ManageRelatedRecords
 
     public function table(Table $table): Table
     {
-        return $table
+        return $table->modifyQueryUsing(fn (Builder $query) => $query->with('server'))
             ->columns([
                 TextColumn::make('user'),
                 TextColumn::make('expression'),
@@ -43,10 +43,11 @@ class CronServer extends ManageRelatedRecords
                 //                    ->visible(fn (): bool => $this->getRelationship()->getResults()->count()),
             ])
             ->actions([
-                // ...
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
-                // ...
+                Tables\Actions\DeleteBulkAction::make(),
             ])
             ->emptyStateActions([
                 $this->customCreateProcess(),

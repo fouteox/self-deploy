@@ -6,17 +6,17 @@ use App\TeamSubscriptionOptions;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Laravel\Jetstream\Events\TeamCreated;
 use Laravel\Jetstream\Events\TeamDeleted;
 use Laravel\Jetstream\Events\TeamUpdated;
-use Laravel\Jetstream\Team as JetstreamTeam;
 
 /**
  * @property Collection<int, Server> $servers
  */
-class Team extends JetstreamTeam
+class Team extends Model
 {
     use HasFactory;
     use HasUlids;
@@ -42,6 +42,11 @@ class Team extends JetstreamTeam
         return $this->hasMany(Server::class)->orderBy(
             (new Server)->qualifyColumn('name')
         );
+    }
+
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
     }
 
     public function backups(): HasManyThrough

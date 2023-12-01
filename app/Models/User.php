@@ -7,12 +7,12 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Notifications\Notification;
-use Laravel\Fortify\TwoFactorAuthenticatable;
-use Laravel\Jetstream\HasProfilePhoto;
-use Laravel\Jetstream\HasTeams;
 
 /**
  * @property Collection<int, Disk> $disks
@@ -24,11 +24,8 @@ use Laravel\Jetstream\HasTeams;
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory;
-    use HasProfilePhoto;
-    use HasTeams;
     use HasUlids;
     use Notifiable;
-    use TwoFactorAuthenticatable;
 
     protected $fillable = [
         'name', 'email', 'password',
@@ -95,15 +92,20 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->githubCredentials()->exists();
     }
 
-    public function githubCredentials()
+    public function githubCredentials(): HasOne
     {
         return $this->credentials()->one()->where('provider', Provider::Github);
     }
 
-    public function credentials()
+    public function credentials(): HasMany
     {
         return $this->hasMany(Credentials::class)->orderBy(
             (new Credentials)->qualifyColumn('name')
         );
+    }
+
+    public function currentTeam(): BelongsTo
+    {
+        return $this->belongsTo(Team::class, 'current_team_id');
     }
 }

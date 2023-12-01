@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models;
 use Illuminate\Contracts\Console\Kernel as ConsoleKernel;
 use Illuminate\Contracts\Http\Kernel as HttpKernel;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
@@ -111,22 +113,22 @@ class AppServiceProvider extends ServiceProvider
             });
         }
 
-        //        // Enforce a morph map instead of making it optional.
-        //        Relation::enforceMorphMap([
-        //            'backup_job' => Models\BackupJob::class,
-        //            'backup' => Models\Backup::class,
-        //            'cron' => Models\Cron::class,
-        //            'daemon' => Models\Daemon::class,
-        //            'database_user' => Models\DatabaseUser::class,
-        //            'database' => Models\Database::class,
-        //            'deployment' => Models\Deployment::class,
-        //            'disk' => Models\Disk::class,
-        //            'firewall_rule' => Models\FirewallRule::class,
-        //            'server' => Models\Server::class,
-        //            'site' => Models\Site::class,
-        //            'team' => Models\Team::class,
-        //            'user' => Models\User::class,
-        //        ]);
+        // Enforce a morph map instead of making it optional.
+        Relation::enforceMorphMap([
+            'backup_job' => Models\BackupJob::class,
+            'backup' => Models\Backup::class,
+            'cron' => Models\Cron::class,
+            'daemon' => Models\Daemon::class,
+            'database_user' => Models\DatabaseUser::class,
+            'database' => Models\Database::class,
+            'deployment' => Models\Deployment::class,
+            'disk' => Models\Disk::class,
+            'firewall_rule' => Models\FirewallRule::class,
+            'server' => Models\Server::class,
+            'site' => Models\Site::class,
+            'team' => Models\Team::class,
+            'user' => Models\User::class,
+        ]);
 
         DB::listen(function ($query) {
             if ($query->time > 1000) {
