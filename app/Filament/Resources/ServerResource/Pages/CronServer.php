@@ -8,6 +8,7 @@ use App\Rules\CronExpression;
 use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
 use Filament\Forms;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Pages\ManageRelatedRecords;
@@ -15,6 +16,7 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class CronServer extends ManageRelatedRecords
 {
@@ -94,6 +96,17 @@ class CronServer extends ManageRelatedRecords
                 Forms\Components\Radio::make('frequency')
                     ->options(Cron::predefinedFrequencyOptions())
                     ->required()
+                    ->afterStateHydrated(function (Radio $component, ?Model $record): void {
+                        if ($record) {
+                            $predefinedOptions = Cron::predefinedFrequencyOptions();
+
+                            if (array_key_exists($record?->expression, $predefinedOptions)) {
+                                $component->state($record?->expression);
+                            } else {
+                                $component->state('custom');
+                            }
+                        }
+                    })
                     ->live(),
                 Forms\Components\TextInput::make('expression')
                     ->visible(fn (Get $get): bool => $get('frequency') === 'custom')
