@@ -47,7 +47,7 @@ class CronServer extends ManageRelatedRecords
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
-                    ->mutateFormDataUsing(function (array $data) {
+                    ->mutateFormDataUsing(function (array $data): array {
                         return $this->mutateCronFormData($data);
                     })
                     ->successNotificationTitle(__('The Cron has been created and will be installed on the server.')),
@@ -55,10 +55,10 @@ class CronServer extends ManageRelatedRecords
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
-                    ->mutateFormDataUsing(function (array $data) {
+                    ->mutateFormDataUsing(function (array $data): array {
                         return $this->mutateCronFormData($data);
                     })
-                    ->successNotificationTitle(__('The Cron has been updated.')),
+                    ->successNotificationTitle(__('The Cron will be updated on the server.')),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
