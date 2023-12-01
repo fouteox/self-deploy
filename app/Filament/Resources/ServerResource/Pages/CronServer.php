@@ -96,6 +96,8 @@ class CronServer extends ManageRelatedRecords
                 Forms\Components\Radio::make('frequency')
                     ->options(Cron::predefinedFrequencyOptions())
                     ->required()
+                    ->in(array_keys(Cron::predefinedFrequencyOptions()))
+                    ->live()
                     ->afterStateHydrated(function (Radio $component, ?Model $record): void {
                         if ($record) {
                             $predefinedOptions = Cron::predefinedFrequencyOptions();
@@ -106,8 +108,7 @@ class CronServer extends ManageRelatedRecords
                                 $component->state('custom');
                             }
                         }
-                    })
-                    ->live(),
+                    }),
                 Forms\Components\TextInput::make('expression')
                     ->visible(fn (Get $get): bool => $get('frequency') === 'custom')
                     ->requiredIf('frequency', 'custom')
