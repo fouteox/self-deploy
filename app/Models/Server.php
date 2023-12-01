@@ -24,7 +24,6 @@ use App\Tasks\Whoami;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -46,7 +45,6 @@ use ProtoneMedia\LaravelTaskRunner\PendingTask;
  */
 class Server extends Model
 {
-    use HasFactory;
     use HasUlids;
 
     protected $fillable = [
@@ -109,7 +107,7 @@ class Server extends Model
      */
     public function getNameWithIpAttribute(): string
     {
-        return "{$this->name} ({$this->public_ipv4})";
+        return "$this->name ($this->public_ipv4)";
     }
 
     /**
@@ -233,7 +231,7 @@ class Server extends Model
             port: $this->ssh_port,
             username: 'root',
             privateKey: $this->private_key,
-            scriptPath: "/root/{$this->working_directory}",
+            scriptPath: "/root/$this->working_directory",
             proxyJump: self::randomSshProxy()
         );
     }
@@ -261,7 +259,7 @@ class Server extends Model
             port: $this->ssh_port,
             username: $username,
             privateKey: $this->private_key,
-            scriptPath: "/home/{$username}/{$this->working_directory}",
+            scriptPath: "/home/$username/$this->working_directory",
             proxyJump: self::randomSshProxy()
         );
     }

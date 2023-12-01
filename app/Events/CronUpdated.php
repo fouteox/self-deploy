@@ -3,12 +3,12 @@
 namespace App\Events;
 
 use App\Models\Cron;
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use ProtoneMedia\Splade\Facades\Splade;
 
 class CronUpdated implements ShouldBroadcast
 {
@@ -25,7 +25,7 @@ class CronUpdated implements ShouldBroadcast
     /**
      * Get the channels the event should broadcast on.
      *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
+     * @return array<int, Channel>
      */
     public function broadcastOn(): array
     {
@@ -42,7 +42,7 @@ class CronUpdated implements ShouldBroadcast
     public function broadcastWith()
     {
         return [
-            Splade::refreshOnEvent(),
+            //            Splade::refreshOnEvent(),
         ];
     }
 }

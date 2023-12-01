@@ -27,10 +27,8 @@ class InstallCron implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
-    public function handle()
+    public function handle(): void
     {
         $contents = CronView::build($this->cron);
 
@@ -44,10 +42,8 @@ class InstallCron implements ShouldQueue
 
     /**
      * Handle a job failure.
-     *
-     * @return void
      */
-    public function failed(Throwable $exception)
+    public function failed(Throwable $exception): void
     {
         $this->cron->forceFill(['installation_failed_at' => now()])->save();
 
