@@ -100,13 +100,7 @@ class CronServer extends ManageRelatedRecords
                     ->live()
                     ->afterStateHydrated(function (Radio $component, ?Model $record): void {
                         if ($record) {
-                            $predefinedOptions = Cron::predefinedFrequencyOptions();
-
-                            if (array_key_exists($record?->expression, $predefinedOptions)) {
-                                $component->state($record?->expression);
-                            } else {
-                                $component->state('custom');
-                            }
+                            $component->state($record->expression && array_key_exists($record->expression, Cron::predefinedFrequencyOptions()) ? $record->expression : 'custom');
                         }
                     }),
                 Forms\Components\TextInput::make('expression')
