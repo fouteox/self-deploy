@@ -4,8 +4,12 @@ namespace App\Filament\Resources\ServerResource\Pages;
 
 use App\Filament\Resources\ServerResource;
 use App\Models\Database;
+use App\Models\DatabaseUser;
 use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -36,7 +40,7 @@ class DatabaseServer extends ManageRelatedRecords
                 TextColumn::make('users.name')
                     ->listWithLineBreaks()
                     ->limitList(2)
-                    ->expandableLimitedList()
+//                    ->expandableLimitedList() // TODO: vérifier pourquoi ça ne fonctionne pas
                     ->placeholder('No user.'),
             ])
             ->filters([
@@ -80,9 +84,9 @@ class DatabaseServer extends ManageRelatedRecords
             ->schema([
                 TextInput::make('name')
                     ->required(),
-                /*                Select::make('users')
+                Select::make('users')
                     ->label('Existing users')
-                    ->options(DatabaseUser::where('server_id', $this->record->id)->pluck('name', 'id'))
+                    ->options(DatabaseUser::where('server_id', $this->getRecord()->id)->pluck('name', 'id'))
                     ->multiple(),
                 Repeater::make('members')
                     ->schema([
@@ -94,14 +98,14 @@ class DatabaseServer extends ManageRelatedRecords
                                 'owner' => 'Owner',
                             ])
                             ->required(),
-                    ]),*/
+                    ]),
             ]);
     }
 
     protected function getHeaderActions(): array
     {
         return [
-            //            Action::make('Manage users')->badge(DatabaseUser::where('server_id', $this->record->id)->count()),
+            Action::make('Manage users')->badge(DatabaseUser::where('server_id', $this->record->id)->count()),
         ];
     }
 }
