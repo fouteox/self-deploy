@@ -35,11 +35,13 @@ class CronServer extends ManageRelatedRecords
         return $table->modifyQueryUsing(fn (Builder $query) => $query->with('server'))
             ->columns([
                 TextColumn::make('user'),
-                TextColumn::make('expression')->description(function (string $state): string {
-                    $options = Cron::predefinedFrequencyOptions();
+                TextColumn::make('expression')
+                    ->label(__('Frequency'))
+                    ->description(function (string $state): string {
+                        $options = Cron::predefinedFrequencyOptions();
 
-                    return $options[$state] ?? __('Custom expression');
-                }),
+                        return $options[$state] ?? __('Custom expression');
+                    }),
                 TextColumn::make('command'),
             ])
             ->filters([
