@@ -1,7 +1,6 @@
-import preset from '../../../../vendor/filament/filament/tailwind.config.preset'
+import preset from './vendor/filament/filament/tailwind.config.preset.js'
 
 export default {
-    darkMode: 'class',
     presets: [preset],
     content: [
         './app/Filament/**/*.php',
