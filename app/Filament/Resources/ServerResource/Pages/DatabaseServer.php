@@ -3,14 +3,12 @@
 namespace App\Filament\Resources\ServerResource\Pages;
 
 use App\Filament\Resources\ServerResource;
-use App\Filament\Resources\SiteResource;
 use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 
 class DatabaseServer extends ManageRelatedRecords
 {
@@ -29,8 +27,11 @@ class DatabaseServer extends ManageRelatedRecords
         return $table
             ->columns([
                 TextColumn::make('name'),
-                TextColumn::make('status'),
-                TextColumn::make('server.name'),
+                TextColumn::make('users')
+                    ->listWithLineBreaks()
+                    ->limitList(2)
+                    ->expandableLimitedList()
+                    ->placeholder('No user.'),
             ])
             ->filters([
                 // ...
@@ -45,9 +46,7 @@ class DatabaseServer extends ManageRelatedRecords
                 // ...
             ])
             ->emptyStateActions([
-                Tables\Actions\CreateAction::make()
-                    ->url(fn (): string => ServerResource::getUrl('sites/create', ['record' => $this->record])),
-            ])
-            ->recordUrl(fn (Model $site) => SiteResource::getUrl('view', ['record' => $site]));
+                // ...
+            ]);
     }
 }
