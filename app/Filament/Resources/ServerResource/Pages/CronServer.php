@@ -16,7 +16,6 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 
 class CronServer extends ManageRelatedRecords
 {
@@ -102,7 +101,7 @@ class CronServer extends ManageRelatedRecords
                     ->required()
                     ->in(array_keys(Cron::predefinedFrequencyOptions()))
                     ->live()
-                    ->afterStateHydrated(function (Radio $component, ?Model $record): void {
+                    ->afterStateHydrated(function (Radio $component, ?Cron $record): void {
                         if ($record) {
                             $component->state($record->expression && array_key_exists($record->expression, Cron::predefinedFrequencyOptions()) ? $record->expression : 'custom');
                         }
