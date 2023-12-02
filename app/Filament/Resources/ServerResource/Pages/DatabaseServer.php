@@ -80,6 +80,28 @@ class DatabaseServer extends ManageRelatedRecords
             ->schema([
                 TextInput::make('name')
                     ->required(),
+                /*                Select::make('users')
+                    ->label('Existing users')
+                    ->options(DatabaseUser::where('server_id', $this->record->id)->pluck('name', 'id'))
+                    ->multiple(),
+                Repeater::make('members')
+                    ->schema([
+                        TextInput::make('name')->required(),
+                        Select::make('role')
+                            ->options([
+                                'member' => 'Member',
+                                'administrator' => 'Administrator',
+                                'owner' => 'Owner',
+                            ])
+                            ->required(),
+                    ]),*/
             ]);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            //            Action::make('Manage users')->badge(DatabaseUser::where('server_id', $this->record->id)->count()),
+        ];
     }
 }
