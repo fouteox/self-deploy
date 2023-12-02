@@ -7,7 +7,6 @@ use App\Provider;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsEncryptedArrayObject;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
@@ -16,7 +15,6 @@ use Illuminate\Support\Str;
  */
 class Credentials extends Model
 {
-    use HasFactory;
     use HasUlids;
 
     protected $casts = [
@@ -43,11 +41,6 @@ class Credentials extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function team()
-    {
-        return $this->belongsTo(Team::class);
-    }
-
     /**
      * Indicates if the credentials can be used in the context of the given team.
      */
@@ -62,6 +55,11 @@ class Credentials extends Model
         }
 
         return is_null($this->team_id) || $this->team()->is($team);
+    }
+
+    public function team()
+    {
+        return $this->belongsTo(Team::class);
     }
 
     public function scopeCanBeUsedByTeam(Builder $query, Team $team)
