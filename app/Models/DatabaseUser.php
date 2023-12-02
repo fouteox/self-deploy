@@ -6,7 +6,6 @@ use App\Events\DatabaseUserDeleted;
 use App\Events\DatabaseUserUpdated;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -17,12 +16,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  */
 class DatabaseUser extends Model
 {
-    use HasFactory;
     use HasUlids;
     use InstallsAsynchronously;
 
     protected $fillable = [
         'name',
+        'server_id',
     ];
 
     protected $casts = [
@@ -36,7 +35,7 @@ class DatabaseUser extends Model
         'updated' => DatabaseUserUpdated::class,
     ];
 
-    protected static function booted()
+    protected static function booted(): void
     {
         static::deleted(function ($database) {
             event(new DatabaseUserDeleted($database->id, $database->server->team_id));
