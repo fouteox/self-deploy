@@ -32,7 +32,9 @@ class CronServer extends ManageRelatedRecords
 
     public function table(Table $table): Table
     {
-        return $table->modifyQueryUsing(fn (Builder $query) => $query->with('server'))
+        return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->with('server'))
+            ->recordTitleAttribute('command')
             ->columns([
                 TextColumn::make('user'),
                 TextColumn::make('expression')
