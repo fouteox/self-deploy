@@ -53,6 +53,16 @@ class ServerTaskDispatcher
     }
 
     /**
+     * Sets the task to run in the background.
+     */
+    public function inBackground(bool $value = true): self
+    {
+        $this->pendingTask->inBackground($value);
+
+        return $this;
+    }
+
+    /**
      * Run the task as the root user.
      */
     public function asRoot(): self
@@ -73,16 +83,6 @@ class ServerTaskDispatcher
     }
 
     /**
-     * Sets the task to run in the background.
-     */
-    public function inBackground(bool $value = true): self
-    {
-        $this->pendingTask->inBackground($value);
-
-        return $this;
-    }
-
-    /**
      * Sets the interval in seconds to update the task log.
      */
     public function updateLogIntervalInSeconds(int $value): self
@@ -95,31 +95,13 @@ class ServerTaskDispatcher
     }
 
     /**
-     * Sets a custom name for the task.
+     * Throws an exception if the task fails.
      */
-    public function as(string $id): self
+    public function throw(bool $value = true): self
     {
-        $this->pendingTask->as($id);
+        $this->throwException = $value;
 
         return $this;
-    }
-
-    /**
-     * Creates a Task Model and sets the name of the pending task to the id of the model.
-     */
-    private function createTask(): TaskModel
-    {
-        $actualTask = $this->pendingTask->task;
-
-        return $this->server->tasks()->create([
-            'name' => $actualTask->getName(),
-            'user' => $this->pendingTask->getConnection()->is($this->server->connectionAsRoot()) ? 'root' : $this->server->username,
-            'type' => get_class($actualTask),
-            'script' => $actualTask->getScript(),
-            'timeout' => $actualTask->getTimeout() ?: 0,
-            'status' => TaskStatus::Pending,
-            'instance' => $actualTask instanceof HasCallbacks ? serialize($actualTask) : null,
-        ]);
     }
 
     /**
@@ -173,6 +155,34 @@ class ServerTaskDispatcher
     }
 
     /**
+     * Creates a Task Model and sets the name of the pending task to the id of the model.
+     */
+    private function createTask(): TaskModel
+    {
+        $actualTask = $this->pendingTask->task;
+
+        return $this->server->tasks()->create([
+            'name' => $actualTask->getName(),
+            'user' => $this->pendingTask->getConnection()->is($this->server->connectionAsRoot()) ? 'root' : $this->server->username,
+            'type' => get_class($actualTask),
+            'script' => $actualTask->getScript(),
+            'timeout' => $actualTask->getTimeout() ?: 0,
+            'status' => TaskStatus::Pending,
+            'instance' => $actualTask instanceof HasCallbacks ? serialize($actualTask) : null,
+        ]);
+    }
+
+    /**
+     * Sets a custom name for the task.
+     */
+    public function as(string $id): self
+    {
+        $this->pendingTask->as($id);
+
+        return $this;
+    }
+
+    /**
      * Dispatches the pending task.
      */
     private function dispatchPendingTask(): ?ProcessOutput
@@ -192,17 +202,13 @@ class ServerTaskDispatcher
     }
 
     /**
-     * Throws an exception if the task fails.
-     */
-    public function throw(bool $value = true): self
-    {
-        $this->throwException = $value;
-
-        return $this;
-    }
-
-    /**
      * Dispatches the task.
+     *
+     * @return ProcessOutput|Task|null
+     *
+     * @throws CouldNotConnectToServerException
+     * @throws NoConnectionSelectedException
+     * @throws TaskFailedException
      */
     public function dispatch(): ProcessOutput|TaskModel|null
     {
