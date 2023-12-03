@@ -294,8 +294,6 @@ end
 
     /**
      * Get the public IPv4 address of a server.
-     *
-     * @return string
      */
     public function getPublicIpv4OfServer(string $id): ?string
     {

@@ -274,8 +274,6 @@ class HetznerCloud implements HasCredentials, ServerProvider
      * Get the public IPv4 address of a server.
      *
      * @see https://docs.hetzner.cloud/#servers-get-a-server
-     *
-     * @return string
      */
     public function getPublicIpv4OfServer(string $id): ?string
     {
