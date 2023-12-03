@@ -2,10 +2,19 @@
 
 namespace App\Filament\Resources\ServerResource\Pages;
 
+use App\Enum;
 use App\Filament\Resources\ServerResource;
+use App\Signal;
 use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
 use Filament\Resources\Pages\ManageRelatedRecords;
+use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class DaemonServer extends ManageRelatedRecords
 {
@@ -18,4 +27,73 @@ class DaemonServer extends ManageRelatedRecords
     protected static ?string $title = 'Daemons';
 
     protected static ?string $navigationIcon = 'heroicon-s-wrench-screwdriver';
+
+    public function table(Table $table): Table
+    {
+        return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->with('server'))
+            ->recordTitleAttribute('command')
+            ->columns([
+                TextColumn::make('command'),
+                TextColumn::make('user'),
+                TextColumn::make('processes'),
+            ])
+            ->filters([
+                // ...
+            ])
+            ->headerActions([
+                Tables\Actions\CreateAction::make()
+                    ->successNotificationTitle(__('The Daemon has been created and will be installed on the server.')),
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make()
+                    ->successNotificationTitle(__('The Daemon will be updated on the server.')),
+                Tables\Actions\DeleteAction::make()
+                    ->successNotificationTitle(__('The Daemon will be uninstalled from the server.')),
+            ])
+            ->bulkActions([
+                //                Tables\Actions\DeleteBulkAction::make(),
+            ]);
+    }
+
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                TextInput::make('command')
+                    ->required()
+                    ->maxLength(255),
+                TextInput::make('directory')
+                    ->maxLength(255)
+                    ->placeholder('/home/eddy/site.com/current'),
+                Select::make('user')
+                    ->options([
+                        'root' => 'root',
+                        $this->getRecord()->username => $this->getRecord()->username,
+                    ])
+                    ->default($this->getRecord()->username)
+                    ->required()
+                    ->in(['root', $this->getRecord()->username]),
+                TextInput::make('processes')
+                    ->numeric()
+                    ->required()
+                    ->minValue(1)
+                    ->default(1),
+                TextInput::make('stop_wait_seconds')
+                    ->numeric()
+                    ->required()
+                    ->minValue(0)
+                    ->default(10),
+                Select::make('stop_signal')
+                    ->options($this->signalOptions())
+                    ->default(Signal::TERM)
+                    ->required()
+                    ->enum(Signal::class),
+            ]);
+    }
+
+    private function signalOptions(): array
+    {
+        return Enum::options(Signal::class, true);
+    }
 }
