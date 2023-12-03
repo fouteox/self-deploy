@@ -27,10 +27,8 @@ class UninstallCron implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
-    public function handle()
+    public function handle(): void
     {
         $this->cron->server->runTask(new DeleteFile($this->cron->path()))->asRoot()->dispatch();
 
@@ -39,10 +37,8 @@ class UninstallCron implements ShouldQueue
 
     /**
      * Handle a job failure.
-     *
-     * @return void
      */
-    public function failed(Throwable $exception)
+    public function failed(Throwable $exception): void
     {
         $this->cron->forceFill(['uninstallation_failed_at' => now()])->save();
 
