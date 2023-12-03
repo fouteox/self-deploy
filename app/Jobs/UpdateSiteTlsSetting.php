@@ -4,13 +4,17 @@ namespace App\Jobs;
 
 use App\CaddyfilePatcher;
 use App\Models\Certificate;
+use App\Models\CouldNotConnectToServerException;
+use App\Models\NoConnectionSelectedException;
 use App\Models\Site;
+use App\Models\TaskFailedException;
 use App\Models\TlsSetting;
 use App\Models\User;
 use App\Tasks\GetFile;
 use App\Tasks\PrettifyCaddyfile;
 use App\Tasks\UpdateCaddyfile;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -37,9 +41,12 @@ class UpdateSiteTlsSetting implements ShouldQueue
     /**
      * Execute the job.
      *
-     * @return void
+     * @throws CouldNotConnectToServerException
+     * @throws NoConnectionSelectedException
+     * @throws TaskFailedException
+     * @throws BindingResolutionException
      */
-    public function handle()
+    public function handle(): void
     {
         $path = $this->site->files()->caddyfile()->path;
 
@@ -51,9 +58,8 @@ class UpdateSiteTlsSetting implements ShouldQueue
 
         // Patch the Caddyfile.
 
-        /** @var CaddyfilePatcher */
         $patcher = app()->makeWith(CaddyfilePatcher::class, ['site' => $this->site, 'caddyfile' => $currentCaddyfile]);
-        $newCaddyfile = $patcher->replaceTlsSnippet($this->tlsSetting, $this->certificate);
+        $patcher->replaceTlsSnippet($this->tlsSetting, $this->certificate);
 
         if ($this->site->tls_setting === TlsSetting::Off) {
             $patcher->replacePort(443);
@@ -73,20 +79,16 @@ class UpdateSiteTlsSetting implements ShouldQueue
 
         $this->site->certificates()->update(['is_active' => false]);
 
-        if ($this->certificate) {
-            $this->certificate->forceFill([
-                'is_active' => true,
-                'uploaded_at' => now(),
-            ])->save();
-        }
+        $this->certificate?->forceFill([
+            'is_active' => true,
+            'uploaded_at' => now(),
+        ])->save();
     }
 
     /**
      * Handle a job failure.
-     *
-     * @return void
      */
-    public function failed(Throwable $exception)
+    public function failed(Throwable $exception): void
     {
         $this->site->forceFill([
             'pending_tls_update_since' => null,

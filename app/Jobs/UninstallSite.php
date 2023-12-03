@@ -2,7 +2,10 @@
 
 namespace App\Jobs;
 
+use App\Models\CouldNotConnectToServerException;
+use App\Models\NoConnectionSelectedException;
 use App\Models\Server;
+use App\Models\TaskFailedException;
 use App\Tasks\DeleteFile;
 use App\Tasks\UpdateCaddySiteImports;
 use Illuminate\Bus\Queueable;
@@ -27,9 +30,11 @@ class UninstallSite implements ShouldQueue
     /**
      * Execute the job.
      *
-     * @return void
+     * @throws CouldNotConnectToServerException
+     * @throws NoConnectionSelectedException
+     * @throws TaskFailedException
      */
-    public function handle()
+    public function handle(): void
     {
         $this->server->runTask(new UpdateCaddySiteImports($this->server))->throw()->asRoot()->dispatch();
         $this->server->runTask(new DeleteFile($this->sitePath))->throw()->asRoot()->dispatch();

@@ -3,13 +3,17 @@
 namespace App\Jobs;
 
 use App\CaddyfilePatcher;
+use App\Models\CouldNotConnectToServerException;
+use App\Models\NoConnectionSelectedException;
 use App\Models\Site;
+use App\Models\TaskFailedException;
 use App\Models\User;
 use App\Server\PhpVersion;
 use App\Tasks\GetFile;
 use App\Tasks\PrettifyCaddyfile;
 use App\Tasks\UpdateCaddyfile;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -36,9 +40,12 @@ class UpdateSiteCaddyfile implements ShouldQueue
     /**
      * Execute the job.
      *
-     * @return void
+     * @throws CouldNotConnectToServerException
+     * @throws NoConnectionSelectedException
+     * @throws TaskFailedException
+     * @throws BindingResolutionException
      */
-    public function handle()
+    public function handle(): void
     {
         $path = $this->site->files()->caddyfile()->path;
 
@@ -50,7 +57,6 @@ class UpdateSiteCaddyfile implements ShouldQueue
 
         // Patch the Caddyfile.
 
-        /** @var CaddyfilePatcher */
         $patcher = app()->makeWith(CaddyfilePatcher::class, ['site' => $this->site, 'caddyfile' => $currentCaddyfile]);
         $newCaddyfile = $patcher->replacePhpVersion($this->phpVersion)
             ->replacePublicFolder($this->site->generateWebDirectory($this->webFolder))
@@ -68,10 +74,8 @@ class UpdateSiteCaddyfile implements ShouldQueue
 
     /**
      * Handle a job failure.
-     *
-     * @return void
      */
-    public function failed(Throwable $exception)
+    public function failed(Throwable $exception): void
     {
         $this->site->forceFill([
             'pending_caddyfile_update_since' => null,

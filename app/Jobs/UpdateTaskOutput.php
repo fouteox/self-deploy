@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Task;
 use App\Models\TaskStatus;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -30,9 +31,9 @@ class UpdateTaskOutput implements ShouldQueue
     /**
      * Execute the job.
      *
-     * @return void
+     * @throws Exception
      */
-    public function handle()
+    public function handle(): void
     {
         $this->task->updateOutput();
 

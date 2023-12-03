@@ -2,7 +2,10 @@
 
 namespace App\Jobs;
 
+use App\Models\CouldNotConnectToServerException;
+use App\Models\NoConnectionSelectedException;
 use App\Models\Server;
+use App\Models\TaskFailedException;
 use App\Tasks\DeauthorizePublicKey;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeEncrypted;
@@ -25,6 +28,10 @@ class RemoveSshKeyFromServer implements ShouldBeEncrypted, ShouldQueue
 
     /**
      * Execute the job.
+     *
+     * @throws CouldNotConnectToServerException
+     * @throws NoConnectionSelectedException
+     * @throws TaskFailedException
      */
     public function handle(): void
     {

@@ -29,8 +29,8 @@ class InstallTaskCleanupCron implements ShouldQueue
         $workingDirectory = $this->server->working_directory;
 
         $command = implode(' ; ', [
-            "find /root/{$workingDirectory} -name \"task-*\" -type f -mtime +7 -exec rm {} \;",
-            "find /home/eddy/{$workingDirectory} -name \"task-*\" -type f -mtime +7 -exec rm {} \;",
+            "find /root/$workingDirectory -name \"task-*\" -type f -mtime +7 -exec rm {} \;",
+            "find /home/eddy/$workingDirectory -name \"task-*\" -type f -mtime +7 -exec rm {} \;",
         ]);
 
         $this->server->uploadAsRoot(

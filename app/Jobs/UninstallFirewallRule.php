@@ -2,7 +2,10 @@
 
 namespace App\Jobs;
 
+use App\Models\CouldNotConnectToServerException;
 use App\Models\FirewallRule;
+use App\Models\NoConnectionSelectedException;
+use App\Models\TaskFailedException;
 use App\Models\User;
 use App\Tasks\DeleteFirewallRule;
 use Illuminate\Bus\Queueable;
@@ -28,9 +31,11 @@ class UninstallFirewallRule implements ShouldQueue
     /**
      * Execute the job.
      *
-     * @return void
+     * @throws CouldNotConnectToServerException
+     * @throws NoConnectionSelectedException
+     * @throws TaskFailedException
      */
-    public function handle()
+    public function handle(): void
     {
         $this->rule->server->runTask(new DeleteFirewallRule($this->rule))->asRoot()->dispatch();
 
@@ -39,10 +44,8 @@ class UninstallFirewallRule implements ShouldQueue
 
     /**
      * Handle a job failure.
-     *
-     * @return void
      */
-    public function failed(Throwable $exception)
+    public function failed(Throwable $exception): void
     {
         $this->rule->forceFill(['uninstallation_failed_at' => now()])->save();
 

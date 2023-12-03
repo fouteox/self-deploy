@@ -26,10 +26,8 @@ class UninstallDatabaseUser implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
-    public function handle()
+    public function handle(): void
     {
         $this->databaseUser->server->databaseManager()->dropUser($this->databaseUser->name);
         $this->databaseUser->delete();
@@ -37,10 +35,8 @@ class UninstallDatabaseUser implements ShouldQueue
 
     /**
      * Handle a job failure.
-     *
-     * @return void
      */
-    public function failed(Throwable $exception)
+    public function failed(Throwable $exception): void
     {
         $this->databaseUser->forceFill(['uninstallation_failed_at' => now()])->save();
 

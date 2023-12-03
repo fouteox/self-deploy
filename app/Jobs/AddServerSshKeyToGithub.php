@@ -4,8 +4,8 @@ namespace App\Jobs;
 
 use App\Models\Credentials;
 use App\Models\Server;
-use App\SourceControl\Github;
 use App\SourceControl\ProviderFactory;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -27,16 +27,17 @@ class AddServerSshKeyToGithub implements ShouldQueue
 
     /**
      * Execute the job.
+     *
+     * @throws Exception
      */
-    public function handle(ProviderFactory $providerFactory)
+    public function handle(ProviderFactory $providerFactory): void
     {
-        /** @var Github */
         $github = $providerFactory->forCredentials($this->githubCredentials);
 
         $appName = config('app.name');
 
         $github->addKey(
-            "{$this->server->name} (added by {$appName})",
+            "{$this->server->name} (added by $appName)",
             $this->server->user_public_key
         );
     }

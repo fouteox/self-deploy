@@ -28,10 +28,8 @@ class InstallDatabaseUser implements ShouldBeEncrypted, ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
-    public function handle()
+    public function handle(): void
     {
         $manager = $this->databaseUser->server->databaseManager();
 
@@ -49,10 +47,8 @@ class InstallDatabaseUser implements ShouldBeEncrypted, ShouldQueue
 
     /**
      * Handle a job failure.
-     *
-     * @return void
      */
-    public function failed(Throwable $exception)
+    public function failed(Throwable $exception): void
     {
         // Clean up the database user if it was created.
         rescue(function () {

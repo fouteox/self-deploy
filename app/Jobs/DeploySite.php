@@ -2,8 +2,10 @@
 
 namespace App\Jobs;
 
+use App\Models\CouldNotConnectToServerException;
 use App\Models\Deployment;
-use App\Models\Task;
+use App\Models\NoConnectionSelectedException;
+use App\Models\TaskFailedException;
 use App\Tasks;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeEncrypted;
@@ -28,9 +30,11 @@ class DeploySite implements ShouldBeEncrypted, ShouldQueue
     /**
      * Execute the job.
      *
-     * @return void
+     * @throws CouldNotConnectToServerException
+     * @throws NoConnectionSelectedException
+     * @throws TaskFailedException
      */
-    public function handle()
+    public function handle(): void
     {
         $taskClass = $this->deployment->site->zero_downtime_deployment
             ? Tasks\DeploySiteWithoutDowntime::class
@@ -40,7 +44,6 @@ class DeploySite implements ShouldBeEncrypted, ShouldQueue
 
         $server = $this->deployment->site->server;
 
-        /** @var Task */
         $taskModel = $server->runTask($task)
             ->asUser()
             ->inBackground()

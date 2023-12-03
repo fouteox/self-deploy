@@ -3,6 +3,9 @@
 namespace App\Jobs;
 
 use App\Models\Backup;
+use App\Models\CouldNotConnectToServerException;
+use App\Models\NoConnectionSelectedException;
+use App\Models\TaskFailedException;
 use App\Models\User;
 use App\Tasks\InstallEddyBackupCli;
 use App\View\Components\Backup as BackupView;
@@ -31,9 +34,11 @@ class InstallBackup implements ShouldQueue
     /**
      * Execute the job.
      *
-     * @return void
+     * @throws CouldNotConnectToServerException
+     * @throws NoConnectionSelectedException
+     * @throws TaskFailedException
      */
-    public function handle()
+    public function handle(): void
     {
         $this->backup->server->runTask(new InstallEddyBackupCli($this->backup->server))
             ->asRoot()
@@ -51,10 +56,8 @@ class InstallBackup implements ShouldQueue
 
     /**
      * Handle a job failure.
-     *
-     * @return void
      */
-    public function failed(Throwable $exception)
+    public function failed(Throwable $exception): void
     {
         $this->backup->forceFill(['installation_failed_at' => now()])->save();
 

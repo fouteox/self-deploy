@@ -3,9 +3,12 @@
 namespace App\Jobs;
 
 use App\Infrastructure\Entities\ServerStatus;
+use App\Models\CouldNotConnectToServerException;
+use App\Models\NoConnectionSelectedException;
 use App\Models\Server;
 use App\Models\ServerTaskDispatcher;
 use App\Models\Task;
+use App\Models\TaskFailedException;
 use App\Tasks\ProvisionFreshServer;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -13,7 +16,6 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Throwable;
 
 class ProvisionServer implements ShouldQueue
 {
@@ -33,6 +35,10 @@ class ProvisionServer implements ShouldQueue
 
     /**
      * Execute the job.
+     *
+     * @throws CouldNotConnectToServerException
+     * @throws NoConnectionSelectedException
+     * @throws TaskFailedException
      */
     public function handle(): Task
     {
@@ -50,7 +56,7 @@ class ProvisionServer implements ShouldQueue
     /**
      * Handle a job failure.
      */
-    public function failed(Throwable $exception): void
+    public function failed(): void
     {
         dispatch(new CleanupFailedServerProvisioning($this->server));
     }

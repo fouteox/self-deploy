@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use App\Models\Cron;
 use App\Models\Site;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -25,14 +24,11 @@ class InstallWordpressCron implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
-    public function handle()
+    public function handle(): void
     {
         $server = $this->site->server;
 
-        /** @var Cron */
         $cron = $server->crons()->create([
             'command' => $this->site->php_version->getBinary().' '.$this->site->getWebDirectory().'/wp-cron.php',
             'user' => $this->site->user,

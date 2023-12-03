@@ -9,11 +9,15 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Throwable;
 
 class WaitForServerToConnect implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    /**
+     * The number of times the job may be attempted.
+     */
+    public int $tries = 40;
 
     /**
      * Create a new job instance.
@@ -25,18 +29,9 @@ class WaitForServerToConnect implements ShouldQueue
     }
 
     /**
-     * The number of times the job may be attempted.
-     *
-     * @var int
-     */
-    public $tries = 40;
-
-    /**
      * Execute the job.
-     *
-     * @return bool
      */
-    public function handle()
+    public function handle(): bool
     {
         if (! $this->server->public_ipv4) {
             $ip = $this->server->getProvider()->getPublicIpv4OfServer($this->server->provider_id);
@@ -65,10 +60,8 @@ class WaitForServerToConnect implements ShouldQueue
 
     /**
      * Handle a job failure.
-     *
-     * @return void
      */
-    public function failed(Throwable $exception)
+    public function failed(): void
     {
         dispatch(new CleanupFailedServerProvisioning($this->server));
     }

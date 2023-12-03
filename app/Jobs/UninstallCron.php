@@ -2,7 +2,10 @@
 
 namespace App\Jobs;
 
+use App\Models\CouldNotConnectToServerException;
 use App\Models\Cron;
+use App\Models\NoConnectionSelectedException;
+use App\Models\TaskFailedException;
 use App\Models\User;
 use App\Tasks\DeleteFile;
 use Illuminate\Bus\Queueable;
@@ -27,6 +30,10 @@ class UninstallCron implements ShouldQueue
 
     /**
      * Execute the job.
+     *
+     * @throws CouldNotConnectToServerException
+     * @throws NoConnectionSelectedException
+     * @throws TaskFailedException
      */
     public function handle(): void
     {

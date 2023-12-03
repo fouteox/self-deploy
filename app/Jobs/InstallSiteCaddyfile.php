@@ -2,7 +2,10 @@
 
 namespace App\Jobs;
 
+use App\Models\CouldNotConnectToServerException;
+use App\Models\NoConnectionSelectedException;
 use App\Models\Site;
+use App\Models\TaskFailedException;
 use App\Models\User;
 use App\Tasks\UpdateCaddyfile;
 use App\Tasks\UpdateCaddySiteImports;
@@ -30,9 +33,11 @@ class InstallSiteCaddyfile implements ShouldQueue
     /**
      * Execute the job.
      *
-     * @return void
+     * @throws CouldNotConnectToServerException
+     * @throws NoConnectionSelectedException
+     * @throws TaskFailedException
      */
-    public function handle()
+    public function handle(): void
     {
         $server = $this->site->server;
 
@@ -45,10 +50,8 @@ class InstallSiteCaddyfile implements ShouldQueue
 
     /**
      * Handle a job failure.
-     *
-     * @return void
      */
-    public function failed(Throwable $exception)
+    public function failed(Throwable $exception): void
     {
         $this->site->forceFill(['installation_failed_at' => now()])->save();
 

@@ -27,10 +27,8 @@ class InstallCertificate implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
-    public function handle()
+    public function handle(): void
     {
         $site = $this->certificate->site;
 
@@ -49,10 +47,8 @@ class InstallCertificate implements ShouldQueue
 
     /**
      * Handle a job failure.
-     *
-     * @return void
      */
-    public function failed(Throwable $exception)
+    public function failed(Throwable $exception): void
     {
         $this->certificate->site->forceFill([
             'pending_tls_update_since' => null,

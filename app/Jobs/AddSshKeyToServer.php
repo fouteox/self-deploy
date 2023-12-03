@@ -2,8 +2,11 @@
 
 namespace App\Jobs;
 
+use App\Models\CouldNotConnectToServerException;
+use App\Models\NoConnectionSelectedException;
 use App\Models\Server;
 use App\Models\SshKey;
+use App\Models\TaskFailedException;
 use App\Tasks\AuthorizePublicKey;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -25,6 +28,10 @@ class AddSshKeyToServer implements ShouldQueue
 
     /**
      * Execute the job.
+     *
+     * @throws CouldNotConnectToServerException
+     * @throws NoConnectionSelectedException
+     * @throws TaskFailedException
      */
     public function handle(): void
     {

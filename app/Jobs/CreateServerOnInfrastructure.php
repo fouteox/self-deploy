@@ -37,10 +37,8 @@ class CreateServerOnInfrastructure implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
-    public function handle()
+    public function handle(): void
     {
         if ($this->server->provider === Provider::CustomServer) {
             $this->server->forceFill(['status' => ServerStatus::Starting])->save();
@@ -78,10 +76,8 @@ class CreateServerOnInfrastructure implements ShouldQueue
 
     /**
      * Gathers the SSH keys to add to the server.
-     *
-     * @return mixed
      */
-    public function sshKeys(ServerProvider $client)
+    public function sshKeys(ServerProvider $client): mixed
     {
         $keys = [];
 
@@ -98,10 +94,8 @@ class CreateServerOnInfrastructure implements ShouldQueue
 
     /**
      * Handle a job failure.
-     *
-     * @return void
      */
-    public function failed(Throwable $exception)
+    public function failed(Throwable $exception): void
     {
         $errorMessage = null;
 

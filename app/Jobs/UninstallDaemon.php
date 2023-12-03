@@ -2,8 +2,11 @@
 
 namespace App\Jobs;
 
+use App\Models\CouldNotConnectToServerException;
 use App\Models\Daemon;
+use App\Models\NoConnectionSelectedException;
 use App\Models\Server;
+use App\Models\TaskFailedException;
 use App\Models\User;
 use App\Tasks\DeleteFile;
 use App\Tasks\ReloadSupervisor;
@@ -29,6 +32,10 @@ class UninstallDaemon implements ShouldQueue
 
     /**
      * Execute the job.
+     *
+     * @throws CouldNotConnectToServerException
+     * @throws NoConnectionSelectedException
+     * @throws TaskFailedException
      */
     public function handle(): void
     {

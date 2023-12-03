@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\PendingDeploymentException;
 use App\Models\Site;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
@@ -26,9 +27,9 @@ class CreateDeployment implements ShouldQueue
     /**
      * Execute the job.
      *
-     * @return void
+     * @throws PendingDeploymentException
      */
-    public function handle()
+    public function handle(): void
     {
         $this->site->deploy([], $this->user);
     }

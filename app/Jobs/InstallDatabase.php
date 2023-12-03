@@ -26,10 +26,8 @@ class InstallDatabase implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
-    public function handle()
+    public function handle(): void
     {
         $this->database
             ->server
@@ -44,10 +42,8 @@ class InstallDatabase implements ShouldQueue
 
     /**
      * Handle a job failure.
-     *
-     * @return void
      */
-    public function failed(Throwable $exception)
+    public function failed(Throwable $exception): void
     {
         // Clean up the database if it was created.
         rescue(function () {
