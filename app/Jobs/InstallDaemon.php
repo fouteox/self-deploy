@@ -25,8 +25,11 @@ class InstallDaemon implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(public Daemon $daemon, public ?User $user = null)
-    {
+    public function __construct(
+        public Daemon $daemon,
+        public ?User $user = null,
+    ) {
+        $this->onQueue('commands');
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Filament\Resources\ServerResource\Pages;
 
 use App\Enum;
 use App\Filament\Resources\ServerResource;
+use App\Jobs\InstallDaemon;
 use App\Models\ActivityLog;
 use App\Models\Daemon;
 use App\Signal;
@@ -69,6 +70,8 @@ class DaemonServer extends ManageRelatedRecords
                             'subject_type' => $record->getMorphClass(),
                             'description' => __("Updated daemon ':command' on server ':server'", ['command' => $record->command, 'server' => $record->server->name]),
                         ]);
+
+                        dispatch(new InstallDaemon($record, auth()->user()));
 
                         return $record;
                     })

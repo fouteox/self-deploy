@@ -45,7 +45,7 @@ class Daemon extends Model
     protected static function booted(): void
     {
         static::created(function ($daemon) {
-            InstallDaemon::dispatch($daemon, auth()->user())->onQueue('commands');
+            InstallDaemon::dispatch($daemon, auth()->user());
         });
         static::deleted(function ($daemon) {
             event(new DaemonDeleted($daemon->id, $daemon->server->team_id));
