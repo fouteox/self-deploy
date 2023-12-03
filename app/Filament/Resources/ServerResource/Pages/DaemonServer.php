@@ -46,7 +46,7 @@ class DaemonServer extends ManageRelatedRecords
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
-                    ->after(function (Daemon $record) {
+                    ->after(function (Daemon $record): void {
                         ActivityLog::create([
                             'team_id' => auth()->user()->current_team_id,
                             'user_id' => auth()->user()->id,
@@ -61,6 +61,14 @@ class DaemonServer extends ManageRelatedRecords
                 Tables\Actions\EditAction::make()
                     ->using(function (Daemon $record, array $data): Daemon {
                         $record->forceFill(['installed_at' => null])->update($data);
+
+                        ActivityLog::create([
+                            'team_id' => auth()->user()->current_team_id,
+                            'user_id' => auth()->user()->id,
+                            'subject_id' => $record->getKey(),
+                            'subject_type' => $record->getMorphClass(),
+                            'description' => __("Updated daemon ':command' on server ':server'", ['command' => $record->command, 'server' => $record->server->name]),
+                        ]);
 
                         return $record;
                     })
