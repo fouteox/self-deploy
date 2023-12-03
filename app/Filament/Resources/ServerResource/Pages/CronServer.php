@@ -3,6 +3,9 @@
 namespace App\Filament\Resources\ServerResource\Pages;
 
 use App\Filament\Resources\ServerResource;
+use App\Jobs\InstallCron;
+use App\Jobs\UninstallCron;
+use App\Models\ActivityLog;
 use App\Models\Cron;
 use App\Rules\CronExpression;
 use App\Traits\BreadcrumbTrait;
@@ -11,6 +14,7 @@ use Filament\Forms;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -45,27 +49,63 @@ class CronServer extends ManageRelatedRecords
                     }),
                 TextColumn::make('command'),
             ])
-            ->filters([
-                // ...
-            ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->mutateFormDataUsing(function (array $data): array {
                         return $this->mutateCronFormData($data);
                     })
+                    ->after(function (Cron $record): void {
+                        ActivityLog::create([
+                            'team_id' => auth()->user()->current_team_id,
+                            'user_id' => auth()->user()->id,
+                            'subject_id' => $record->getKey(),
+                            'subject_type' => $record->getMorphClass(),
+                            'description' => __("Created cron ':command' on server ':server'", ['command' => $record->command, 'server' => $record->server->name]),
+                        ]);
+                    })
                     ->successNotificationTitle(__('The Cron has been created and will be installed on the server.')),
-                //                    ->visible(fn (): bool => $this->getRelationship()->getResults()->count()),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
-                    ->mutateFormDataUsing(function (array $data): array {
-                        return $this->mutateCronFormData($data);
+                    ->using(function (Cron $record, array $data): Cron {
+                        $record->forceFill([
+                            'installed_at' => null,
+                            'installation_failed_at' => null,
+                            'uninstallation_failed_at' => null,
+                        ])->update($this->mutateCronFormData($data));
+
+                        ActivityLog::create([
+                            'team_id' => auth()->user()->current_team_id,
+                            'user_id' => auth()->user()->id,
+                            'subject_id' => $record->getKey(),
+                            'subject_type' => $record->getMorphClass(),
+                            'description' => __("Updated cron ':command' on server ':server'", ['command' => $record->command, 'server' => $record->server->name]),
+                        ]);
+
+                        dispatch(new InstallCron($record, auth()->user()));
+
+                        return $record;
                     })
                     ->successNotificationTitle(__('The Cron will be updated on the server.')),
-                Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->using(function (Cron $record): void {
+                        $record->markUninstallationRequest();
+
+                        dispatch(new UninstallCron($record, auth()->user()));
+
+                        ActivityLog::create([
+                            'team_id' => auth()->user()->current_team_id,
+                            'user_id' => auth()->user()->id,
+                            'subject_id' => $record->getKey(),
+                            'subject_type' => $record->getMorphClass(),
+                            'description' => __("Deleted cron ':command' from server ':server'", ['command' => $record->command, 'server' => $record->server->name]),
+                        ]);
+
+                        Notification::make()
+                            ->title(__('The Cron will be uninstalled from the server.'))
+                            ->success()
+                            ->send();
+                    }),
             ]);
     }
 
@@ -75,12 +115,6 @@ class CronServer extends ManageRelatedRecords
         unset($data['frequency']);
 
         return $data;
-
-        //            ->after(fn () => Notification::make()
-        //                ->success()
-        //                ->title(__('The Cron has been created and will be installed on the server.'))
-        //                ->broadcast(auth()->user())
-        //            );
     }
 
     public function form(Form $form): Form
