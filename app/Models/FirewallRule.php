@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Events\FirewallRuleDeleted;
 use App\Events\FirewallRuleUpdated;
+use App\Jobs\InstallFirewallRule;
 use App\Server\Firewall\RuleAction;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
@@ -38,6 +39,7 @@ class FirewallRule extends Model
 
     protected static function booted(): void
     {
+        static::created(fn ($firewallRule) => InstallFirewallRule::dispatch($firewallRule, auth()->user()));
         static::deleted(function ($firewallRule) {
             event(new FirewallRuleDeleted($firewallRule->id, $firewallRule->server->team_id));
         });
