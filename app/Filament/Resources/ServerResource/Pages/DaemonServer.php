@@ -4,6 +4,8 @@ namespace App\Filament\Resources\ServerResource\Pages;
 
 use App\Enum;
 use App\Filament\Resources\ServerResource;
+use App\Models\ActivityLog;
+use App\Models\Daemon;
 use App\Signal;
 use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
@@ -44,10 +46,24 @@ class DaemonServer extends ManageRelatedRecords
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
+                    ->after(function (Daemon $record) {
+                        ActivityLog::create([
+                            'team_id' => auth()->user()->current_team_id,
+                            'user_id' => auth()->user()->id,
+                            'subject_id' => $record->getKey(),
+                            'subject_type' => $record->getMorphClass(),
+                            'description' => __("Created daemon ':command' on server ':server'", ['command' => $record->command, 'server' => $record->server->name]),
+                        ]);
+                    })
                     ->successNotificationTitle(__('The Daemon has been created and will be installed on the server.')),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
+                    ->using(function (Daemon $record, array $data): Daemon {
+                        $record->forceFill(['installed_at' => null])->update($data);
+
+                        return $record;
+                    })
                     ->successNotificationTitle(__('The Daemon will be updated on the server.')),
                 Tables\Actions\DeleteAction::make()
                     ->successNotificationTitle(__('The Daemon will be uninstalled from the server.')),

@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use App\Models\ActivityLog;
 use App\Models\CouldNotConnectToServerException;
 use App\Models\Daemon;
 use App\Models\NoConnectionSelectedException;
@@ -39,14 +38,6 @@ class InstallDaemon implements ShouldQueue
      */
     public function handle(): void
     {
-        ActivityLog::create([
-            'team_id' => $this->user->current_team_id,
-            'user_id' => $this->user->id,
-            'subject_id' => $this->daemon->getKey(),
-            'subject_type' => $this->daemon->getMorphClass(),
-            'description' => __("Created daemon ':command' on server ':server'", ['command' => $this->daemon->command, 'server' => $this->daemon->server->name]),
-        ]);
-
         $contents = SupervisorProgram::build($this->daemon);
 
         $this->daemon->server->uploadAsRoot($this->daemon->path(), $contents);
