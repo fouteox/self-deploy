@@ -16,6 +16,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
+// TODO : gérer la création, la mise à jour et la suppresison du daemon pour effectuer les bones actions (voir eddy)
 class DaemonServer extends ManageRelatedRecords
 {
     use BreadcrumbTrait, RedirectsIfProvisioned;
