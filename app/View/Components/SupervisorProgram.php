@@ -3,6 +3,8 @@
 namespace App\View\Components;
 
 use App\Models\Daemon;
+use Closure;
+use Illuminate\Contracts\View\View;
 
 class SupervisorProgram extends Component implements BashScript
 {
@@ -17,10 +19,8 @@ class SupervisorProgram extends Component implements BashScript
 
     /**
      * Get the view / contents that represent the component.
-     *
-     * @return \Illuminate\Contracts\View\View|\Closure|string
      */
-    public function render()
+    public function render(): View|Closure|string
     {
         return view('components.server.supervisor-program');
     }
