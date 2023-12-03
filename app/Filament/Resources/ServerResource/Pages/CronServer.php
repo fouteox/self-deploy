@@ -50,7 +50,7 @@ class CronServer extends ManageRelatedRecords
                     }),
                 TextColumn::make('command'),
                 TextColumn::make('status')
-                    ->state(fn (Cron $record): string => StatusColumn::getStatus(record: $record, installable: true)),
+                    ->state(fn (Cron $record): string => StatusColumn::getStatus(record: $record)),
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
