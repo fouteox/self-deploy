@@ -12,7 +12,7 @@ use Throwable;
 
 class ServerHandler
 {
-    private $notifiable;
+    private mixed $notifiable;
 
     private Throwable $exception;
 
@@ -22,24 +22,8 @@ class ServerHandler
         CouldNotConnectToServerException::class => ServerConnectionLost::class,
     ];
 
-    public function __construct(private Server $server)
+    public function __construct(private readonly Server $server)
     {
-    }
-
-    /**
-     * Setter for the notifiable.
-     *
-     * @param  mixed  $notifiable
-     */
-    public function notify($notifiable): self
-    {
-        if ($notifiable instanceof Model && ! $notifiable->exists) {
-            $notifiable = null;
-        }
-
-        $this->notifiable = $notifiable;
-
-        return $this;
     }
 
     /**
@@ -63,18 +47,6 @@ class ServerHandler
     }
 
     /**
-     * Creates a Notification instance based on the exception type.
-     */
-    private function buildNotification(): Notification
-    {
-        $exceptionClass = get_class($this->exception);
-
-        $notificationClass = $this->exceptionMailMap[$exceptionClass] ?? JobOnServerFailed::class;
-
-        return new $notificationClass($this->server, $this->reference);
-    }
-
-    /**
      * Sends the notification if the notifiable is set.
      */
     public function send(): void
@@ -84,5 +56,31 @@ class ServerHandler
         }
 
         $this->notifiable->notify($this->buildNotification());
+    }
+
+    /**
+     * Setter for the notifiable.
+     */
+    public function notify(mixed $notifiable): self
+    {
+        if ($notifiable instanceof Model && ! $notifiable->exists) {
+            $notifiable = null;
+        }
+
+        $this->notifiable = $notifiable;
+
+        return $this;
+    }
+
+    /**
+     * Creates a Notification instance based on the exception type.
+     */
+    private function buildNotification(): Notification
+    {
+        $exceptionClass = get_class($this->exception);
+
+        $notificationClass = $this->exceptionMailMap[$exceptionClass] ?? JobOnServerFailed::class;
+
+        return new $notificationClass($this->server, $this->reference);
     }
 }
