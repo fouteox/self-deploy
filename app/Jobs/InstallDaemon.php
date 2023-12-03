@@ -2,7 +2,11 @@
 
 namespace App\Jobs;
 
+use App\Models\ActivityLog;
+use App\Models\CouldNotConnectToServerException;
 use App\Models\Daemon;
+use App\Models\NoConnectionSelectedException;
+use App\Models\TaskFailedException;
 use App\Models\User;
 use App\Tasks\ReloadSupervisor;
 use App\View\Components\SupervisorProgram;
@@ -29,10 +33,20 @@ class InstallDaemon implements ShouldQueue
     /**
      * Execute the job.
      *
-     * @return void
+     * @throws CouldNotConnectToServerException
+     * @throws NoConnectionSelectedException
+     * @throws TaskFailedException
      */
-    public function handle()
+    public function handle(): void
     {
+        ActivityLog::create([
+            'team_id' => $this->user->current_team_id,
+            'user_id' => $this->user->id,
+            'subject_id' => $this->daemon->getKey(),
+            'subject_type' => $this->daemon->getMorphClass(),
+            'description' => __("Created daemon ':command' on server ':server'", ['command' => $this->daemon->command, 'server' => $this->daemon->server->name]),
+        ]);
+
         $contents = SupervisorProgram::build($this->daemon);
 
         $this->daemon->server->uploadAsRoot($this->daemon->path(), $contents);
@@ -47,10 +61,8 @@ class InstallDaemon implements ShouldQueue
 
     /**
      * Handle a job failure.
-     *
-     * @return void
      */
-    public function failed(Throwable $exception)
+    public function failed(Throwable $exception): void
     {
         $this->daemon->forceFill(['installation_failed_at' => now()])->save();
 
