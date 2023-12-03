@@ -36,10 +36,8 @@ class CronUpdated implements ShouldBroadcast
 
     /**
      * Get the data that should be sent with the broadcasted event.
-     *
-     * @return array|null
      */
-    public function broadcastWith()
+    public function broadcastWith(): ?array
     {
         return [
             //            Splade::refreshOnEvent(),

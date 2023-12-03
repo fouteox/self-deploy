@@ -2,12 +2,12 @@
 
 namespace App\Events;
 
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use ProtoneMedia\Splade\Facades\Splade;
 
 class ServerDeleted implements ShouldBroadcast
 {
@@ -24,7 +24,7 @@ class ServerDeleted implements ShouldBroadcast
     /**
      * Get the channels the event should broadcast on.
      *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
+     * @return array<int, Channel>
      */
     public function broadcastOn(): array
     {
@@ -35,14 +35,12 @@ class ServerDeleted implements ShouldBroadcast
 
     /**
      * Get the data that should be sent with the broadcasted event.
-     *
-     * @return array|null
      */
-    public function broadcastWith()
+    public function broadcastWith(): ?array
     {
         return [
-            Splade::redirectOnEvent()->route('servers.index'),
-            Splade::toastOnEvent()->warning(__('The server has been deleted.')),
+            //            Splade::redirectOnEvent()->route('servers.index'),
+            //            Splade::toastOnEvent()->warning(__('The server has been deleted.')),
         ];
     }
 }

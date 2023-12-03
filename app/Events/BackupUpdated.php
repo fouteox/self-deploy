@@ -3,12 +3,12 @@
 namespace App\Events;
 
 use App\Models\Backup;
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use ProtoneMedia\Splade\Facades\Splade;
 
 class BackupUpdated implements ShouldBroadcast
 {
@@ -25,7 +25,7 @@ class BackupUpdated implements ShouldBroadcast
     /**
      * Get the channels the event should broadcast on.
      *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
+     * @return array<int, Channel>
      */
     public function broadcastOn(): array
     {
@@ -37,13 +37,11 @@ class BackupUpdated implements ShouldBroadcast
 
     /**
      * Get the data that should be sent with the broadcasted event.
-     *
-     * @return array|null
      */
-    public function broadcastWith()
+    public function broadcastWith(): ?array
     {
         return [
-            Splade::refreshOnEvent(),
+            //            Splade::refreshOnEvent(),
         ];
     }
 }
