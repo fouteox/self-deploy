@@ -4,9 +4,11 @@ namespace App\Notifications;
 
 use App\Filament\Resources\ServerResource;
 use App\Models\Server;
+use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Markdown;
+use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -29,7 +31,16 @@ class JobOnServerFailed extends Notification implements ShouldQueue
      */
     public function via(): array
     {
-        return ['mail'];
+        return ['broadcast', 'mail'];
+    }
+
+    public function toBroadcast(): BroadcastMessage
+    {
+        return FilamentNotification::make()
+            ->title('Job on server failed')
+            ->danger()
+            ->body("We tried to run a job on your server, but it failed. Here's what we tried to do:\n\n".$this->reference)
+            ->getBroadcastMessage();
     }
 
     /**
