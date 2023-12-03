@@ -66,11 +66,12 @@ class InstallDaemon implements ShouldQueue
     {
         $this->daemon->forceFill(['installation_failed_at' => now()])->save();
 
-        $this->daemon->server
+        // TODO : réactiver les notifications en cas d'echec de la tache
+        /*$this->daemon->server
             ->exceptionHandler()
             ->notify($this->user)
             ->about($exception)
             ->withReference(__("Installation of daemon ':daemon'", ['daemon' => "`{$this->daemon->command}`"]))
-            ->send();
+            ->send();*/
     }
 }
