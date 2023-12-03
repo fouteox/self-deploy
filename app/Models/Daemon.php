@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Events\DaemonDeleted;
 use App\Events\DaemonUpdated;
+use App\Jobs\InstallDaemon;
 use App\Signal;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
@@ -43,6 +44,9 @@ class Daemon extends Model
 
     protected static function booted(): void
     {
+        static::created(function ($daemon) {
+            InstallDaemon::dispatch($daemon, auth()->user())->onQueue('commands');
+        });
         static::deleted(function ($daemon) {
             event(new DaemonDeleted($daemon->id, $daemon->server->team_id));
         });
