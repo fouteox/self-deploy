@@ -6,7 +6,6 @@ use App\Events\FirewallRuleDeleted;
 use App\Events\FirewallRuleUpdated;
 use App\Server\Firewall\RuleAction;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -15,7 +14,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class FirewallRule extends Model
 {
-    use HasFactory;
     use HasUlids;
     use InstallsAsynchronously;
 
@@ -38,7 +36,7 @@ class FirewallRule extends Model
         'updated' => FirewallRuleUpdated::class,
     ];
 
-    protected static function booted()
+    protected static function booted(): void
     {
         static::deleted(function ($firewallRule) {
             event(new FirewallRuleDeleted($firewallRule->id, $firewallRule->server->team_id));
@@ -55,7 +53,7 @@ class FirewallRule extends Model
      */
     public function formatAsUfwRule(): string
     {
-        $from = $this->from_ipv4 ? "from {$this->from_ipv4} to any port" : null;
+        $from = $this->from_ipv4 ? "from $this->from_ipv4 to any port" : null;
 
         return implode(' ', array_filter([
             $this->action->value,
