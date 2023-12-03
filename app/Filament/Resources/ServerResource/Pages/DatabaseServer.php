@@ -7,7 +7,6 @@ use App\Models\Database;
 use App\Models\DatabaseUser;
 use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
-use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -75,7 +74,8 @@ class DatabaseServer extends ManageRelatedRecords
             ])
             ->emptyStateActions([
                 // ...
-            ]);
+            ])
+            ->paginated(false);
     }
 
     public function form(Form $form): Form
@@ -100,12 +100,5 @@ class DatabaseServer extends ManageRelatedRecords
                             ->required(),
                     ]),
             ]);
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            Action::make('Manage users')->badge(DatabaseUser::where('server_id', $this->record->id)->count()),
-        ];
     }
 }
