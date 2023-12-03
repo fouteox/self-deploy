@@ -6,7 +6,6 @@ use App\Events\DaemonDeleted;
 use App\Events\DaemonUpdated;
 use App\Signal;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -15,7 +14,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Daemon extends Model
 {
-    use HasFactory;
     use HasUlids;
     use InstallsAsynchronously;
 
@@ -43,7 +41,7 @@ class Daemon extends Model
         'updated' => DaemonUpdated::class,
     ];
 
-    protected static function booted()
+    protected static function booted(): void
     {
         static::deleted(function ($daemon) {
             event(new DaemonDeleted($daemon->id, $daemon->server->team_id));
@@ -60,7 +58,7 @@ class Daemon extends Model
      */
     public function path(): string
     {
-        return "/etc/supervisor/conf.d/daemon-{$this->id}.conf";
+        return "/etc/supervisor/conf.d/daemon-$this->id.conf";
     }
 
     /**
@@ -69,8 +67,8 @@ class Daemon extends Model
     public function errorLogPath(): string
     {
         return $this->user === 'root'
-            ? "/root/{$this->server->working_directory}/daemon-{$this->id}.err"
-            : "/home/{$this->user}/{$this->server->working_directory}/daemon-{$this->id}.err";
+            ? "/root/{$this->server->working_directory}/daemon-$this->id.err"
+            : "/home/$this->user/{$this->server->working_directory}/daemon-$this->id.err";
     }
 
     /**
@@ -79,7 +77,7 @@ class Daemon extends Model
     public function outputLogPath(): string
     {
         return $this->user === 'root'
-            ? "/root/{$this->server->working_directory}/daemon-{$this->id}.log"
-            : "/home/{$this->user}/{$this->server->working_directory}/daemon-{$this->id}.log";
+            ? "/root/{$this->server->working_directory}/daemon-$this->id.log"
+            : "/home/$this->user/{$this->server->working_directory}/daemon-$this->id.log";
     }
 }
