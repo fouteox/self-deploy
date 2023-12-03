@@ -10,6 +10,7 @@ use App\Models\Cron;
 use App\Rules\CronExpression;
 use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
+use App\View\Components\StatusColumn;
 use Filament\Forms;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Form;
@@ -48,6 +49,8 @@ class CronServer extends ManageRelatedRecords
                         return $options[$state] ?? __('Custom expression');
                     }),
                 TextColumn::make('command'),
+                TextColumn::make('status')
+                    ->state(fn (Cron $record): string => StatusColumn::getStatus(record: $record, installable: true)),
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
