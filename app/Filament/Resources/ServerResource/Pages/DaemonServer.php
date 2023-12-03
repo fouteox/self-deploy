@@ -5,6 +5,7 @@ namespace App\Filament\Resources\ServerResource\Pages;
 use App\Enum;
 use App\Filament\Resources\ServerResource;
 use App\Jobs\InstallDaemon;
+use App\Jobs\UninstallDaemon;
 use App\Models\ActivityLog;
 use App\Models\Daemon;
 use App\Signal;
@@ -13,13 +14,13 @@ use App\Traits\RedirectsIfProvisioned;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-// TODO : gérer la création, la mise à jour et la suppresison du daemon pour effectuer les bones actions (voir eddy)
 class DaemonServer extends ManageRelatedRecords
 {
     use BreadcrumbTrait, RedirectsIfProvisioned;
@@ -41,9 +42,6 @@ class DaemonServer extends ManageRelatedRecords
                 TextColumn::make('command'),
                 TextColumn::make('user'),
                 TextColumn::make('processes'),
-            ])
-            ->filters([
-                // ...
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
@@ -77,10 +75,24 @@ class DaemonServer extends ManageRelatedRecords
                     })
                     ->successNotificationTitle(__('The Daemon will be updated on the server.')),
                 Tables\Actions\DeleteAction::make()
-                    ->successNotificationTitle(__('The Daemon will be uninstalled from the server.')),
-            ])
-            ->bulkActions([
-                //                Tables\Actions\DeleteBulkAction::make(),
+                    ->using(function (Daemon $record): void {
+                        $record->markUninstallationRequest();
+
+                        dispatch(new UninstallDaemon($record, auth()->user()));
+
+                        ActivityLog::create([
+                            'team_id' => auth()->user()->current_team_id,
+                            'user_id' => auth()->user()->id,
+                            'subject_id' => $record->getKey(),
+                            'subject_type' => $record->getMorphClass(),
+                            'description' => __("Deleted daemon ':command' from server ':server'", ['command' => $record->command, 'server' => $record->server->name]),
+                        ]);
+
+                        Notification::make()
+                            ->title(__('The Daemon will be uninstalled from the server.'))
+                            ->success()
+                            ->send();
+                    }),
             ]);
     }
 
