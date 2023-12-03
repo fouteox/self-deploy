@@ -29,10 +29,8 @@ class UninstallDaemon implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
-    public function handle()
+    public function handle(): void
     {
         tap($this->daemon->server, function (Server $server) {
             $server->runTask(new DeleteFile($this->daemon->path()))->asRoot()->dispatch();
@@ -44,10 +42,8 @@ class UninstallDaemon implements ShouldQueue
 
     /**
      * Handle a job failure.
-     *
-     * @return void
      */
-    public function failed(Throwable $exception)
+    public function failed(Throwable $exception): void
     {
         $this->daemon->forceFill(['uninstallation_failed_at' => now()])->save();
 
