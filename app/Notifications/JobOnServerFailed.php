@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Filament\Resources\ServerResource;
 use App\Models\Server;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -26,7 +27,7 @@ class JobOnServerFailed extends Notification implements ShouldQueue
      *
      * @return array<int, string>
      */
-    public function via(object $notifiable): array
+    public function via(): array
     {
         return ['mail'];
     }
@@ -34,13 +35,13 @@ class JobOnServerFailed extends Notification implements ShouldQueue
     /**
      * Get the mail representation of the notification.
      */
-    public function toMail(object $notifiable): MailMessage
+    public function toMail(): MailMessage
     {
         return (new MailMessage)
             ->error()
             ->subject(__('Job on server failed'))
             ->line(__("We tried to run a job on your server, but it failed. Here's what we tried to do:"))
             ->line(Markdown::parse($this->reference))
-            ->action(__('View Server'), route('servers.show', $this->server));
+            ->action(__('View Server'), ServerResource::getUrl('sites', ['record' => $this->server->id]));
     }
 }
