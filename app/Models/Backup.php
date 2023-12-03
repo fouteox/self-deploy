@@ -6,10 +6,10 @@ use App\Events\BackupDeleted;
 use App\Events\BackupUpdated;
 use App\Tasks\RunBackupJob;
 use Cron\CronExpression;
+use Exception;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -31,7 +31,6 @@ class Backup extends Model
 {
     const TIMESTAMP_FORMAT = 'Y-m-d-H-i-s';
 
-    use HasFactory;
     use HasUlids;
     use InstallsAsynchronously;
 
@@ -63,7 +62,7 @@ class Backup extends Model
         'saved' => BackupUpdated::class,
     ];
 
-    protected static function booted()
+    protected static function booted(): void
     {
         static::creating(function (Backup $backup) {
             $backup->include_files ??= [];
@@ -90,6 +89,9 @@ class Backup extends Model
         return Carbon::parse($dates[0])->diffInSeconds($dates[1]);
     }
 
+    /**
+     * @throws Exception
+     */
     public function getNextRunAttribute(): Carbon
     {
         $nextRun = (new CronExpression($this->cron_expression))->getNextRunDate(now());
@@ -129,10 +131,11 @@ class Backup extends Model
 
     /**
      * Creates a new backup job for this backup with all databases in pending state.
+     *
+     * @throws CouldNotCreateBackupJobException
      */
     public function createJob(): BackupJob
     {
-        /** @var BackupJob|null */
         $pendingOrRunningJob = $this->jobs()->whereIn('status', [
             BackupJobStatus::Pending,
             BackupJobStatus::Running,
@@ -151,6 +154,11 @@ class Backup extends Model
 
     /**
      * Creates a new backup job and dispatches it to the server.
+     *
+     * @throws CouldNotConnectToServerException
+     * @throws CouldNotCreateBackupJobException
+     * @throws NoConnectionSelectedException
+     * @throws TaskFailedException
      */
     public function createAndDispatchJob(): BackupJob
     {
@@ -200,7 +208,7 @@ class Backup extends Model
      */
     public function cronPath(): string
     {
-        return "/etc/cron.d/backup-{$this->id}";
+        return "/etc/cron.d/backup-$this->id";
     }
 
     /**
@@ -210,6 +218,6 @@ class Backup extends Model
     {
         $dispatchUrl = URL::relativeSignedRoute('backup-job.store', [$this, $this->dispatch_token]);
 
-        return "(curl -X POST --max-time 15 {$dispatchUrl})";
+        return "(curl -X POST --max-time 15 $dispatchUrl)";
     }
 }
