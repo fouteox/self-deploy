@@ -8,6 +8,7 @@ use App\Jobs\InstallDaemon;
 use App\Jobs\UninstallDaemon;
 use App\Models\ActivityLog;
 use App\Models\Daemon;
+use App\Models\Server;
 use App\Signal;
 use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
@@ -21,6 +22,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
+/* @method Server getRecord() */
 class DaemonServer extends ManageRelatedRecords
 {
     use BreadcrumbTrait, RedirectsIfProvisioned;

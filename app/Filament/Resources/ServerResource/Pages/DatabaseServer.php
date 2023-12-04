@@ -5,6 +5,7 @@ namespace App\Filament\Resources\ServerResource\Pages;
 use App\Filament\Resources\ServerResource;
 use App\Models\Database;
 use App\Models\DatabaseUser;
+use App\Models\Server;
 use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
 use Filament\Forms\Components\Repeater;
@@ -17,6 +18,7 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
+/* @method Server getRecord() */
 class DatabaseServer extends ManageRelatedRecords
 {
     use BreadcrumbTrait, RedirectsIfProvisioned;
