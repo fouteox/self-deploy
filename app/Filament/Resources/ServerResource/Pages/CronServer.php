@@ -7,6 +7,7 @@ use App\Jobs\InstallCron;
 use App\Jobs\UninstallCron;
 use App\Models\ActivityLog;
 use App\Models\Cron;
+use App\Models\Server;
 use App\Rules\CronExpression;
 use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
@@ -22,6 +23,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
+/* @method Server getRecord() */
 class CronServer extends ManageRelatedRecords
 {
     use BreadcrumbTrait, RedirectsIfProvisioned;
