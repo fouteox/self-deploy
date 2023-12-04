@@ -14,6 +14,6 @@ class UpdateAlternatives extends Task
      */
     public function render(): string
     {
-        return "update-alternatives --set {$this->link} {$this->path}";
+        return "update-alternatives --set $this->link $this->path";
     }
 }
