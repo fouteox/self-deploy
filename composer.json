@@ -8,7 +8,7 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.1",
+        "php": "^8.3",
         "calebporzio/sushi": "^2.4",
         "filament/filament": "^v3.1.5",
         "guzzlehttp/guzzle": "^7.8.0",
