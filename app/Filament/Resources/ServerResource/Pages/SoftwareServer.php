@@ -3,22 +3,21 @@
 namespace App\Filament\Resources\ServerResource\Pages;
 
 use App\Filament\Resources\ServerResource;
+use App\Jobs\MakeSoftwareDefaultOnServer;
+use App\Models\ActivityLog;
 use App\Models\Server;
-use App\Models\Software;
+use App\Server\Software;
 use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
+use Filament\Actions\Contracts\HasActions;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Concerns\InteractsWithTable;
-use Filament\Tables\Contracts\HasTable;
-use Filament\Tables\Table;
 
 /* @method Server getRecord() */
-class SoftwareServer extends Page implements HasTable
+class SoftwareServer extends Page implements HasActions
 {
-    use BreadcrumbTrait, InteractsWithRecord, InteractsWithTable, RedirectsIfProvisioned {
+    use BreadcrumbTrait, InteractsWithRecord, RedirectsIfProvisioned {
         BreadcrumbTrait::getBreadcrumbs insteadof InteractsWithRecord;
     }
 
@@ -37,24 +36,39 @@ class SoftwareServer extends Page implements HasTable
         static::authorizeResourceAccess();
     }
 
-    public function table(Table $table): Table
+    public function restartAction(string $softwareId): void
     {
-        Software::initializeForServer($this->getRecord());
+        $software = Software::from($softwareId);
 
-        return $table
-            ->query(Software::query())
-            ->columns([
-                TextColumn::make('name'),
-            ])
-            ->filters([
-                // ...
-            ])
-            ->actions([
-                Action::make('restart'),
-            ])
-            ->bulkActions([
-                // ...
-            ])
-            ->paginated(false);
+        // TODO: ajouter les logs et le dispatch
+
+        Notification::make()
+            ->title(__(':software will be restarted on the server.', ['software' => $software->getDisplayName()]))
+            ->success()
+            ->send();
+
+        $this->dispatch('close-modal', id: $softwareId);
+    }
+
+    public function default(string $softwareId): void
+    {
+        $software = Software::from($softwareId);
+
+        dispatch(new MakeSoftwareDefaultOnServer($this->getRecord(), $software));
+
+        ActivityLog::create([
+            'team_id' => auth()->user()->current_team_id,
+            'user_id' => auth()->user()->id,
+            'subject_id' => $this->getRecord()->getKey(),
+            'subject_type' => $this->getRecord()->getMorphClass(),
+            'description' => __("Made ':software' the CLI default on server ':server'", ['software' => $software->getDisplayName(), 'server' => $this->getRecord()->name]),
+        ]);
+
+        Notification::make()
+            ->title(__(':software will now be the CLI default on the server.', ['software' => $software->getDisplayName()]))
+            ->success()
+            ->send();
+
+        $this->dispatch('close-modal', id: $softwareId);
     }
 }
