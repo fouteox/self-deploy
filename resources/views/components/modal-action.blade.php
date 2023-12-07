@@ -8,7 +8,6 @@
     <x-slot name="heading">
         Are you sure you want to continue?
     </x-slot>
-    {{-- TODO: differencier default de restart--}}
     <x-slot name="footerActions">
         <x-filament::button
             :color="$color ?? null"
