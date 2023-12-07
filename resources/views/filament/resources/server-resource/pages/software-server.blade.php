@@ -21,6 +21,7 @@
                         <x-modal-action
                             :item="$software['id']"
                             action="{{__('Make CLI default')}}"
+                            type="default"
                             :$record
                         />
                     @endif
@@ -28,6 +29,7 @@
                     @if ($software['hasRestartTask'])
                         <x-modal-action
                             :item="$software['id']"
+                            type="restart"
                             color="danger"
                             action="{{__('Restart')}}"
                             :$record

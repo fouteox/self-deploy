@@ -12,7 +12,7 @@
     <x-slot name="footerActions">
         <x-filament::button
             :color="$color ?? null"
-            wire:click="default('{{ $item }}')"
+            wire:click="{{$type}}('{{ $item }}')"
         >
             {{ $action }}
         </x-filament::button>
