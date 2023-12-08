@@ -41,43 +41,50 @@ class SoftwareServer extends Page implements HasActions
     {
         $software = Software::from($softwareId);
 
-        dispatch(new RestartSoftwareOnServer($this->getRecord(), $software));
+        $this->softwareOperation(
+            $softwareId,
+            new RestartSoftwareOnServer($this->getRecord(), $software),
+            __("Restarted ':software' on server ':server'", ['software' => $software->getDisplayName(), 'server' => $this->getRecord()->name]),
+            __(':software will be restarted on the server.', ['software' => $software->getDisplayName()])
+        );
+    }
 
+    private function softwareOperation(string $softwareId, $job, string $activityDescription, string $notificationTitle): void
+    {
+        dispatch($job);
+        $this->logActivity($activityDescription);
+        $this->sendNotification($notificationTitle);
+        $this->dispatch('close-modal', id: $softwareId);
+    }
+
+    private function logActivity(string $activityDescription): void
+    {
         ActivityLog::create([
             'team_id' => auth()->user()->current_team_id,
             'user_id' => auth()->user()->id,
             'subject_id' => $this->getRecord()->getKey(),
             'subject_type' => $this->getRecord()->getMorphClass(),
-            'description' => __("Restarted ':software' on server ':server'", ['software' => $software->getDisplayName(), 'server' => $this->getRecord()->name]),
+            'description' => $activityDescription,
         ]);
+    }
 
+    private function sendNotification(string $notificationTitle): void
+    {
         Notification::make()
-            ->title(__(':software will be restarted on the server.', ['software' => $software->getDisplayName()]))
+            ->title($notificationTitle)
             ->success()
             ->send();
-
-        $this->dispatch('close-modal', id: $softwareId);
     }
 
     public function default(string $softwareId): void
     {
         $software = Software::from($softwareId);
 
-        dispatch(new MakeSoftwareDefaultOnServer($this->getRecord(), $software));
-
-        ActivityLog::create([
-            'team_id' => auth()->user()->current_team_id,
-            'user_id' => auth()->user()->id,
-            'subject_id' => $this->getRecord()->getKey(),
-            'subject_type' => $this->getRecord()->getMorphClass(),
-            'description' => __("Made ':software' the CLI default on server ':server'", ['software' => $software->getDisplayName(), 'server' => $this->getRecord()->name]),
-        ]);
-
-        Notification::make()
-            ->title(__(':software will now be the CLI default on the server.', ['software' => $software->getDisplayName()]))
-            ->success()
-            ->send();
-
-        $this->dispatch('close-modal', id: $softwareId);
+        $this->softwareOperation(
+            $softwareId,
+            new MakeSoftwareDefaultOnServer($this->getRecord(), $software),
+            __("Made ':software' the CLI default on server ':server'", ['software' => $software->getDisplayName(), 'server' => $this->getRecord()->name]),
+            __(':software will now be the CLI default on the server.', ['software' => $software->value])
+        );
     }
 }
