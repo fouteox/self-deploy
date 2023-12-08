@@ -11,6 +11,7 @@ use App\Rules\FirewallPort;
 use App\Server\Firewall\RuleAction;
 use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
+use App\View\Components\StatusColumn;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -49,7 +50,8 @@ class FirewallRulesServer extends ManageRelatedRecords
                 TextColumn::make('from_ipv4')
                     ->default(__('Any'))
                     ->sortable(),
-                TextColumn::make('status'),
+                TextColumn::make('status')
+                    ->state(fn (FirewallRule $record): string => StatusColumn::getStatus(record: $record)),
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()

@@ -42,6 +42,7 @@ class CronServer extends ManageRelatedRecords
             ->modifyQueryUsing(fn (Builder $query) => $query->with('server'))
             ->recordTitleAttribute('command')
             ->columns([
+                TextColumn::make('command'),
                 TextColumn::make('user'),
                 TextColumn::make('expression')
                     ->label(__('Frequency'))
@@ -50,7 +51,6 @@ class CronServer extends ManageRelatedRecords
 
                         return $options[$state] ?? __('Custom expression');
                     }),
-                TextColumn::make('command'),
                 TextColumn::make('status')
                     ->state(fn (Cron $record): string => StatusColumn::getStatus(record: $record)),
             ])

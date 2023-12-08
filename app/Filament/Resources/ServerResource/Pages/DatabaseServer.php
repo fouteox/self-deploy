@@ -8,6 +8,7 @@ use App\Models\DatabaseUser;
 use App\Models\Server;
 use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
+use App\View\Components\StatusColumn;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -43,6 +44,8 @@ class DatabaseServer extends ManageRelatedRecords
                     ->limitList(2)
 //                    ->expandableLimitedList() // TODO: vérifier pourquoi ça ne fonctionne pas
                     ->placeholder('No user.'),
+                TextColumn::make('status')
+                    ->state(fn (Database $record): string => StatusColumn::getStatus(record: $record)),
             ])
             ->filters([
                 // ...
