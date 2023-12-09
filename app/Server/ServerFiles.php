@@ -15,42 +15,19 @@ use App\Tasks\RestartPhp81;
 use App\Tasks\RestartPhp82;
 use Illuminate\Support\Collection;
 
-class ServerFiles
+readonly class ServerFiles
 {
     public function __construct(private Server $server)
     {
-        $this->server = $server;
     }
 
     /**
-     * The 'global' Caddyfile.
+     * Returns a collection of all log files, including the sites' logs.
      */
-    public function caddyfile(): FileOnServer
+    public function allLogFiles(): Collection
     {
-        return new FileOnServer(
-            'Caddyfile',
-            __('The configuration file for Caddy. It is used to configure your site(s), including how to handle requests, TLS certificates, and more.'),
-            '/etc/caddy/Caddyfile',
-            PrismLanguage::Nginx,
-            $this->server->name,
-            new CaddyfileOnServer($this->server),
-            fn () => $this->server->runTask(ReloadCaddy::class)->asRoot()->inBackground()->dispatch(),
-        );
-    }
-
-    /**
-     * The my.cnf file.
-     */
-    public function mysqlConfigFile(): FileOnServer
-    {
-        return new FileOnServer(
-            __('MySQL config file'),
-            __('The MySQL configuration file. It is used to configure MySQL\'s behavior.'),
-            '/etc/mysql/my.cnf',
-            PrismLanguage::Clike,
-            $this->server->name,
-            new MySqlConfigOnServer($this->server),
-            fn () => $this->server->runTask(RestartMySql::class)->asRoot()->inBackground()->dispatch(),
+        return $this->logFiles()->merge(
+            $this->server->sites->map(fn (Site $site) => $site->files()->logFiles())->flatten()
         );
     }
 
@@ -102,12 +79,12 @@ class ServerFiles
     }
 
     /**
-     * Returns a collection of all log files, including the sites' logs.
+     * Returns a collection of all config files, including the sites' config files.
      */
-    public function allLogFiles(): Collection
+    public function allEditableFiles(): Collection
     {
-        return $this->logFiles()->merge(
-            $this->server->sites->map(fn (Site $site) => $site->files()->logFiles())->flatten()
+        return $this->editableFiles()->merge(
+            $this->server->sites->map(fn (Site $site) => $site->files()->editableFiles())->flatten()
         );
     }
 
@@ -167,12 +144,34 @@ class ServerFiles
     }
 
     /**
-     * Returns a collection of all config files, including the sites' config files.
+     * The 'global' Caddyfile.
      */
-    public function allEditableFiles(): Collection
+    public function caddyfile(): FileOnServer
     {
-        return $this->editableFiles()->merge(
-            $this->server->sites->map(fn (Site $site) => $site->files()->editableFiles())->flatten()
+        return new FileOnServer(
+            'Caddyfile',
+            __('The configuration file for Caddy. It is used to configure your site(s), including how to handle requests, TLS certificates, and more.'),
+            '/etc/caddy/Caddyfile',
+            PrismLanguage::Nginx,
+            $this->server->name,
+            new CaddyfileOnServer($this->server),
+            fn () => $this->server->runTask(ReloadCaddy::class)->asRoot()->inBackground()->dispatch(),
+        );
+    }
+
+    /**
+     * The my.cnf file.
+     */
+    public function mysqlConfigFile(): FileOnServer
+    {
+        return new FileOnServer(
+            __('MySQL config file'),
+            __('The MySQL configuration file. It is used to configure MySQL\'s behavior.'),
+            '/etc/mysql/my.cnf',
+            PrismLanguage::Clike,
+            $this->server->name,
+            new MySqlConfigOnServer($this->server),
+            fn () => $this->server->runTask(RestartMySql::class)->asRoot()->inBackground()->dispatch(),
         );
     }
 }
