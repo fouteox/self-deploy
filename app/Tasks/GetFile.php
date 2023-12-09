@@ -6,7 +6,7 @@ class GetFile extends Task
 {
     protected int $timeout = 30;
 
-    public function __construct(private string $path, private ?int $lines = null)
+    public function __construct(private readonly string $path, private readonly ?int $lines = null)
     {
     }
 
@@ -16,9 +16,9 @@ class GetFile extends Task
     public function render(): string
     {
         if ($this->lines) {
-            return "tail -n {$this->lines} {$this->path}";
+            return "tail -n $this->lines $this->path";
         }
 
-        return "tail -c 1M {$this->path}";
+        return "tail -c 1M $this->path";
     }
 }
