@@ -20,7 +20,7 @@ class FileOnServer
         $this->prismLanguage ??= PrismLanguage::Clike;
     }
 
-    public function context(string $context = null): self
+    public function context(?string $context = null): self
     {
         $this->context = $context;
 
@@ -32,7 +32,7 @@ class FileOnServer
         $name = $this->name;
 
         if ($this->context) {
-            $name .= " ({$this->context})";
+            $name .= " ($this->context)";
         }
 
         return $name;
