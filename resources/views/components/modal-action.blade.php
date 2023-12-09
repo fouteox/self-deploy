@@ -16,7 +16,10 @@
             {{ $action }}
         </x-filament::button>
 
-        <x-filament::button color="gray">
+        <x-filament::button
+            color="gray"
+            wire:click="$dispatch('close-modal', { id: '{{ $item }}'})"
+        >
             Cancel
         </x-filament::button>
     </x-slot>

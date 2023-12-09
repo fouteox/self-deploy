@@ -10,13 +10,12 @@ use App\Models\Server;
 use App\Server\Software;
 use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
-use Filament\Actions\Contracts\HasActions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
 
 /* @method Server getRecord() */
-class SoftwareServer extends Page implements HasActions
+class SoftwareServer extends Page
 {
     use BreadcrumbTrait, InteractsWithRecord, RedirectsIfProvisioned {
         BreadcrumbTrait::getBreadcrumbs insteadof InteractsWithRecord;
