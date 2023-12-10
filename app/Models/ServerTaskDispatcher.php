@@ -33,7 +33,7 @@ class ServerTaskDispatcher
     private int $updateLogIntervalInSeconds = 0;
 
     public function __construct(
-        private Server $server,
+        private readonly Server $server,
         private PendingTask $pendingTask,
     ) {
     }
@@ -44,7 +44,7 @@ class ServerTaskDispatcher
     public function keepTrackInBackground(bool $value = true): self
     {
         if ($value) {
-            $this->inBackground(true);
+            $this->inBackground();
         }
 
         $this->keepTrack = $value;
@@ -75,7 +75,7 @@ class ServerTaskDispatcher
     /**
      * Run the task as the non-root user.
      */
-    public function asUser(string $username = null): self
+    public function asUser(?string $username = null): self
     {
         $this->pendingTask->onConnection($this->server->connectionAsUser($username));
 
@@ -112,7 +112,7 @@ class ServerTaskDispatcher
         // Create the Eloquent model for the task
         $taskModel = $this->createTask();
 
-        /** @var Task */
+        /** @var Task $actualTask */
         $actualTask = $this->pendingTask->task;
 
         // Create a new task that will track the actual task
@@ -184,18 +184,15 @@ class ServerTaskDispatcher
 
     /**
      * Dispatches the pending task.
+     *
+     * @throws CouldNotConnectToServerException
      */
     private function dispatchPendingTask(): ?ProcessOutput
     {
         try {
             $processOutput = $this->pendingTask->dispatch();
-        } catch (CouldNotCreateScriptDirectoryException|CouldNotUploadFileException $e) {
-            throw new CouldNotConnectToServerException(
-                $this->server,
-                $e->getMessage(),
-                $e->getCode(),
-                $e
-            );
+        } catch (CouldNotCreateScriptDirectoryException|CouldNotUploadFileException) {
+            throw new CouldNotConnectToServerException();
         }
 
         return $processOutput;
