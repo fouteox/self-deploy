@@ -12,7 +12,6 @@ use App\Tasks\Task;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -31,7 +30,6 @@ use ProtoneMedia\LaravelTaskRunner\PendingTask;
  */
 class Site extends Model
 {
-    use HasFactory;
     use HasUlids;
 
     protected $casts = [
@@ -136,7 +134,7 @@ class Site extends Model
      */
     public function getLogsDirectory(): string
     {
-        return "{$this->path}/logs";
+        return "$this->path/logs";
     }
 
     /**
@@ -155,8 +153,8 @@ class Site extends Model
         $folder = trim($folder, '/');
 
         $path = $this->zero_downtime_deployment
-            ? "{$this->path}/current/{$folder}"
-            : "{$this->path}/repository/{$folder}";
+            ? "$this->path/current/$folder"
+            : "$this->path/repository/$folder";
 
         return rtrim($path, '/');
     }
@@ -186,7 +184,7 @@ class Site extends Model
 
         if ($this->type === SiteType::Laravel) {
             $variables['APP_KEY'] = 'base64:'.base64_encode(Encrypter::generateKey('AES-256-CBC'));
-            $variables['APP_URL'] = $this->tls_setting === TlsSetting::Off ? "http://{$this->address}" : "https://{$this->address}";
+            $variables['APP_URL'] = $this->tls_setting === TlsSetting::Off ? "http://$this->address" : "https://$this->address";
         }
 
         if ($this->type === SiteType::Wordpress) {
@@ -211,14 +209,16 @@ class Site extends Model
 
     /**
      * Create a 'Deployment' record in the database and dispatch the 'DeploySite' job.
+     *
+     * @throws PendingDeploymentException
      */
-    public function deploy(array $environmentVariables = [], User $user = null): Deployment
+    public function deploy(array $environmentVariables = [], ?User $user = null): Deployment
     {
         if ($this->fresh()->latestDeployment?->status === DeploymentStatus::Pending) {
             throw new PendingDeploymentException($this);
         }
 
-        /** @var Deployment */
+        /** @var Deployment $deployment */
         $deployment = $this->deployments()->create([
             'status' => DeploymentStatus::Pending,
             'user_id' => $user?->exists ? $user->id : null,
@@ -244,13 +244,13 @@ class Site extends Model
     /**
      * Updates the site's Caddyfile with the given PHP version and web folder.
      */
-    public function updateCaddyfile(PhpVersion $phpVersion, string $webFolder, User $user = null): void
+    public function updateCaddyfile(PhpVersion $phpVersion, string $webFolder, ?User $user = null): void
     {
         $this->pending_caddyfile_update_since = now();
         $this->save();
 
         $site = $this->fresh();
-        $user = $user ? $user->fresh() : null;
+        $user = $user?->fresh();
 
         Bus::chain([
             new UpdateSiteCaddyfile(
@@ -296,7 +296,7 @@ class Site extends Model
         return $this->hasMany(Certificate::class);
     }
 
-    public function activeCertificate()
+    public function activeCertificate(): HasOne
     {
         return $this->hasOne(Certificate::class)
             ->where((new Certificate)->qualifyColumn('is_active'), true)

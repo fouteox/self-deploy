@@ -10,55 +10,10 @@ use App\Rules\CaddyfileOnServer;
 use App\Tasks\ReloadCaddy;
 use Illuminate\Support\Collection;
 
-class SiteFiles
+readonly class SiteFiles
 {
     public function __construct(private Site $site)
     {
-        $this->site = $site;
-    }
-
-    /**
-     * The Caddyfile for this site.
-     */
-    public function caddyfile(): FileOnServer
-    {
-        return new FileOnServer(
-            'Caddyfile',
-            __('The configuration file for Caddy. It is used to configure your site(s), including how to handle requests, TLS certificates, and more.'),
-            "{$this->site->path}/Caddyfile",
-            PrismLanguage::Nginx,
-            $this->site->address,
-            new CaddyfileOnServer($this->site->server),
-            fn () => $this->site->server->runTask(ReloadCaddy::class)->asRoot()->inBackground()->dispatch(),
-        );
-    }
-
-    /**
-     * The .env file for this site.
-     */
-    public function environmentFile(): FileOnServer
-    {
-        return new FileOnServer(
-            __('Environment file'),
-            __('The environment file for your site. It contains environment variables that are available to your site.'),
-            $this->site->zero_downtime_deployment ? "{$this->site->path}/shared/.env" : "{$this->site->path}/repository/.env",
-            PrismLanguage::Clike,
-            context: $this->site->address
-        );
-    }
-
-    /**
-     * The WordPress wp-config.php file.
-     */
-    public function wordpressConfig(): FileOnServer
-    {
-        return new FileOnServer(
-            __('Wordpress config'),
-            __('The configuration file for Wordpress. It contains database credentials and other settings.'),
-            $this->site->zero_downtime_deployment ? "{$this->site->path}/shared/wp-config.php" : "{$this->site->path}/repository/wp-config.php",
-            PrismLanguage::Php,
-            context: $this->site->address
-        );
     }
 
     /**
@@ -93,5 +48,49 @@ class SiteFiles
         }
 
         return $logs->each(fn (FileOnServer $fileOnServer) => $fileOnServer->context($this->site->address));
+    }
+
+    /**
+     * The Caddyfile for this site.
+     */
+    public function caddyfile(): FileOnServer
+    {
+        return new FileOnServer(
+            'Caddyfile',
+            __('The configuration file for Caddy. It is used to configure your site(s), including how to handle requests, TLS certificates, and more.'),
+            "{$this->site->path}/Caddyfile",
+            PrismLanguage::Nginx,
+            $this->site->address,
+            new CaddyfileOnServer($this->site->server),
+            fn () => $this->site->server->runTask(ReloadCaddy::class)->asRoot()->inBackground()->dispatch(),
+        );
+    }
+
+    /**
+     * The WordPress wp-config.php file.
+     */
+    public function wordpressConfig(): FileOnServer
+    {
+        return new FileOnServer(
+            __('Wordpress config'),
+            __('The configuration file for Wordpress. It contains database credentials and other settings.'),
+            $this->site->zero_downtime_deployment ? "{$this->site->path}/shared/wp-config.php" : "{$this->site->path}/repository/wp-config.php",
+            PrismLanguage::Php,
+            context: $this->site->address
+        );
+    }
+
+    /**
+     * The .env file for this site.
+     */
+    public function environmentFile(): FileOnServer
+    {
+        return new FileOnServer(
+            __('Environment file'),
+            __('The environment file for your site. It contains environment variables that are available to your site.'),
+            $this->site->zero_downtime_deployment ? "{$this->site->path}/shared/.env" : "{$this->site->path}/repository/.env",
+            PrismLanguage::Clike,
+            context: $this->site->address
+        );
     }
 }
