@@ -23,7 +23,6 @@ class CleanupFailedServerProvisioning implements ShouldQueue
         public ?Task $task = null,
         public ?string $errorMessage = null,
     ) {
-        //
     }
 
     /**

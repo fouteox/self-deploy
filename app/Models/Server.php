@@ -21,6 +21,8 @@ use App\Server\Software;
 use App\Tasks\Task;
 use App\Tasks\UploadFile;
 use App\Tasks\Whoami;
+use Exception;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -158,6 +160,8 @@ class Server extends Model
 
     /**
      * Returns an instance of the Infrastructure Provider.
+     *
+     * @throws Exception
      */
     public function getProvider(): ServerProvider
     {
@@ -250,7 +254,7 @@ class Server extends Model
     /**
      * Returns a Connection instance to connect to the server as a non-root user.
      */
-    public function connectionAsUser(string $username = null): Connection
+    public function connectionAsUser(?string $username = null): Connection
     {
         $username = $username ?? $this->username;
 
@@ -267,14 +271,18 @@ class Server extends Model
     /**
      * Dispatches a chain of jobs to provision the server.
      */
-    public function dispatchCreateAndProvisionJobs(Collection $sshKeys): void
+    // Ancienne signature :
+    //public function dispatchCreateAndProvisionJobs(Collection $sshKeys): void
+    public function dispatchCreateAndProvisionJobs(): void
     {
         $server = $this->fresh();
 
         $jobs = [
             new CreateServerOnInfrastructure($server),
             new WaitForServerToConnect($server),
-            new ProvisionServer($server, EloquentCollection::make($sshKeys)),
+            // Ancien ProvisionServer :
+            //new ProvisionServer($server, EloquentCollection::make($sshKeys)),
+            new ProvisionServer($server),
         ];
 
         Bus::chain($jobs)->dispatch();
@@ -293,7 +301,7 @@ class Server extends Model
     /**
      * Uploads the given file to the server as a non-root user.
      */
-    public function uploadAsUser(string $path, string $contents, string $username = null, bool $throw = false): bool
+    public function uploadAsUser(string $path, string $contents, ?string $username = null, bool $throw = false): bool
     {
         $task = new UploadFile($path, $contents);
 
@@ -302,6 +310,8 @@ class Server extends Model
 
     /**
      * Returns an instance of the DatabaseManager for this server.
+     *
+     * @throws BindingResolutionException
      */
     public function databaseManager(): DatabaseManager
     {

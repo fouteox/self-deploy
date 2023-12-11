@@ -6,6 +6,7 @@ use App\Infrastructure\Entities\ServerStatus;
 use App\Infrastructure\ServerProvider;
 use App\Models\Server;
 use App\Provider;
+use Exception;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -37,6 +38,8 @@ class CreateServerOnInfrastructure implements ShouldQueue
 
     /**
      * Execute the job.
+     *
+     * @throws Exception
      */
     public function handle(): void
     {

@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Mail;
 
 class ProvisionFreshServer extends Task implements HasCallbacks
 {
-    protected int $timeout = 15 * 60;
+    protected int $timeout = 30 * 60;
 
     public function __construct(public Server $server, public ?Collection $sshKeys = null)
     {

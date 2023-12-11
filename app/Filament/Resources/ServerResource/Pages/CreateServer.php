@@ -4,11 +4,13 @@ namespace App\Filament\Resources\ServerResource\Pages;
 
 use App\Filament\Resources\ServerResource;
 use App\KeyPairGenerator;
+use App\Models\Server;
 use App\Provider;
 use App\Traits\HandlesUserContext;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Str;
 
+/* @method Server getRecord() */
 class CreateServer extends CreateRecord
 {
     use HandlesUserContext;
@@ -52,6 +54,15 @@ class CreateServer extends CreateRecord
             'password' => $password,
             'database_password' => $database_password,
         ];
+    }
+
+    protected function afterCreate(): void
+    {
+        $this->getRecord()->dispatchCreateAndProvisionJobs();
+
+        //        $this->getRecord()->dispatchCreateAndProvisionJobs(
+        //            SshKey::whereKey($request->validated('ssh_keys'))->get(),
+        //        );
     }
 
     protected function getRedirectUrl(): string

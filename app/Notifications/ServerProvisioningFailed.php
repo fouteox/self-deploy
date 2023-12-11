@@ -20,7 +20,6 @@ class ServerProvisioningFailed extends Notification implements ShouldQueue
         public string $output = '',
         public string $errorMessage = '',
     ) {
-        //
     }
 
     /**
@@ -43,12 +42,12 @@ class ServerProvisioningFailed extends Notification implements ShouldQueue
             ->when($this->output, function (MailMessage $message) {
                 $message
                     ->line(__("Here you'll find the 10 last lines of the task that failed:"))
-                    ->line(Markdown::parse("```{$this->output}```"));
+                    ->line(Markdown::parse("```$this->output```"));
             })
             ->when($this->errorMessage, function (MailMessage $message) {
                 $message
                     ->line(__('This is the error message we received:'))
-                    ->line(Markdown::parse("```{$this->errorMessage}```"));
+                    ->line(Markdown::parse("```$this->errorMessage```"));
             });
     }
 }
