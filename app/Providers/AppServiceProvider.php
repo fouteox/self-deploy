@@ -46,7 +46,7 @@ class AppServiceProvider extends ServiceProvider
         // Set value names whenever a new Validator instance is created.
         $validatorFactory->resolver(function (Translator $translator, array $data, array $rules, array $messages, array $attributes) {
             return tap(new Validator($translator, $data, $rules, $messages, $attributes), function (Validator $validator) {
-                $validator->setValueNames(trans('validation.value_names', []));
+                $validator->setValueNames(trans('validation.value_names'));
             });
         });
 
