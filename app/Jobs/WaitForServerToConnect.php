@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Infrastructure\Entities\ServerStatus;
 use App\Models\Server;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -30,6 +31,8 @@ class WaitForServerToConnect implements ShouldQueue
 
     /**
      * Execute the job.
+     *
+     * @throws Exception
      */
     public function handle(): bool
     {
