@@ -18,7 +18,7 @@ class SshKey extends Model
     ];
 
     protected $fillable = [
-        'name', 'public_key',
+        'name', 'public_key', 'user_id',
     ];
 
     protected static function booted(): void
