@@ -10,6 +10,7 @@ use App\Models\SshKey;
 use App\Rules\PublicKey;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -60,6 +61,11 @@ class SshKeyResource extends Resource
 
                             dispatch(new AddSshKeyToServer($record, $server));
                         });
+
+                        Notification::make()
+                            ->title(__('The SSH Key will be added to the selected servers. This may take a few minutes.'))
+                            ->success()
+                            ->send();
                     }),
                 Tables\Actions\Action::make(__('Remove From Servers'))
                     ->form([
@@ -85,10 +91,13 @@ class SshKeyResource extends Resource
                         collect($data['servers'])->each(function ($serverId) use ($record) {
                             $server = Auth::user()->currentTeam->servers()->findOrFail($serverId);
 
-                            //                            dd($record->public_key);
-
                             dispatch(new RemoveSshKeyFromServer($record->public_key, $server));
                         });
+
+                        Notification::make()
+                            ->title(__('The SSH Key will be removed from the selected servers. This may take a few minutes.'))
+                            ->success()
+                            ->send();
                     }),
             ]);
     }
