@@ -42,7 +42,7 @@ class FileServer extends Page
         $file = $this->findEditableFileByRouteParameter($this->getRecord(), $fileCrypted);
 
         try {
-            $this->fileContents = $this->getRecord()->runTask(new GetFile($file->name))
+            $this->fileContents = $this->getRecord()->runTask(new GetFile($file->path))
                 ->asRoot()
                 ->throw()
                 ->dispatch()
