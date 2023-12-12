@@ -138,7 +138,7 @@ class ServerTaskDispatcher
 
         try {
             $this->dispatchPendingTask();
-        } catch (CouldNotConnectToServerException $e) {
+        } catch (CouldNotConnectToServerException) {
             return tap($taskModel)->update([
                 'status' => TaskStatus::UploadFailed,
             ]);

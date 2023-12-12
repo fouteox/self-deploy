@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SshKeyResource\Pages;
 use App\Infrastructure\Entities\ServerStatus;
+use App\Jobs\AddSshKeyToServer;
 use App\Models\SshKey;
 use App\Rules\PublicKey;
 use Filament\Forms;
@@ -52,8 +53,12 @@ class SshKeyResource extends Resource
                                 }
                             ),
                     ])
-                    ->action(function (array $data) {
-                        //TODO: gérer l'insertion
+                    ->action(function (array $data, SshKey $record) {
+                        collect($data['servers'])->each(function ($serverId) use ($record) {
+                            $server = Auth::user()->currentTeam->servers()->findOrFail($serverId);
+
+                            dispatch(new AddSshKeyToServer($record, $server));
+                        });
                     }),
                 Tables\Actions\EditAction::make(),
             ]);
