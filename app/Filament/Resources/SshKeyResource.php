@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\SshKeyResource\Pages;
 use App\Infrastructure\Entities\ServerStatus;
 use App\Jobs\AddSshKeyToServer;
+use App\Jobs\RemoveSshKeyFromServer;
 use App\Models\SshKey;
 use App\Rules\PublicKey;
 use Filament\Forms;
@@ -60,7 +61,35 @@ class SshKeyResource extends Resource
                             dispatch(new AddSshKeyToServer($record, $server));
                         });
                     }),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make(__('Remove From Servers'))
+                    ->form([
+                        Forms\Components\Select::make('servers')
+                            ->label(__('Select servers to add SSH Key to.'))
+                            ->options(
+                                Auth::user()->currentTeam->servers()
+                                    ->where('status', '!=', ServerStatus::Deleting)
+                                    ->get()
+                                    ->mapWithKeys(fn ($server) => [$server->id => $server->name_with_ip])
+                            )
+                            ->multiple()
+                            ->required()
+                            ->exists(
+                                table: 'servers',
+                                column: 'id',
+                                modifyRuleUsing: function (Exists $rule) {
+                                    return $rule->where('team_id', Auth::user()->currentTeam->id);
+                                }
+                            ),
+                    ])
+                    ->action(function (array $data, SshKey $record) {
+                        collect($data['servers'])->each(function ($serverId) use ($record) {
+                            $server = Auth::user()->currentTeam->servers()->findOrFail($serverId);
+
+                            //                            dd($record->public_key);
+
+                            dispatch(new RemoveSshKeyFromServer($record->public_key, $server));
+                        });
+                    }),
             ]);
     }
 

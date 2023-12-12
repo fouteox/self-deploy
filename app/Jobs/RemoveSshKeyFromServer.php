@@ -23,7 +23,6 @@ class RemoveSshKeyFromServer implements ShouldBeEncrypted, ShouldQueue
      */
     public function __construct(public string $publicKey, public Server $server)
     {
-        //
     }
 
     /**

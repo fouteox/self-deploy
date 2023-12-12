@@ -1,3 +1,4 @@
-<x-task-shell-defaults />
+<x-task-shell-defaults/>
 
-ssh-keygen -f /home/{{ $server->username }}/.ssh/authorized_keys -R "{{ $publicKey }}"
+sed -i 's#{{ $publicKey }}##' /home/{{ $server->username }}/.ssh/authorized_keys
+sed -i '/^$/d' /home/{{ $server->username }}/.ssh/authorized_keys
