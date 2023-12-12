@@ -6,6 +6,7 @@ use App\Filament\Resources\SshKeyResource\Pages;
 use App\Infrastructure\Entities\ServerStatus;
 use App\Jobs\AddSshKeyToServer;
 use App\Jobs\RemoveSshKeyFromServer;
+use App\Models\Server;
 use App\Models\SshKey;
 use App\Rules\PublicKey;
 use Filament\Forms;
@@ -96,6 +97,24 @@ class SshKeyResource extends Resource
 
                         Notification::make()
                             ->title(__('The SSH Key will be removed from the selected servers. This may take a few minutes.'))
+                            ->success()
+                            ->send();
+                    }),
+                Tables\Actions\DeleteAction::make('delete')
+                    ->label(__('Delete Key'))
+                    ->successNotificationTitle(__('SSH Key deleted.')),
+                Tables\Actions\DeleteAction::make('delete-and-remove-from-servers')
+                    ->label(__('Delete Key and Remove From Servers'))
+                    ->action(function (SshKey $record) {
+
+                        Auth::user()->currentTeam->servers()->each(function (Server $server) use ($record) {
+                            dispatch(new RemoveSshKeyFromServer($record->public_key, $server));
+                        });
+
+                        $record->delete();
+
+                        Notification::make()
+                            ->title(__('The SSH Key will be deleted and removed from all servers. This may take a few minutes.'))
                             ->success()
                             ->send();
                     }),
