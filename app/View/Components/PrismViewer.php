@@ -29,6 +29,6 @@ class PrismViewer extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('entries.prism-viewer');
+        return view('components.prism-viewer');
     }
 }
