@@ -28,32 +28,6 @@ class SiteResource extends Resource
         ]);
     }
 
-    /*    public static function sidebar(Model $record): FilamentPageSidebar
-        {
-            return FilamentPageSidebar::make()
-                ->setTitle($record->address)
-                ->setNavigationItems([
-                    PageNavigationItem::make('Overview')
-                        ->url(static::getUrl('view', ['record' => $record]))
-                        ->icon('heroicon-s-eye')
-                        ->isActiveWhen(function () {
-                            return request()->routeIs(static::getRouteBaseName().'.view');
-                        }),
-                    PageNavigationItem::make('Edit')
-                        ->url(static::getUrl('edit', ['record' => $record]))
-                        ->icon('heroicon-s-globe-alt')
-                        ->isActiveWhen(function () {
-                            return Str::startsWith(request()->route()->getName(), static::getRouteBaseName().'.edit');
-                        }),
-                    PageNavigationItem::make('Deployments')
-                        ->url(static::getUrl('deployments_site', ['record' => $record]))
-                        ->icon('heroicon-s-globe-alt')
-                        ->isActiveWhen(function () {
-                            return Str::startsWith(request()->route()->getName(), static::getRouteBaseName().'.deployments_site');
-                        }),
-                ]);
-        }*/
-
     public static function form(Form $form): Form
     {
         return $form

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ServerResource\Pages;
 
 use App\Filament\Resources\ServerResource;
+use App\Filament\Resources\SiteResource;
 use App\KeyPair;
 use App\KeyPairGenerator;
 use App\Models\PendingDeploymentException;
@@ -186,7 +187,7 @@ class CreateSiteServer extends Page
      *
      * @throws PendingDeploymentException
      */
-    public function store(Set $set)
+    public function store(Set $set): void
     {
         //        abort_unless($this->team()->subscriptionOptions()->canCreateSiteOnServer($server), 403);
 
@@ -210,7 +211,7 @@ class CreateSiteServer extends Page
                 $this->extracted($key_pair_generator);
                 $set('deploy_key', trim($this->key_pair->publicKey));
 
-                return null;
+                return;
             }
 
             $site->deploy_key_public = $deployKey->publicKey;
@@ -226,8 +227,6 @@ class CreateSiteServer extends Page
         Cache::forget("deploy-key-{$this->record->id}-$this->deploy_key_uuid");
         Cache::forget("deploy-key-uuid-{$this->record->id}");
 
-        return to_route('filament.admin.resources.servers.sites', $this->record);
-        // TODO: modifier la redirection et le type de retour de la fonction
-        //        return to_route('servers.sites.deployments.show', [$this->record, $site, $deployment]);
+        $this->redirect(SiteResource::getUrl('deployments_site', ['record' => $deployment->site_id]), navigate: true);
     }
 }

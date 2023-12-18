@@ -37,7 +37,8 @@ class ListSitesServer extends ManageRelatedRecords
                 // ...
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make()
+                    ->url(fn (): string => ServerResource::getUrl('sites/create', ['record' => $this->record])),
             ])
             ->actions([
                 // ...
