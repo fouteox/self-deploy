@@ -36,6 +36,18 @@ class CronServer extends ManageRelatedRecords
 
     protected static ?string $navigationIcon = 'heroicon-s-clock';
 
+    public function getListeners(): array
+    {
+        return [
+            'echo-private:teams.'.auth()->user()->current_team_id.',CronDeleted,' => 'refreshComponent',
+        ];
+    }
+
+    public function refreshComponent(): void
+    {
+        $this->resetTable();
+    }
+
     public function table(Table $table): Table
     {
         return $table

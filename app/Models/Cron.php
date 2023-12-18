@@ -2,9 +2,6 @@
 
 namespace App\Models;
 
-use App\Events\CronDeleted;
-use App\Events\CronUpdated;
-use App\Jobs\InstallCron;
 use Cron\CronExpression as BaseCronExpression;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
@@ -35,10 +32,6 @@ class Cron extends Model
         'expression',
     ];
 
-    protected $dispatchesEvents = [
-        'updated' => CronUpdated::class,
-    ];
-
     /**
      * Returns a set of options for the frequency select.
      */
@@ -54,16 +47,6 @@ class Cron extends Model
             '@reboot' => __('On Reboot'),
             'custom' => __('Custom expression'),
         ];
-    }
-
-    protected static function booted(): void
-    {
-        static::created(function ($cron) {
-            InstallCron::dispatch($cron, auth()->user())->onQueue('commands');
-        });
-        static::deleted(function ($cron) {
-            event(new CronDeleted($cron->id, $cron->server->team_id));
-        });
     }
 
     public function server(): BelongsTo
