@@ -40,7 +40,7 @@ class ServerUpdated implements ShouldBroadcast
     public function broadcastWith(): ?array
     {
         return [
-            //            Splade::refreshOnEvent(),
+            //
         ];
     }
 }

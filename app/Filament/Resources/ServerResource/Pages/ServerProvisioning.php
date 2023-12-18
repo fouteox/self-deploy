@@ -22,6 +22,19 @@ class ServerProvisioning extends Page
         }
     }
 
+    public function getListeners(): array
+    {
+        return [
+            'echo-private:teams.'.auth()->user()->current_team_id.',ServerUpdated' => 'refreshComponent',
+            'echo-private:teams.'.auth()->user()->current_team_id.',ServerDeleted' => 'refreshComponent',
+        ];
+    }
+
+    public function refreshComponent(): void
+    {
+        $this->redirect(ServerResource::getUrl('provisioning', ['record' => $this->record->id]), navigate: true);
+    }
+
     public function getHeading(): string
     {
         return $this->record->name;
