@@ -39,7 +39,8 @@ class CronServer extends ManageRelatedRecords
     public function getListeners(): array
     {
         return [
-            'echo-private:teams.'.auth()->user()->current_team_id.',CronDeleted,' => 'refreshComponent',
+            'echo-private:teams.'.auth()->user()->current_team_id.',CronDeleted' => 'refreshComponent',
+            'echo-private:teams.'.auth()->user()->current_team_id.',CronUpdated' => 'refreshComponent',
         ];
     }
 
