@@ -276,8 +276,6 @@ class Site extends Model
             ?: Notification::route('mail', $this->deploy_notification_email);
     }
 
-    //
-
     /**
      * Returns an instance of SiteFiles to manage the site's files.
      */

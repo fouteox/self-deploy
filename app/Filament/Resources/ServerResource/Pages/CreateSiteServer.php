@@ -25,23 +25,25 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Forms\Set;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Unique;
 
+/* @method Server getRecord() */
 class CreateSiteServer extends Page
 {
-    use BreadcrumbTrait, HandlesUserContext, RedirectsIfProvisioned;
+    use BreadcrumbTrait, HandlesUserContext, InteractsWithRecord, RedirectsIfProvisioned {
+        BreadcrumbTrait::getBreadcrumbs insteadof InteractsWithRecord;
+    }
 
     protected static string $resource = ServerResource::class;
 
     protected static ?string $title = 'Create Site';
 
     protected static string $view = 'filament.resources.server-resource.pages.create-site-server';
-
-    public Server $record;
 
     public ?array $data = [];
 
@@ -51,8 +53,12 @@ class CreateSiteServer extends Page
 
     public ?string $deploy_key_uuid = null;
 
-    public function mount(KeyPairGenerator $key_pair_generator): void
+    public function mount(int|string $record, KeyPairGenerator $key_pair_generator): void
     {
+        $this->record = $this->resolveRecord($record);
+
+        static::authorizeResourceAccess();
+
         $this->extracted($key_pair_generator);
 
         $this->form->fill();
@@ -60,15 +66,15 @@ class CreateSiteServer extends Page
 
     public function extracted(KeyPairGenerator $key_pair_generator): void
     {
-        $this->deploy_key_uuid = Cache::get("deploy-key-uuid-{$this->record->id}");
+        $this->deploy_key_uuid = Cache::get("deploy-key-uuid-{$this->getRecord()->id}");
 
         if (! $this->deploy_key_uuid) {
             $this->deploy_key_uuid = Str::uuid()->toString();
-            Cache::put("deploy-key-uuid-{$this->record->id}", $this->deploy_key_uuid, config('session.lifetime') * 60);
+            Cache::put("deploy-key-uuid-{$this->getRecord()->id}", $this->deploy_key_uuid, config('session.lifetime') * 60);
         }
 
         $key_pair = Cache::remember(
-            key: "deploy-key-{$this->record->id}-$this->deploy_key_uuid",
+            key: "deploy-key-{$this->getRecord()->id}-$this->deploy_key_uuid",
             ttl: config('session.lifetime') * 60,
             callback: fn () => $key_pair_generator->ed25519()
         );
@@ -89,18 +95,18 @@ class CreateSiteServer extends Page
                             ->required()
                             ->maxValue(255)
                             ->unique(modifyRuleUsing: function (Unique $rule) {
-                                return $rule->where('server_id', $this->record->id);
+                                return $rule->where('server_id', $this->getRecord()->id);
                             }),
                         Grid::make()
                             ->schema([
                                 Select::make('php_version')
                                     ->label('PHP Version')
-                                    ->options($this->record->installedPhpVersions())
-                                    ->default(array_keys($this->record->installedPhpVersions())[0])
+                                    ->options($this->getRecord()->installedPhpVersions())
+                                    ->default(array_keys($this->getRecord()->installedPhpVersions())[0])
                                     ->selectablePlaceholder(false)
                                     ->required()
                                     ->enum(PhpVersion::class)
-                                    ->in(array_keys($this->record->installedPhpVersions()))
+                                    ->in(array_keys($this->getRecord()->installedPhpVersions()))
                                     ->native(false),
                                 Select::make('type')
                                     ->label('Project type')
@@ -133,7 +139,7 @@ class CreateSiteServer extends Page
                         $this->createTextInput(
                             name: 'server_public_key',
                             label: 'Public Key Server',
-                            default: $this->record->user_public_key ?? 'default',
+                            default: $this->getRecord()->user_public_key ?? 'default',
                             helperText: 'Make sure this key is added to Github or other repository provider.',
                             switchAction: fn () => $this->type_key = 'deploy_key',
                             switchLabel: 'Switch to deploy key'
@@ -191,15 +197,15 @@ class CreateSiteServer extends Page
     {
         //        abort_unless($this->team()->subscriptionOptions()->canCreateSiteOnServer($server), 403);
 
-        $site = $this->record->sites()->make(Arr::except($this->form->getState(), ['deploy_key', 'server_public_key']));
+        $site = $this->getRecord()->sites()->make(Arr::except($this->form->getState(), ['deploy_key', 'server_public_key']));
 
         $site->tls_setting = TlsSetting::Auto;
-        $site->user = $this->record->username;
+        $site->user = $this->getRecord()->username;
         $site->path = "/home/$site->user/$site->address";
         $site->forceFill($site->type->defaultAttributes($site->zero_downtime_deployment));
 
-        if ($this->form->getState()['deploy_key']) {
-            $deployKey = Cache::get("deploy-key-{$this->record->id}-$this->deploy_key_uuid");
+        if (isset($this->form->getState()['deploy_key'])) {
+            $deployKey = Cache::get("deploy-key-{$this->getRecord()->id}-$this->deploy_key_uuid");
 
             if (! $deployKey) {
                 Notification::make()
@@ -220,12 +226,12 @@ class CreateSiteServer extends Page
 
         $site->save();
 
-        $this->logActivity(__("Created site ':address' on server ':server'", ['address' => $site->address, 'server' => $this->record->name]), $site);
+        $this->logActivity(__("Created site ':address' on server ':server'", ['address' => $site->address, 'server' => $this->getRecord()->name]), $site);
 
         $deployment = $site->deploy(user: $this->user());
 
-        Cache::forget("deploy-key-{$this->record->id}-$this->deploy_key_uuid");
-        Cache::forget("deploy-key-uuid-{$this->record->id}");
+        Cache::forget("deploy-key-{$this->getRecord()->id}-$this->deploy_key_uuid");
+        Cache::forget("deploy-key-uuid-{$this->getRecord()->id}");
 
         $this->redirect(SiteResource::getUrl('deployments_site', ['record' => $deployment->site_id]), navigate: true);
     }
