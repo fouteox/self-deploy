@@ -24,6 +24,18 @@ class ListSitesServer extends ManageRelatedRecords
 
     protected static ?string $navigationIcon = 'heroicon-s-globe-alt';
 
+    public function getListeners(): array
+    {
+        return [
+            'echo-private:teams.'.auth()->user()->current_team_id.',SiteUpdated' => 'refreshComponent',
+        ];
+    }
+
+    public function refreshComponent(): void
+    {
+        $this->resetTable();
+    }
+
     public function table(Table $table): Table
     {
         return $table
