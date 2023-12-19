@@ -12,7 +12,6 @@ use App\View\Components\StatusColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
-use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -21,7 +20,7 @@ use Filament\Tables\Table;
 /* @method Server getRecord() */
 class DatabaseServer extends ManageRelatedRecords
 {
-    use BreadcrumbTrait, ExposesTableToWidgets, RedirectsIfProvisioned;
+    use BreadcrumbTrait, RedirectsIfProvisioned;
 
     protected static string $resource = ServerResource::class;
 
