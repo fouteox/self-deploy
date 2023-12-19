@@ -42,6 +42,8 @@ class DatabaseServer extends ManageRelatedRecords
         return [
             'echo-private:teams.'.auth()->user()->current_team_id.',DatabaseDeleted' => 'refreshComponent',
             'echo-private:teams.'.auth()->user()->current_team_id.',DatabaseUpdated' => 'refreshComponent',
+            'echo-private:teams.'.auth()->user()->current_team_id.',DatabaseUserDeleted' => 'refreshComponent',
+            'echo-private:teams.'.auth()->user()->current_team_id.',DatabaseUserUpdated' => 'refreshComponent',
         ];
     }
 
@@ -61,7 +63,7 @@ class DatabaseServer extends ManageRelatedRecords
                 TextColumn::make('users.name')
                     ->listWithLineBreaks()
                     ->limitList(2)
-//                    ->expandableLimitedList() // TODO: vérifier pourquoi ça ne fonctionne pas
+                    ->expandableLimitedList()
                     ->placeholder('No user.'),
                 TextColumn::make('status')
                     ->state(fn (Database $record): string => StatusColumn::getStatus(record: $record))
