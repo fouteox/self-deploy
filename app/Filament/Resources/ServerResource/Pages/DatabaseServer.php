@@ -35,8 +35,6 @@ class DatabaseServer extends ManageRelatedRecords
         return [
             'echo-private:teams.'.auth()->user()->current_team_id.',DatabaseDeleted' => 'refreshComponent',
             'echo-private:teams.'.auth()->user()->current_team_id.',DatabaseUpdated' => 'refreshComponent',
-            'echo-private:teams.'.auth()->user()->current_team_id.',DatabaseUserDeleted' => 'refreshComponent',
-            'echo-private:teams.'.auth()->user()->current_team_id.',DatabaseUserUpdated' => 'refreshComponent',
         ];
     }
 

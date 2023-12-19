@@ -6,6 +6,7 @@ use App\Jobs\InstallDatabaseUser;
 use App\Models\ActivityLog;
 use App\Models\DatabaseUser;
 use App\Models\Server;
+use App\View\Components\StatusColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -19,6 +20,19 @@ class CreateDatabaseUserWidget extends BaseWidget
 
     protected int|string|array $columnSpan = 'full';
 
+    public function getListeners(): array
+    {
+        return [
+            'echo-private:teams.'.auth()->user()->current_team_id.',DatabaseUserDeleted' => 'refreshComponent',
+            'echo-private:teams.'.auth()->user()->current_team_id.',DatabaseUserUpdated' => 'refreshComponent',
+        ];
+    }
+
+    public function refreshComponent(): void
+    {
+        $this->resetTable();
+    }
+
     public function table(Table $table): Table
     {
         return $table
@@ -26,6 +40,9 @@ class CreateDatabaseUserWidget extends BaseWidget
             ->heading('Users')
             ->columns([
                 TextColumn::make('name'),
+                TextColumn::make('status')
+                    ->state(fn (DatabaseUser $record): string => StatusColumn::getStatus(record: $record))
+                    ->alignEnd(),
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
