@@ -9,28 +9,29 @@
                 <h2 class="flex-none w-1/4 font-semibold text-sm">{{ $file->name }}</h2>
                 <p class="flex-grow text-sm text-left">{{ $file->description }}</p>
                 <x-filament::button
-                    color="danger"
-                    wire:click="test('{{encrypt(gzencode($file->path, 9))}}')"
+                    wire:click="openModal('{{encrypt(gzencode($file->path, 9))}}')"
                 >
-                    Load
-                </x-filament::button>
-                <x-filament::button class="flex-none">
                     View
                 </x-filament::button>
             </div>
         </x-filament::card>
     @endforeach
-    <x-filament::modal width="3xl" id="modaleEditFile">
+    <x-filament::modal width="2xl" id="modaleEditFile">
         <x-slot name="heading">
-            {{ $this->fileContents }}
+            Edit File
         </x-slot>
-        <x-slot name="footerActions">
+
+        <form wire:submit="create">
+            {{ $this->form }}
+            <x-filament::button type="submit">
+                Submit
+            </x-filament::button>
             <x-filament::button
                 color="gray"
-                wire:click="$dispatch('close-modal', { id: 'modaleEditFile'})"
+                wire:click="resetData"
             >
                 Cancel
             </x-filament::button>
-        </x-slot>
+        </form>
     </x-filament::modal>
 </x-filament-panels::page>
