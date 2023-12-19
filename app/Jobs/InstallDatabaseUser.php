@@ -6,6 +6,7 @@ use App\Models\Database;
 use App\Models\DatabaseUser;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Queue\ShouldBeEncrypted;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -28,6 +29,8 @@ class InstallDatabaseUser implements ShouldBeEncrypted, ShouldQueue
 
     /**
      * Execute the job.
+     *
+     * @throws BindingResolutionException
      */
     public function handle(): void
     {
@@ -47,6 +50,8 @@ class InstallDatabaseUser implements ShouldBeEncrypted, ShouldQueue
 
     /**
      * Handle a job failure.
+     *
+     * @throws BindingResolutionException
      */
     public function failed(Throwable $exception): void
     {

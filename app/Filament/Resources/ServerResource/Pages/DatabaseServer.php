@@ -3,17 +3,16 @@
 namespace App\Filament\Resources\ServerResource\Pages;
 
 use App\Filament\Resources\ServerResource;
+use App\Filament\Resources\ServerResource\Widgets\CreateDatabaseUserWidget;
 use App\Models\Database;
-use App\Models\DatabaseUser;
 use App\Models\Server;
 use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
 use App\View\Components\StatusColumn;
-use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
+use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -22,7 +21,7 @@ use Filament\Tables\Table;
 /* @method Server getRecord() */
 class DatabaseServer extends ManageRelatedRecords
 {
-    use BreadcrumbTrait, RedirectsIfProvisioned;
+    use BreadcrumbTrait, ExposesTableToWidgets, RedirectsIfProvisioned;
 
     protected static string $resource = ServerResource::class;
 
@@ -37,6 +36,8 @@ class DatabaseServer extends ManageRelatedRecords
         return [
             'echo-private:teams.'.auth()->user()->current_team_id.',DatabaseDeleted' => 'refreshComponent',
             'echo-private:teams.'.auth()->user()->current_team_id.',DatabaseUpdated' => 'refreshComponent',
+            'echo-private:teams.'.auth()->user()->current_team_id.',DatabaseUserDeleted' => 'refreshComponent',
+            'echo-private:teams.'.auth()->user()->current_team_id.',DatabaseUserUpdated' => 'refreshComponent',
         ];
     }
 
@@ -49,6 +50,7 @@ class DatabaseServer extends ManageRelatedRecords
     {
         return $table
             ->modifyQueryUsing(fn ($query) => $query->with('server'))
+            ->heading('Databases')
             ->recordTitleAttribute('name')
             ->columns([
                 TextColumn::make('name'),
@@ -72,7 +74,8 @@ class DatabaseServer extends ManageRelatedRecords
                     ->form([
                         TextInput::make('name')
                             ->required(),
-                    ])->action(function (Database $database, array $data) {
+                    ])
+                    ->action(function (Database $database, array $data) {
 
                         $database->users()->create([
                             'name' => $data['name'],
@@ -102,21 +105,15 @@ class DatabaseServer extends ManageRelatedRecords
             ->schema([
                 TextInput::make('name')
                     ->required(),
-                Select::make('users')
-                    ->label('Existing users')
-                    ->options(DatabaseUser::where('server_id', $this->getRecord()->id)->pluck('name', 'id'))
-                    ->multiple(),
-                Repeater::make('members')
-                    ->schema([
-                        TextInput::make('name')->required(),
-                        Select::make('role')
-                            ->options([
-                                'member' => 'Member',
-                                'administrator' => 'Administrator',
-                                'owner' => 'Owner',
-                            ])
-                            ->required(),
-                    ]),
             ]);
+    }
+
+    protected function getFooterWidgets(): array
+    {
+        return [
+            CreateDatabaseUserWidget::make([
+                'server' => $this->getRecord(),
+            ]),
+        ];
     }
 }
