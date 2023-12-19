@@ -39,7 +39,7 @@ class DaemonDeleted implements ShouldBroadcast
     public function broadcastWith(): ?array
     {
         return [
-            //            Splade::refreshOnEvent(),
+            //
         ];
     }
 }

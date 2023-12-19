@@ -35,6 +35,19 @@ class DaemonServer extends ManageRelatedRecords
 
     protected static ?string $navigationIcon = 'heroicon-s-wrench-screwdriver';
 
+    public function getListeners(): array
+    {
+        return [
+            'echo-private:teams.'.auth()->user()->current_team_id.',DaemonDeleted' => 'refreshComponent',
+            'echo-private:teams.'.auth()->user()->current_team_id.',DaemonUpdated' => 'refreshComponent',
+        ];
+    }
+
+    public function refreshComponent(): void
+    {
+        $this->resetTable();
+    }
+
     public function table(Table $table): Table
     {
         return $table
