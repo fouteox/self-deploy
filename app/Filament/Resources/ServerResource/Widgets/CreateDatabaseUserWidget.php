@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ServerResource\Widgets;
 
 use App\Jobs\InstallDatabaseUser;
+use App\Jobs\UpdateDatabaseUser;
 use App\Models\ActivityLog;
 use App\Models\Database;
 use App\Models\DatabaseUser;
@@ -14,6 +15,8 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\Rules\Exists;
 use Illuminate\Validation\Rules\Unique;
 
@@ -56,7 +59,8 @@ class CreateDatabaseUserWidget extends BaseWidget
                             ->maxLength(255)
                             ->unique(modifyRuleUsing: fn (Unique $rule) => $rule->where('server_id', $this->server->id)),
                         TextInput::make('password')
-                            ->required()
+                            ->dehydrated(fn (?string $state): bool => filled($state))
+                            ->required(fn (string $operation): bool => $operation === 'create')
                             ->maxLength(255),
                         CheckboxList::make('databases')
                             ->options(
@@ -98,6 +102,50 @@ class CreateDatabaseUserWidget extends BaseWidget
                     ->createAnother(false),
             ])
             ->actions([
+                Tables\Actions\EditAction::make()
+                    ->model(DatabaseUser::class)
+                    ->form([
+                        TextInput::make('name')
+                            ->disabled(),
+                        TextInput::make('password')
+                            ->dehydrated(fn (?string $state): bool => filled($state))
+                            ->required(fn (string $operation): bool => $operation === 'create')
+                            ->maxLength(255)
+                            ->helperText(__('Leave empty to keep the current password.')),
+                        CheckboxList::make('databases')
+                            ->relationship(
+                                titleAttribute: 'name',
+                                modifyQueryUsing: fn (Builder $query) => $query->where('server_id', $this->server->id)
+                            )
+                            ->exists(
+                                table: Database::class,
+                                column: 'id',
+                                modifyRuleUsing: fn (Exists $rule) => $rule->where('server_id', $this->server->id)
+                            ),
+                    ])
+                    ->using(function (DatabaseUser $record, array $data): DatabaseUser {
+                        $dataWithoutPassword = Arr::except($data, ['password']);
+                        $record->update($dataWithoutPassword);
+
+                        return $record;
+                    })->after(function (DatabaseUser $record, array $data): void {
+                        $record->forceFill([
+                            'installed_at' => null,
+                            'installation_failed_at' => null,
+                            'uninstallation_failed_at' => null,
+                        ])->save();
+
+                        ActivityLog::create([
+                            'team_id' => auth()->user()->current_team_id,
+                            'user_id' => auth()->user()->id,
+                            'subject_id' => $record->getKey(),
+                            'subject_type' => $record->getMorphClass(),
+                            'description' => __("Updated database user ':name' on server ':server'", ['name' => $record->name, 'server' => $this->server->name]),
+                        ]);
+
+                        dispatch(new UpdateDatabaseUser($record, $data['password'] ?? null, auth()->user()));
+                    })
+                    ->successNotificationTitle(__('The database user will be updated shortly.')),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->paginated(false);

@@ -6,6 +6,7 @@ use App\Models\Database;
 use App\Models\DatabaseUser;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Queue\ShouldBeEncrypted;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -31,6 +32,8 @@ class UpdateDatabaseUser implements ShouldBeEncrypted, ShouldQueue
 
     /**
      * Execute the job.
+     *
+     * @throws BindingResolutionException
      */
     public function handle(): void
     {
