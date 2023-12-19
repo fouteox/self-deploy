@@ -34,6 +34,19 @@ class FirewallRulesServer extends ManageRelatedRecords
 
     protected static ?string $navigationIcon = 'heroicon-s-shield-check';
 
+    public function getListeners(): array
+    {
+        return [
+            'echo-private:teams.'.auth()->user()->current_team_id.',FirewallRuleDeleted' => 'refreshComponent',
+            'echo-private:teams.'.auth()->user()->current_team_id.',FirewallRuleUpdated' => 'refreshComponent',
+        ];
+    }
+
+    public function refreshComponent(): void
+    {
+        $this->resetTable();
+    }
+
     public function table(Table $table): Table
     {
         return $table
