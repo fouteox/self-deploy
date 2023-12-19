@@ -86,9 +86,12 @@ class CreateDatabaseUserWidget extends BaseWidget
                             $record->databases()->attach($data['databases']);
                         }
 
-                        dispatch(new InstallDatabaseUser(
-                            $record, $data['password'],
-                            auth()->user())
+                        dispatch(
+                            new InstallDatabaseUser(
+                                $record,
+                                $data['password'],
+                                auth()->user()
+                            )
                         );
                     })
                     ->successNotificationTitle(__('The database user will be created shortly.'))
