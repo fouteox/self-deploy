@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\Database;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -26,6 +27,8 @@ class InstallDatabase implements ShouldQueue
 
     /**
      * Execute the job.
+     *
+     * @throws BindingResolutionException
      */
     public function handle(): void
     {
@@ -42,6 +45,8 @@ class InstallDatabase implements ShouldQueue
 
     /**
      * Handle a job failure.
+     *
+     * @throws BindingResolutionException
      */
     public function failed(Throwable $exception): void
     {

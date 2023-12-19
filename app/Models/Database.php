@@ -16,6 +16,7 @@ class Database extends Model
 
     protected $fillable = [
         'name',
+        'server_id',
     ];
 
     protected $casts = [
