@@ -21,6 +21,19 @@ class BackupServer extends ManageRelatedRecords
 
     protected static ?string $navigationIcon = 'heroicon-s-rectangle-stack';
 
+    public function getListeners(): array
+    {
+        return [
+            'echo-private:teams.'.auth()->user()->current_team_id.',BackupDeleted' => 'refreshComponent',
+            'echo-private:teams.'.auth()->user()->current_team_id.',BackupUpdated' => 'refreshComponent',
+        ];
+    }
+
+    public function refreshComponent(): void
+    {
+        $this->resetTable();
+    }
+
     public function table(Table $table): Table
     {
         return $table
