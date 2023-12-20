@@ -8,6 +8,7 @@ use App\Jobs\InstallDatabase;
 use App\Jobs\InstallDatabaseUser;
 use App\Models\ActivityLog;
 use App\Models\Database;
+use App\Models\DatabaseUser;
 use App\Models\Server;
 use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
@@ -161,7 +162,7 @@ class DatabaseServer extends ManageRelatedRecords
                     ->columnSpanFull()
                     ->maxLength(255)
                     ->unique(
-                        table: 'database_users',
+                        table: DatabaseUser::class,
                         column: 'name',
                         modifyRuleUsing: fn (Unique $rule) => $rule->where('server_id', $this->getRecord()->id)
                     )
