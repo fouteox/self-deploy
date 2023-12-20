@@ -75,7 +75,7 @@ class CronServer extends ManageRelatedRecords
                     ->after(function (Cron $record): void {
                         ActivityLog::create([
                             'team_id' => auth()->user()->current_team_id,
-                            'user_id' => auth()->user()->id,
+                            'user_id' => auth()->id(),
                             'subject_id' => $record->getKey(),
                             'subject_type' => $record->getMorphClass(),
                             'description' => __("Created cron ':command' on server ':server'", ['command' => $record->command, 'server' => $record->server->name]),
@@ -94,7 +94,7 @@ class CronServer extends ManageRelatedRecords
 
                         ActivityLog::create([
                             'team_id' => auth()->user()->current_team_id,
-                            'user_id' => auth()->user()->id,
+                            'user_id' => auth()->id(),
                             'subject_id' => $record->getKey(),
                             'subject_type' => $record->getMorphClass(),
                             'description' => __("Updated cron ':command' on server ':server'", ['command' => $record->command, 'server' => $record->server->name]),
@@ -113,7 +113,7 @@ class CronServer extends ManageRelatedRecords
 
                         ActivityLog::create([
                             'team_id' => auth()->user()->current_team_id,
-                            'user_id' => auth()->user()->id,
+                            'user_id' => auth()->id(),
                             'subject_id' => $record->getKey(),
                             'subject_type' => $record->getMorphClass(),
                             'description' => __("Deleted cron ':command' from server ':server'", ['command' => $record->command, 'server' => $record->server->name]),

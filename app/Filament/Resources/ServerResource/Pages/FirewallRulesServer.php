@@ -71,7 +71,7 @@ class FirewallRulesServer extends ManageRelatedRecords
                     ->after(function (FirewallRule $record): void {
                         ActivityLog::create([
                             'team_id' => auth()->user()->current_team_id,
-                            'user_id' => auth()->user()->id,
+                            'user_id' => auth()->id(),
                             'subject_id' => $record->getKey(),
                             'subject_type' => $record->getMorphClass(),
                             'description' => __("Created firewall rule ':name' on server ':server'", ['name' => $record->name, 'server' => $record->server->name]),
@@ -84,7 +84,7 @@ class FirewallRulesServer extends ManageRelatedRecords
                     ->after(function (FirewallRule $record): void {
                         ActivityLog::create([
                             'team_id' => auth()->user()->current_team_id,
-                            'user_id' => auth()->user()->id,
+                            'user_id' => auth()->id(),
                             'subject_id' => $record->getKey(),
                             'subject_type' => $record->getMorphClass(),
                             'description' => __("Updated firewall rule ':name' on server ':server'", ['name' => $record->name, 'server' => $record->server->name]),
@@ -99,7 +99,7 @@ class FirewallRulesServer extends ManageRelatedRecords
 
                         ActivityLog::create([
                             'team_id' => auth()->user()->current_team_id,
-                            'user_id' => auth()->user()->id,
+                            'user_id' => auth()->id(),
                             'subject_id' => $record->getKey(),
                             'subject_type' => $record->getMorphClass(),
                             'description' => __("Deleted firewall rule ':name' on server ':server'", ['name' => $record->name, 'server' => $record->server->name]),

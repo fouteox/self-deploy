@@ -60,7 +60,7 @@ class SoftwareServer extends Page
     {
         ActivityLog::create([
             'team_id' => auth()->user()->current_team_id,
-            'user_id' => auth()->user()->id,
+            'user_id' => auth()->id(),
             'subject_id' => $this->getRecord()->getKey(),
             'subject_type' => $this->getRecord()->getMorphClass(),
             'description' => $activityDescription,

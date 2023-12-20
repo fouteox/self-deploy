@@ -63,7 +63,7 @@ class DaemonServer extends ManageRelatedRecords
                     ->after(function (Daemon $record): void {
                         ActivityLog::create([
                             'team_id' => auth()->user()->current_team_id,
-                            'user_id' => auth()->user()->id,
+                            'user_id' => auth()->id(),
                             'subject_id' => $record->getKey(),
                             'subject_type' => $record->getMorphClass(),
                             'description' => __("Created daemon ':command' on server ':server'", ['command' => $record->command, 'server' => $record->server->name]),
@@ -78,7 +78,7 @@ class DaemonServer extends ManageRelatedRecords
 
                         ActivityLog::create([
                             'team_id' => auth()->user()->current_team_id,
-                            'user_id' => auth()->user()->id,
+                            'user_id' => auth()->id(),
                             'subject_id' => $record->getKey(),
                             'subject_type' => $record->getMorphClass(),
                             'description' => __("Updated daemon ':command' on server ':server'", ['command' => $record->command, 'server' => $record->server->name]),
@@ -97,7 +97,7 @@ class DaemonServer extends ManageRelatedRecords
 
                         ActivityLog::create([
                             'team_id' => auth()->user()->current_team_id,
-                            'user_id' => auth()->user()->id,
+                            'user_id' => auth()->id(),
                             'subject_id' => $record->getKey(),
                             'subject_type' => $record->getMorphClass(),
                             'description' => __("Deleted daemon ':command' from server ':server'", ['command' => $record->command, 'server' => $record->server->name]),

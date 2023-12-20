@@ -85,7 +85,7 @@ class DatabaseServer extends ManageRelatedRecords
                     ->after(function (Database $record, array $data): void {
                         ActivityLog::create([
                             'team_id' => auth()->user()->current_team_id,
-                            'user_id' => auth()->user()->id,
+                            'user_id' => auth()->id(),
                             'subject_id' => $record->getKey(),
                             'subject_type' => $record->getMorphClass(),
                             'description' => __("Created database ':name' on server ':server'", ['name' => $record->name, 'server' => $this->getRecord()->name]),
@@ -110,7 +110,7 @@ class DatabaseServer extends ManageRelatedRecords
 
                             ActivityLog::create([
                                 'team_id' => auth()->user()->current_team_id,
-                                'user_id' => auth()->user()->id,
+                                'user_id' => auth()->id(),
                                 'subject_id' => $record->getKey(),
                                 'subject_type' => $record->getMorphClass(),
                                 'description' => __("Created database user ':name' on server ':server'", ['name' => $databaseUser->name, 'server' => $this->getRecord()->name]),

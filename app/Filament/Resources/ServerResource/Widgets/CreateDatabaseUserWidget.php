@@ -88,7 +88,7 @@ class CreateDatabaseUserWidget extends BaseWidget
                     ->after(function (DatabaseUser $record, array $data): void {
                         ActivityLog::create([
                             'team_id' => auth()->user()->current_team_id,
-                            'user_id' => auth()->user()->id,
+                            'user_id' => auth()->id(),
                             'subject_id' => $record->getKey(),
                             'subject_type' => $record->getMorphClass(),
                             'description' => __("Created database user ':name' on server ':server'", ['name' => $record->name, 'server' => $this->server->name]),
@@ -144,7 +144,7 @@ class CreateDatabaseUserWidget extends BaseWidget
 
                         ActivityLog::create([
                             'team_id' => auth()->user()->current_team_id,
-                            'user_id' => auth()->user()->id,
+                            'user_id' => auth()->id(),
                             'subject_id' => $record->getKey(),
                             'subject_type' => $record->getMorphClass(),
                             'description' => __("Updated database user ':name' on server ':server'", ['name' => $record->name, 'server' => $this->server->name]),
