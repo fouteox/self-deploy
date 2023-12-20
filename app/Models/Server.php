@@ -271,18 +271,14 @@ class Server extends Model
     /**
      * Dispatches a chain of jobs to provision the server.
      */
-    // Ancienne signature :
-    //public function dispatchCreateAndProvisionJobs(Collection $sshKeys): void
-    public function dispatchCreateAndProvisionJobs(): void
+    public function dispatchCreateAndProvisionJobs(Collection $sshKeys): void
     {
         $server = $this->fresh();
 
         $jobs = [
             new CreateServerOnInfrastructure($server),
             new WaitForServerToConnect($server),
-            // Ancien ProvisionServer :
-            //new ProvisionServer($server, EloquentCollection::make($sshKeys)),
-            new ProvisionServer($server),
+            new ProvisionServer($server, EloquentCollection::make($sshKeys)),
         ];
 
         Bus::chain($jobs)->dispatch();

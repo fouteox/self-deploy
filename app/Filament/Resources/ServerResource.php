@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ServerResource\Pages;
 use App\Infrastructure\Entities\ServerStatus;
 use App\Models\Server;
+use App\Models\SshKey;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\Page;
@@ -14,6 +15,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rules\Exists;
 
 class ServerResource extends Resource
 {
@@ -41,15 +43,27 @@ class ServerResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('public_ipv4')
-                    ->required()
-                    ->ipv4(),
-                Forms\Components\TextInput::make('ssh_port')
-                    ->required()
-                    ->rules(['integer', 'min:1', 'max:65535']),
+                Forms\Components\Section::make()
+                    ->schema([
+                        Forms\Components\TextInput::make('name')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('public_ipv4')
+                            ->required()
+                            ->ipv4(),
+                        Forms\Components\TextInput::make('ssh_port')
+                            ->required()
+                            ->rules(['integer', 'min:1', 'max:65535']),
+                        Forms\Components\Select::make('ssh_key')
+                            ->label(__('SSH Keys'))
+                            ->multiple()
+                            ->options(auth()->user()->sshKeys()->pluck('name', 'id'))
+                            ->exists(
+                                table: SshKey::class,
+                                column: 'id',
+                                modifyRuleUsing: fn (Exists $rule) => $rule->where('user_id', auth()->id())
+                            ),
+                    ]),
             ]);
     }
 
@@ -93,13 +107,6 @@ class ServerResource extends Resource
             ->recordUrl(
                 fn (Model $record): string => ! $record->provisioned_at ? static::getUrl('provisioning', ['record' => $record]) : static::getUrl('sites', ['record' => $record])
             );
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array

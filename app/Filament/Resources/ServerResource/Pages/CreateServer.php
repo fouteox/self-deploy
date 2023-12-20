@@ -5,9 +5,11 @@ namespace App\Filament\Resources\ServerResource\Pages;
 use App\Filament\Resources\ServerResource;
 use App\KeyPairGenerator;
 use App\Models\Server;
+use App\Models\SshKey;
 use App\Provider;
 use App\Traits\HandlesUserContext;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 /* @method Server getRecord() */
@@ -17,9 +19,10 @@ class CreateServer extends CreateRecord
 
     protected static string $resource = ServerResource::class;
 
+    protected static bool $canCreateAnother = false;
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-
         //        $credentials = $customServer ? null : $this->user()->credentials()
         //            ->canBeUsedByTeam($this->team())
         //            ->findOrFail($request->validated('credentials_id'));
@@ -43,7 +46,7 @@ class CreateServer extends CreateRecord
         //        $github_credentials_id = $request->boolean('add_key_to_github') ? $this->user()->githubCredentials?->id : null;
 
         return [
-            ...$data,
+            ...Arr::except($data, ['ssh_key']),
             'team_id' => $this->team()->id,
             'created_by_user_id' => $this->user()->id,
             'provider' => $provider,
@@ -58,15 +61,13 @@ class CreateServer extends CreateRecord
 
     protected function afterCreate(): void
     {
-        $this->getRecord()->dispatchCreateAndProvisionJobs();
-
-        //        $this->getRecord()->dispatchCreateAndProvisionJobs(
-        //            SshKey::whereKey($request->validated('ssh_keys'))->get(),
-        //        );
+        $this->getRecord()->dispatchCreateAndProvisionJobs(
+            SshKey::whereKey($this->data['ssh_key'])->get(),
+        );
     }
 
     protected function getRedirectUrl(): string
     {
-        return $this->getResource()::getUrl('provisioning', ['record' => $this->record]);
+        return ServerResource::getUrl('provisioning', ['record' => $this->record]);
     }
 }
