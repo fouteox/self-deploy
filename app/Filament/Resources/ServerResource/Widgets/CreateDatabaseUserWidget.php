@@ -9,14 +9,17 @@ use App\Models\Database;
 use App\Models\DatabaseUser;
 use App\Models\Server;
 use App\View\Components\StatusColumn;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Set;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Exists;
 use Illuminate\Validation\Rules\Unique;
 
@@ -61,7 +64,12 @@ class CreateDatabaseUserWidget extends BaseWidget
                         TextInput::make('password')
                             ->dehydrated(fn (?string $state): bool => filled($state))
                             ->required(fn (string $operation): bool => $operation === 'create')
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->suffixAction(
+                                Action::make('generate')
+                                    ->icon('heroicon-s-sparkles')
+                                    ->action(fn (Set $set, $state) => $set('password', Str::password()))
+                            ),
                         CheckboxList::make('databases')
                             ->options(
                                 $this->server->databases->pluck('name', 'id')
@@ -90,13 +98,7 @@ class CreateDatabaseUserWidget extends BaseWidget
                             $record->databases()->attach($data['databases']);
                         }
 
-                        dispatch(
-                            new InstallDatabaseUser(
-                                $record,
-                                $data['password'],
-                                auth()->user()
-                            )
-                        );
+                        dispatch(new InstallDatabaseUser($record, $data['password'], auth()->user()));
                     })
                     ->successNotificationTitle(__('The database user will be created shortly.'))
                     ->createAnother(false),
@@ -111,7 +113,12 @@ class CreateDatabaseUserWidget extends BaseWidget
                             ->dehydrated(fn (?string $state): bool => filled($state))
                             ->required(fn (string $operation): bool => $operation === 'create')
                             ->maxLength(255)
-                            ->helperText(__('Leave empty to keep the current password.')),
+                            ->helperText(__('Leave empty to keep the current password.'))
+                            ->suffixAction(
+                                Action::make('generate')
+                                    ->icon('heroicon-s-sparkles')
+                                    ->action(fn (Set $set, $state) => $set('password', Str::password()))
+                            ),
                         CheckboxList::make('databases')
                             ->relationship(
                                 titleAttribute: 'name',

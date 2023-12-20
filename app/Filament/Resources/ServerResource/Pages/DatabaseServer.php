@@ -12,16 +12,19 @@ use App\Models\Server;
 use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
 use App\View\Components\StatusColumn;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Unique;
 
 /* @method Server getRecord() */
@@ -151,6 +154,7 @@ class DatabaseServer extends ManageRelatedRecords
                     ->label(__('Create user for new database'))
                     ->columnSpanFull()
                     ->required()
+                    ->markAsRequired(false)
                     ->live(),
                 TextInput::make('user')
                     ->label(__('User'))
@@ -168,7 +172,12 @@ class DatabaseServer extends ManageRelatedRecords
                     ->columnSpanFull()
                     ->maxLength(255)
                     ->hidden(fn (Get $get): bool => ! $get('create_user'))
-                    ->required(fn (Get $get): bool => filled($get('create_user'))),
+                    ->required(fn (Get $get): bool => filled($get('create_user')))
+                    ->suffixAction(
+                        Action::make('generate')
+                            ->icon('heroicon-s-sparkles')
+                            ->action(fn (Set $set, $state) => $set('password', Str::password()))
+                    ),
             ]);
     }
 
