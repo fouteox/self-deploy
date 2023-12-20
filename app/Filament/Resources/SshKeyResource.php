@@ -32,92 +32,93 @@ class SshKeyResource extends Resource
                 Tables\Columns\TextColumn::make('name'),
                 Tables\Columns\TextColumn::make('fingerprint'),
             ])
-            ->filters([
-                //
-            ])
             ->actions([
-                Tables\Actions\Action::make(__('Add To Servers'))
-                    ->form([
-                        Forms\Components\Select::make('servers')
-                            ->label(__('Select servers to add SSH Key to.'))
-                            ->options(
-                                Auth::user()->currentTeam->servers()
-                                    ->where('status', '!=', ServerStatus::Deleting)
-                                    ->get()
-                                    ->mapWithKeys(fn ($server) => [$server->id => $server->name_with_ip])
-                            )
-                            ->multiple()
-                            ->required()
-                            ->exists(
-                                table: 'servers',
-                                column: 'id',
-                                modifyRuleUsing: function (Exists $rule) {
-                                    return $rule->where('team_id', Auth::user()->currentTeam->id);
-                                }
-                            ),
-                    ])
-                    ->action(function (array $data, SshKey $record) {
-                        collect($data['servers'])->each(function ($serverId) use ($record) {
-                            $server = Auth::user()->currentTeam->servers()->findOrFail($serverId);
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\Action::make(__('Add To Servers'))
+                        ->form([
+                            Forms\Components\Select::make('servers')
+                                ->label(__('Select servers to add SSH Key to.'))
+                                ->options(
+                                    Auth::user()->currentTeam->servers()
+                                        ->where('status', '!=', ServerStatus::Deleting)
+                                        ->get()
+                                        ->mapWithKeys(fn ($server) => [$server->id => $server->name_with_ip])
+                                )
+                                ->multiple()
+                                ->required()
+                                ->exists(
+                                    table: 'servers',
+                                    column: 'id',
+                                    modifyRuleUsing: function (Exists $rule) {
+                                        return $rule->where('team_id', Auth::user()->currentTeam->id);
+                                    }
+                                ),
+                        ])
+                        ->action(function (array $data, SshKey $record) {
+                            collect($data['servers'])->each(function ($serverId) use ($record) {
+                                $server = Auth::user()->currentTeam->servers()->findOrFail($serverId);
 
-                            dispatch(new AddSshKeyToServer($record, $server));
-                        });
+                                dispatch(new AddSshKeyToServer($record, $server));
+                            });
 
-                        Notification::make()
-                            ->title(__('The SSH Key will be added to the selected servers. This may take a few minutes.'))
-                            ->success()
-                            ->send();
-                    }),
-                Tables\Actions\Action::make(__('Remove From Servers'))
-                    ->form([
-                        Forms\Components\Select::make('servers')
-                            ->label(__('Select servers to add SSH Key to.'))
-                            ->options(
-                                Auth::user()->currentTeam->servers()
-                                    ->where('status', '!=', ServerStatus::Deleting)
-                                    ->get()
-                                    ->mapWithKeys(fn ($server) => [$server->id => $server->name_with_ip])
-                            )
-                            ->multiple()
-                            ->required()
-                            ->exists(
-                                table: 'servers',
-                                column: 'id',
-                                modifyRuleUsing: function (Exists $rule) {
-                                    return $rule->where('team_id', Auth::user()->currentTeam->id);
-                                }
-                            ),
-                    ])
-                    ->action(function (array $data, SshKey $record) {
-                        collect($data['servers'])->each(function ($serverId) use ($record) {
-                            $server = Auth::user()->currentTeam->servers()->findOrFail($serverId);
+                            Notification::make()
+                                ->title(__('The SSH Key will be added to the selected servers. This may take a few minutes.'))
+                                ->success()
+                                ->send();
+                        }),
+                    Tables\Actions\Action::make(__('Remove From Servers'))
+                        ->form([
+                            Forms\Components\Select::make('servers')
+                                ->label(__('Select servers to add SSH Key to.'))
+                                ->options(
+                                    Auth::user()->currentTeam->servers()
+                                        ->where('status', '!=', ServerStatus::Deleting)
+                                        ->get()
+                                        ->mapWithKeys(fn ($server) => [$server->id => $server->name_with_ip])
+                                )
+                                ->multiple()
+                                ->required()
+                                ->exists(
+                                    table: 'servers',
+                                    column: 'id',
+                                    modifyRuleUsing: function (Exists $rule) {
+                                        return $rule->where('team_id', Auth::user()->currentTeam->id);
+                                    }
+                                ),
+                        ])
+                        ->action(function (array $data, SshKey $record) {
+                            collect($data['servers'])->each(function ($serverId) use ($record) {
+                                $server = Auth::user()->currentTeam->servers()->findOrFail($serverId);
 
-                            dispatch(new RemoveSshKeyFromServer($record->public_key, $server));
-                        });
+                                dispatch(new RemoveSshKeyFromServer($record->public_key, $server));
+                            });
 
-                        Notification::make()
-                            ->title(__('The SSH Key will be removed from the selected servers. This may take a few minutes.'))
-                            ->success()
-                            ->send();
-                    }),
-                Tables\Actions\DeleteAction::make('delete')
-                    ->label(__('Delete Key'))
-                    ->successNotificationTitle(__('SSH Key deleted.')),
-                Tables\Actions\DeleteAction::make('delete-and-remove-from-servers')
-                    ->label(__('Delete Key and Remove From Servers'))
-                    ->action(function (SshKey $record) {
+                            Notification::make()
+                                ->title(__('The SSH Key will be removed from the selected servers. This may take a few minutes.'))
+                                ->success()
+                                ->send();
+                        }),
+                    Tables\Actions\DeleteAction::make('delete')
+                        ->label(__('Delete Key'))
+                        ->successNotificationTitle(__('SSH Key deleted.')),
+                    Tables\Actions\DeleteAction::make('delete-and-remove-from-servers')
+                        ->label(__('Delete Key and Remove From Servers'))
+                        ->action(function (SshKey $record) {
 
-                        Auth::user()->currentTeam->servers()->each(function (Server $server) use ($record) {
-                            dispatch(new RemoveSshKeyFromServer($record->public_key, $server));
-                        });
+                            Auth::user()->currentTeam->servers()->each(function (Server $server) use ($record) {
+                                dispatch(new RemoveSshKeyFromServer($record->public_key, $server));
+                            });
 
-                        $record->delete();
+                            $record->delete();
 
-                        Notification::make()
-                            ->title(__('The SSH Key will be deleted and removed from all servers. This may take a few minutes.'))
-                            ->success()
-                            ->send();
-                    }),
+                            Notification::make()
+                                ->title(__('The SSH Key will be deleted and removed from all servers. This may take a few minutes.'))
+                                ->success()
+                                ->send();
+                        }),
+                ])
+                    ->button()
+                    ->label(__('Actions')),
             ]);
     }
 
@@ -127,10 +128,12 @@ class SshKeyResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('name')
                     ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('public_key')
+                    ->maxLength(255)
+                    ->columnSpanFull(),
+                Forms\Components\Textarea::make('public_key')
                     ->required()
-                    ->rule(new PublicKey),
+                    ->rule(new PublicKey)
+                    ->columnSpanFull(),
             ]);
     }
 

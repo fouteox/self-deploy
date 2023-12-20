@@ -13,11 +13,13 @@ class ManageSshKeys extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->mutateFormDataUsing(function ($data) {
-                $data['user_id'] = auth()->id();
+            Actions\CreateAction::make()
+                ->mutateFormDataUsing(function ($data) {
+                    $data['user_id'] = auth()->id();
 
-                return $data;
-            }),
+                    return $data;
+                })
+                ->createAnother(false),
         ];
     }
 }
