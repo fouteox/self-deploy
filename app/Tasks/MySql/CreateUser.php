@@ -14,9 +14,10 @@ class CreateUser extends MySqlTask
     public function sql(): string
     {
         return $this->withHosts(fn ($host) => sprintf(
-            "CREATE USER IF NOT EXISTS %s@%s IDENTIFIED BY \"{$this->password}\";",
+            'CREATE USER IF NOT EXISTS %s@%s IDENTIFIED BY %s;',
             static::wrapValue($this->name),
             static::wrapValue($host),
+            $this->password
         ));
     }
 }

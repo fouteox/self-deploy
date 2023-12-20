@@ -14,9 +14,10 @@ class UpdateUserPassword extends MySqlTask
     public function sql(): string
     {
         return $this->withHosts(fn ($host) => sprintf(
-            "ALTER USER %s@%s IDENTIFIED BY \"{$this->password}\";",
+            'ALTER USER %s@%s IDENTIFIED BY %s;',
             static::wrapValue($this->name),
             static::wrapValue($host),
+            $this->password
         )).' FLUSH PRIVILEGES;';
     }
 }
