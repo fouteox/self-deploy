@@ -14,7 +14,7 @@ interface DatabaseManager
     /**
      * Get all users from the database.
      *
-     * @return array<\App\Server\Database\UserHost>
+     * @return array<UserHost>
      */
     public function getUsers(): array;
 
