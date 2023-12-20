@@ -2,7 +2,10 @@
 
 namespace App\Server\Database;
 
+use App\Models\CouldNotConnectToServerException;
+use App\Models\NoConnectionSelectedException;
 use App\Models\Server;
+use App\Models\TaskFailedException;
 use App\Tasks\MySql\CreateDatabase;
 use App\Tasks\MySql\CreateUser;
 use App\Tasks\MySql\DropDatabase;
@@ -24,24 +27,36 @@ class MySqlDatabase implements DatabaseManager
     }
 
     /**
-     * List of databases that should not be messed with.
+     * Get all databases from the database.
+     *
+     * @return array<string>
+     *
+     * @throws CouldNotAuthenticateWithDatabaseException
+     * @throws CouldNotConnectToDatabaseException
+     * @throws CouldNotConnectToServerException
+     * @throws NoConnectionSelectedException
+     * @throws TaskFailedException
      */
-    public static function protectedDatabases(): array
+    public function getDatabases(): array
     {
-        return [
-            'information_schema',
-            'mysql',
-            'performance_schema',
-            'sys',
-        ];
+        $databases = $this->run(GetDatabases::class);
+
+        return self::parseLines($databases)->filter()->reject(function (string $database) {
+            return in_array($database, static::protectedDatabases());
+        })->unique()->filter()->sort()->values()->all();
     }
 
     /**
      * Run the task on the server and return the output.
+     *
+     * @throws CouldNotAuthenticateWithDatabaseException
+     * @throws CouldNotConnectToDatabaseException
+     * @throws CouldNotConnectToServerException
+     * @throws NoConnectionSelectedException
+     * @throws TaskFailedException
      */
     private function run(string|MySqlTask $task): string
     {
-        /** @var MySqlTask */
         $task = is_string($task) ? new $task($this->server) : $task;
         $task->onServer($this->server);
 
@@ -73,23 +88,28 @@ class MySqlDatabase implements DatabaseManager
     }
 
     /**
-     * Get all databases from the database.
-     *
-     * @return array<string>
+     * List of databases that should not be messed with.
      */
-    public function getDatabases(): array
+    public static function protectedDatabases(): array
     {
-        $databases = $this->run(GetDatabases::class);
-
-        return self::parseLines($databases)->filter()->reject(function (string $database) {
-            return in_array($database, static::protectedDatabases());
-        })->unique()->filter()->sort()->values()->all();
+        return [
+            'information_schema',
+            'mysql',
+            'performance_schema',
+            'sys',
+        ];
     }
 
     /**
      * Get all users from the database.
      *
-     * @return array<\App\Server\Database\UserHost>
+     * @return array<UserHost>
+     *
+     * @throws CouldNotAuthenticateWithDatabaseException
+     * @throws CouldNotConnectToDatabaseException
+     * @throws CouldNotConnectToServerException
+     * @throws NoConnectionSelectedException
+     * @throws TaskFailedException
      */
     public function getUsers(): array
     {
@@ -108,6 +128,12 @@ class MySqlDatabase implements DatabaseManager
      * Get all tables from the database.
      *
      * @return array<string>
+     *
+     * @throws CouldNotAuthenticateWithDatabaseException
+     * @throws CouldNotConnectToDatabaseException
+     * @throws CouldNotConnectToServerException
+     * @throws NoConnectionSelectedException
+     * @throws TaskFailedException
      */
     public function getTables(string $database): array
     {
@@ -118,6 +144,13 @@ class MySqlDatabase implements DatabaseManager
 
     /**
      * Create a new user on the given host.
+     *
+     * @throws CouldNotAuthenticateWithDatabaseException
+     * @throws CouldNotConnectToDatabaseException
+     * @throws CouldNotConnectToServerException
+     * @throws CouldNotCreateUserException
+     * @throws NoConnectionSelectedException
+     * @throws TaskFailedException
      */
     public function createUser(string $name, string $password): bool
     {
@@ -132,6 +165,13 @@ class MySqlDatabase implements DatabaseManager
 
     /**
      * Update the password of the given user.
+     *
+     * @throws CouldNotAuthenticateWithDatabaseException
+     * @throws CouldNotConnectToDatabaseException
+     * @throws CouldNotConnectToServerException
+     * @throws CouldNotCreateUserException
+     * @throws NoConnectionSelectedException
+     * @throws TaskFailedException
      */
     public function updateUserPassword(string $name, string $password): bool
     {
@@ -146,6 +186,13 @@ class MySqlDatabase implements DatabaseManager
 
     /**
      * Grant all privileges to the given user on the given database and host.
+     *
+     * @throws CouldNotAuthenticateWithDatabaseException
+     * @throws CouldNotConnectToDatabaseException
+     * @throws CouldNotConnectToServerException
+     * @throws CouldNotGrantPrivilegesException
+     * @throws NoConnectionSelectedException
+     * @throws TaskFailedException
      */
     public function grantAllPrivileges(string $user, string $database): bool
     {
@@ -160,6 +207,13 @@ class MySqlDatabase implements DatabaseManager
 
     /**
      * Revoke all privileges to the given user on the given database and host.
+     *
+     * @throws CouldNotAuthenticateWithDatabaseException
+     * @throws CouldNotConnectToDatabaseException
+     * @throws CouldNotConnectToServerException
+     * @throws CouldNotRevokePrivilegesException
+     * @throws NoConnectionSelectedException
+     * @throws TaskFailedException
      */
     public function revokeAllPrivileges(string $user, string $database): bool
     {
@@ -174,6 +228,13 @@ class MySqlDatabase implements DatabaseManager
 
     /**
      * Create a new database.
+     *
+     * @throws CouldNotAuthenticateWithDatabaseException
+     * @throws CouldNotConnectToDatabaseException
+     * @throws CouldNotConnectToServerException
+     * @throws DatabaseAlreadyExistsException
+     * @throws NoConnectionSelectedException
+     * @throws TaskFailedException
      */
     public function createDatabase(string $name, string $charset = 'utf8mb4', string $collation = 'utf8mb4_unicode_ci'): bool
     {
@@ -188,6 +249,13 @@ class MySqlDatabase implements DatabaseManager
 
     /**
      * Drop a database.
+     *
+     * @throws CouldNotAuthenticateWithDatabaseException
+     * @throws CouldNotConnectToDatabaseException
+     * @throws CouldNotConnectToServerException
+     * @throws DatabaseNotFoundException
+     * @throws NoConnectionSelectedException
+     * @throws TaskFailedException
      */
     public function dropDatabase(string $name): bool
     {
@@ -202,6 +270,13 @@ class MySqlDatabase implements DatabaseManager
 
     /**
      * Drop a user from the given host.
+     *
+     * @throws CouldNotAuthenticateWithDatabaseException
+     * @throws CouldNotConnectToDatabaseException
+     * @throws CouldNotConnectToServerException
+     * @throws CouldNotDropUserException
+     * @throws NoConnectionSelectedException
+     * @throws TaskFailedException
      */
     public function dropUser(string $user): bool
     {

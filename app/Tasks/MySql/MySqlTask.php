@@ -15,42 +15,6 @@ abstract class MySqlTask extends Task
 
     protected ?string $mySqlPassword = null;
 
-    public function getHosts(): array
-    {
-        return $this->hosts;
-    }
-
-    public function withHosts(callable $callback): string
-    {
-        return Collection::make($this->hosts)->map($callback)->implode(' ');
-    }
-
-    /**
-     * Set the credentials to use for the MySQL connection.
-     */
-    public function withCredentials(string $user, string $password): self
-    {
-        $this->mySqlUser = $user;
-        $this->mySqlPassword = $password;
-
-        return $this;
-    }
-
-    /**
-     * Set the credentials to the server's database credentials.
-     */
-    public function onServer(Server $server): self
-    {
-        $this->hosts = [$server->public_ipv4, '%'];
-
-        return $this->withCredentials('root', $server->database_password);
-    }
-
-    /**
-     * The SQL query to run.
-     */
-    abstract public function sql(): string;
-
     /**
      * Prepare a value for use in a SQL query.
      *
@@ -69,8 +33,41 @@ abstract class MySqlTask extends Task
         return '`'.str_replace('`', '``', $value).'`';
     }
 
+    public function getHosts(): array
+    {
+        return $this->hosts;
+    }
+
+    public function withHosts(callable $callback): string
+    {
+        return Collection::make($this->hosts)->map($callback)->implode(' ');
+    }
+
+    /**
+     * Set the credentials to the server's database credentials.
+     */
+    public function onServer(Server $server): self
+    {
+        $this->hosts = [$server->public_ipv4, '%'];
+
+        return $this->withCredentials('root', $server->database_password);
+    }
+
+    /**
+     * Set the credentials to use for the MySQL connection.
+     */
+    public function withCredentials(string $user, string $password): self
+    {
+        $this->mySqlUser = $user;
+        $this->mySqlPassword = $password;
+
+        return $this;
+    }
+
     /**
      * The SQL query to run, wrapped in a command with the credentials.
+     *
+     * @throws Exception
      */
     public function render(): string
     {
@@ -78,6 +75,11 @@ abstract class MySqlTask extends Task
             throw new Exception('Forgot to set the user or password.');
         }
 
-        return "MYSQL_PWD={$this->mySqlPassword} mysql --user={$this->mySqlUser} --execute='{$this->sql()}' --skip-column-names";
+        return "MYSQL_PWD=$this->mySqlPassword mysql --user=$this->mySqlUser --execute='{$this->sql()}' --skip-column-names";
     }
+
+    /**
+     * The SQL query to run.
+     */
+    abstract public function sql(): string;
 }
