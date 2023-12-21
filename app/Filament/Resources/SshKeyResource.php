@@ -35,6 +35,7 @@ class SshKeyResource extends Resource
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\Action::make(__('Add To Servers'))
+                        ->modalHeading(__('Add SSH Key to Servers'))
                         ->form([
                             Forms\Components\Select::make('servers')
                                 ->label(__('Select servers to add SSH Key to.'))
@@ -67,9 +68,10 @@ class SshKeyResource extends Resource
                                 ->send();
                         }),
                     Tables\Actions\Action::make(__('Remove From Servers'))
+                        ->modalHeading(__('Remove SSH Key from Servers'))
                         ->form([
                             Forms\Components\Select::make('servers')
-                                ->label(__('Select servers to add SSH Key to.'))
+                                ->label(__('Select servers to remove SSH Key from.'))
                                 ->options(
                                     Auth::user()->currentTeam->servers()
                                         ->where('status', '!=', ServerStatus::Deleting)
