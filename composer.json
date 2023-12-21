@@ -10,6 +10,7 @@
     "require": {
         "php": "^8.3",
         "ext-zlib": "*",
+        "calebporzio/sushi": "^2.4",
         "filament/filament": "^v3.1.5",
         "guzzlehttp/guzzle": "^7.8.0",
         "laravel/framework": "^v10.34.2",
