@@ -13,7 +13,7 @@
     $completedSteps = $record->completed_provision_steps->toArray();
     $installedSoftware = $record->installed_software->toArray();
 
-    $totalSteps = 2 + count(\App\Server\ProvisionStep::forFreshServer()) + count(\App\Server\Software::defaultStack());
+    $totalSteps = 2 + count(\App\Server\ProvisionStep::forFreshServer()) + count(\App\Server\SoftwareEnum::defaultStack());
     $currentStep = 1;
 
     $statusForServerCreation = $isNew ? 'current' : 'completed';
@@ -33,7 +33,7 @@
         $currentStep++;
     }
 
-    foreach (\App\Server\Software::defaultStack() as $software) {
+    foreach (\App\Server\SoftwareEnum::defaultStack() as $software) {
         if (!in_array($software->value, $installedSoftware)) {
             break;
         }
@@ -93,7 +93,7 @@
                                             :description="$step->getDescription()"/>
                     @endforeach
 
-                    @foreach (\App\Server\Software::defaultStack() as $software)
+                    @foreach (\App\Server\SoftwareEnum::defaultStack() as $software)
                         @php
                             $completed = in_array($software->value, $installedSoftware);
                             $current = ! $completed && $lastStepWasCompleted;
