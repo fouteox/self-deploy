@@ -12,6 +12,6 @@ class ValidateCaddyfile extends Task
     {
         $id = Str::random();
 
-        $this->path = "/tmp/caddyfile-{$id}.caddyfile";
+        $this->path = "/tmp/caddyfile-$id.caddyfile";
     }
 }
