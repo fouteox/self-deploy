@@ -7,17 +7,23 @@ use App\Jobs\MakeSoftwareDefaultOnServer;
 use App\Jobs\RestartSoftwareOnServer;
 use App\Models\ActivityLog;
 use App\Models\Server;
-use App\Server\Software;
+use App\Models\Software;
+use App\Server\Software as SoftwareEnum;
 use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ViewColumn;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Table;
 
 /* @method Server getRecord() */
-class SoftwareServer extends Page
+class SoftwareServer extends Page implements HasTable
 {
-    use BreadcrumbTrait, InteractsWithRecord, RedirectsIfProvisioned {
+    use BreadcrumbTrait, InteractsWithRecord, InteractsWithTable, RedirectsIfProvisioned {
         BreadcrumbTrait::getBreadcrumbs insteadof InteractsWithRecord;
     }
 
@@ -36,9 +42,23 @@ class SoftwareServer extends Page
         static::authorizeResourceAccess();
     }
 
+    public function table(Table $table): Table
+    {
+        return $table
+            ->query(Software::queryForSoftwares($this->getRecord()))
+            ->columns([
+                TextColumn::make('name'),
+                ViewColumn::make('id')
+                    ->view('filament.tables.columns.column-action')
+                    ->label('Actions')
+                    ->alignEnd(),
+            ])
+            ->paginated(false);
+    }
+
     public function restart(string $softwareId): void
     {
-        $software = Software::from($softwareId);
+        $software = SoftwareEnum::from($softwareId);
 
         $this->softwareOperation(
             $softwareId,
@@ -75,15 +95,15 @@ class SoftwareServer extends Page
             ->send();
     }
 
-    public function default(string $softwareId): void
+    public function makeDefaultCli(string $softwareId): void
     {
-        $software = Software::from($softwareId);
+        $software = SoftwareEnum::from($softwareId);
 
         $this->softwareOperation(
             $softwareId,
             new MakeSoftwareDefaultOnServer($this->getRecord(), $software),
             __("Made ':software' the CLI default on server ':server'", ['software' => $software->getDisplayName(), 'server' => $this->getRecord()->name]),
-            __(':software will now be the CLI default on the server.', ['software' => $software->value])
+            __(':software will now be the CLI default on the server.', ['software' => $software->getDisplayName()])
         );
     }
 }
