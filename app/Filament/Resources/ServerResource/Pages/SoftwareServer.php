@@ -14,8 +14,8 @@ use App\Traits\RedirectsIfProvisioned;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
@@ -48,24 +48,41 @@ class SoftwareServer extends Page implements HasTable
             ->query(Software::queryForSoftwares($this->getRecord()))
             ->columns([
                 TextColumn::make('name'),
-                ViewColumn::make('id')
-                    ->view('filament.tables.columns.column-action')
-                    ->label('Actions')
-                    ->alignEnd(),
+            ])
+            ->actions([
+                Action::make('make-default-cli')
+                    ->label(__('Make CLI default'))
+                    ->button()
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->action(function (Software $record) {
+                        $software = SoftwareEnum::from($record->id);
+
+                        $this->softwareOperation(
+                            $record->id,
+                            new MakeSoftwareDefaultOnServer($this->getRecord(), $software),
+                            __("Made ':software' the CLI default on server ':server'", ['software' => $software->getDisplayName(), 'server' => $this->getRecord()->name]),
+                            __(':software will now be the CLI default on the server.', ['software' => $software->getDisplayName()])
+                        );
+                    })
+                    ->visible(fn (Software $record): bool => $record->hasUpdateAlternativesTask),
+                Action::make('restart')
+                    ->label(__('Restart'))
+                    ->button()
+                    ->requiresConfirmation()
+                    ->action(function (Software $record) {
+                        $software = SoftwareEnum::from($record->id);
+
+                        $this->softwareOperation(
+                            $record->id,
+                            new RestartSoftwareOnServer($this->getRecord(), $software),
+                            __("Restarted ':software' on server ':server'", ['software' => $software->getDisplayName(), 'server' => $this->getRecord()->name]),
+                            __(':software will be restarted on the server.', ['software' => $software->getDisplayName()])
+                        );
+                    })
+                    ->visible(fn (Software $record): bool => $record->hasRestartTask),
             ])
             ->paginated(false);
-    }
-
-    public function restart(string $softwareId): void
-    {
-        $software = SoftwareEnum::from($softwareId);
-
-        $this->softwareOperation(
-            $softwareId,
-            new RestartSoftwareOnServer($this->getRecord(), $software),
-            __("Restarted ':software' on server ':server'", ['software' => $software->getDisplayName(), 'server' => $this->getRecord()->name]),
-            __(':software will be restarted on the server.', ['software' => $software->getDisplayName()])
-        );
     }
 
     private function softwareOperation(string $softwareId, $job, string $activityDescription, string $notificationTitle): void
@@ -93,17 +110,5 @@ class SoftwareServer extends Page implements HasTable
             ->title($notificationTitle)
             ->success()
             ->send();
-    }
-
-    public function makeDefaultCli(string $softwareId): void
-    {
-        $software = SoftwareEnum::from($softwareId);
-
-        $this->softwareOperation(
-            $softwareId,
-            new MakeSoftwareDefaultOnServer($this->getRecord(), $software),
-            __("Made ':software' the CLI default on server ':server'", ['software' => $software->getDisplayName(), 'server' => $this->getRecord()->name]),
-            __(':software will now be the CLI default on the server.', ['software' => $software->getDisplayName()])
-        );
     }
 }
