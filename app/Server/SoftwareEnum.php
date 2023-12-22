@@ -7,7 +7,7 @@ use App\Tasks\Task;
 use App\Tasks\UpdateAlternatives;
 use Illuminate\Support\Str;
 
-enum Software: string
+enum SoftwareEnum: string
 {
     case Caddy2 = 'caddy2';
     case Composer2 = 'composer2';

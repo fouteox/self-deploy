@@ -59,7 +59,7 @@ readonly class ServerFiles
             ),
         ]);
 
-        if ($this->server->softwareIsInstalled(Software::Php81)) {
+        if ($this->server->softwareIsInstalled(SoftwareEnum::Php81)) {
             $logs[] = new FileOnServer(
                 __('PHP 8.1 FPM Log'),
                 __('The PHP 8.1 FPM Log documents all requests made to the PHP 8.1 FastCGI Process Manager, allowing you to monitor performance and identify any issues that may arise.'),
@@ -67,7 +67,7 @@ readonly class ServerFiles
             );
         }
 
-        if ($this->server->softwareIsInstalled(Software::Php82)) {
+        if ($this->server->softwareIsInstalled(SoftwareEnum::Php82)) {
             $logs[] = new FileOnServer(
                 __('PHP 8.2 FPM Log'),
                 __('The PHP 8.2 FPM Log documents all requests made to the PHP 8.2 FastCGI Process Manager, allowing you to monitor performance and identify any issues that may arise.'),
@@ -98,7 +98,7 @@ readonly class ServerFiles
             $this->mysqlConfigFile(),
         ]);
 
-        if ($this->server->softwareIsInstalled(Software::Php81)) {
+        if ($this->server->softwareIsInstalled(SoftwareEnum::Php81)) {
             $files[] = new FileOnServer(
                 __('PHP 8.1 ini File'),
                 __('The PHP 8.1 ini File contains configuration options for the PHP 8.1 interpreter, allowing you to customize the behavior of your PHP applications.'),
@@ -114,7 +114,7 @@ readonly class ServerFiles
             );
         }
 
-        if ($this->server->softwareIsInstalled(Software::Php82)) {
+        if ($this->server->softwareIsInstalled(SoftwareEnum::Php82)) {
             $files[] = new FileOnServer(
                 __('PHP 8.2 ini File'),
                 __('The PHP 8.2 ini File contains configuration options for the PHP 8.2 interpreter, allowing you to customize the behavior of your PHP applications.'),
@@ -130,7 +130,7 @@ readonly class ServerFiles
             );
         }
 
-        if ($this->server->softwareIsInstalled(Software::Composer2)) {
+        if ($this->server->softwareIsInstalled(SoftwareEnum::Composer2)) {
             $files[] = new FileOnServer(
                 __('Composer auth.json'),
                 __('The Composer auth.json file contains your Composer authentication credentials, allowing you to install private packages from sources like Github and Bitbucket.'),

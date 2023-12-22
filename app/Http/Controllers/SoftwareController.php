@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Jobs\MakeSoftwareDefaultOnServer;
 use App\Jobs\RestartSoftwareOnServer;
 use App\Models\Server;
-use App\Server\Software;
+use App\Server\SoftwareEnum;
 use ProtoneMedia\Splade\Facades\Toast;
 use ProtoneMedia\Splade\SpladeTable;
 
@@ -21,7 +21,7 @@ class SoftwareController extends Controller
     {
         return view('software.index', [
             'server' => $server,
-            'software' => SpladeTable::for($server->installedSoftware()->map(function (Software $software) {
+            'software' => SpladeTable::for($server->installedSoftware()->map(function (SoftwareEnum $software) {
                 return [
                     'id' => $software->value,
                     'name' => $software->getDisplayName(),
@@ -37,7 +37,7 @@ class SoftwareController extends Controller
     /**
      * Make the specified resource the 'default' one with update-alternatives.
      */
-    public function default(Server $server, Software $software)
+    public function default(Server $server, SoftwareEnum $software)
     {
         dispatch(new MakeSoftwareDefaultOnServer($server, $software));
 
@@ -51,7 +51,7 @@ class SoftwareController extends Controller
     /**
      * Restart the specified resource.
      */
-    public function restart(Server $server, Software $software)
+    public function restart(Server $server, SoftwareEnum $software)
     {
         dispatch(new RestartSoftwareOnServer($server, $software));
 

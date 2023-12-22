@@ -17,7 +17,7 @@ use App\Server\Database\DatabaseManager;
 use App\Server\Database\MySqlDatabase;
 use App\Server\PhpVersion;
 use App\Server\ServerFiles;
-use App\Server\Software;
+use App\Server\SoftwareEnum;
 use App\Tasks\Task;
 use App\Tasks\UploadFile;
 use App\Tasks\Whoami;
@@ -128,10 +128,15 @@ class Server extends Model
         return $this->status->name;
     }
 
+    public function softwares(): HasMany
+    {
+        return $this->hasMany(Software::class);
+    }
+
     /**
      * Returns a boolean indicating if the server has the given software installed.
      */
-    public function softwareIsInstalled(Software $software): bool
+    public function softwareIsInstalled(SoftwareEnum $software): bool
     {
         return $this->installedSoftware()->contains($software);
     }
@@ -142,7 +147,7 @@ class Server extends Model
     public function installedSoftware(): Collection
     {
         return $this->installed_software->collect()->map(function ($software) {
-            return Software::from($software);
+            return SoftwareEnum::from($software);
         });
     }
 
@@ -152,7 +157,7 @@ class Server extends Model
     public function installedPhpVersions(): array
     {
         return $this->installed_software->collect()->map(function ($software) {
-            return Software::from($software)->findPhpVersion();
+            return SoftwareEnum::from($software)->findPhpVersion();
         })->filter()->pipe(function ($phpVersions) {
             return PhpVersion::named($phpVersions->all());
         });

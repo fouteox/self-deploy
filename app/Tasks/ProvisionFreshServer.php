@@ -14,7 +14,7 @@ use App\Models\Task as TaskModel;
 use App\Rules\PublicKey;
 use App\Server\Firewall\RuleAction;
 use App\Server\ProvisionStep;
-use App\Server\Software;
+use App\Server\SoftwareEnum;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -75,7 +75,7 @@ class ProvisionFreshServer extends Task implements HasCallbacks
 
     public function softwareStack(): array
     {
-        return Software::defaultStack();
+        return SoftwareEnum::defaultStack();
     }
 
     protected function onFailed(TaskModel $task, Request $request): void
@@ -109,7 +109,7 @@ class ProvisionFreshServer extends Task implements HasCallbacks
     {
         $request->validate([
             'provision_step_completed' => ['nullable', Enum::rule(ProvisionStep::class)],
-            'software_installed' => ['nullable', Enum::rule(Software::class)],
+            'software_installed' => ['nullable', Enum::rule(SoftwareEnum::class)],
             'public_key' => ['nullable', 'string', new PublicKey],
         ]);
 

@@ -6,7 +6,7 @@ use App\Models\CouldNotConnectToServerException;
 use App\Models\NoConnectionSelectedException;
 use App\Models\Server;
 use App\Models\TaskFailedException;
-use App\Server\Software;
+use App\Server\SoftwareEnum;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -20,7 +20,7 @@ class MakeSoftwareDefaultOnServer implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public Server $server, public Software $software)
+    public function __construct(public Server $server, public SoftwareEnum $software)
     {
         //
     }

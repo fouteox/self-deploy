@@ -8,7 +8,7 @@ use App\Jobs\RestartSoftwareOnServer;
 use App\Models\ActivityLog;
 use App\Models\Server;
 use App\Models\Software;
-use App\Server\Software as SoftwareEnum;
+use App\Server\SoftwareEnum;
 use App\Traits\BreadcrumbTrait;
 use App\Traits\RedirectsIfProvisioned;
 use Filament\Notifications\Notification;
