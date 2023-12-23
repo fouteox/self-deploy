@@ -327,6 +327,11 @@ class Server extends Model
         return new ServerFiles($this);
     }
 
+    public function editableFiles(): HasMany
+    {
+        return $this->hasMany(File::class);
+    }
+
     /**
      * Returns an exception handler for this server.
      */
