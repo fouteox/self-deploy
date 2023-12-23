@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Contracts\FileProviderInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Sushi\Sushi;
@@ -16,9 +17,9 @@ class File extends Model
 
     protected $keyType = 'string';
 
-    public static function queryForFiles(Server $server): Builder
+    public static function queryForFiles(FileProviderInterface $model): Builder
     {
-        static::$files = $server->files()->editableFiles()->toArray();
+        static::$files = $model->editableFiles();
 
         return static::query();
     }

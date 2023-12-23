@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Contracts\FileProviderInterface;
+use App\Contracts\LogProviderInterface;
 use App\Events\ServerUpdated;
 use App\Exceptions\ServerHandler;
 use App\Infrastructure\Entities\ServerStatus;
@@ -45,7 +47,7 @@ use ProtoneMedia\LaravelTaskRunner\PendingTask;
  * @property Credentials|null $credentials
  * @property User|null $createdByUser
  */
-class Server extends Model
+class Server extends Model implements FileProviderInterface, LogProviderInterface
 {
     use HasUlids;
 
@@ -319,17 +321,22 @@ class Server extends Model
         return app()->makeWith(MySqlDatabase::class, ['server' => $this]);
     }
 
+    public function logFiles(): array
+    {
+        return $this->files()->logFiles()->toArray();
+    }
+
+    public function editableFiles(): array
+    {
+        return $this->files()->editableFiles()->toArray();
+    }
+
     /**
      * Returns an instance of ServerFiles to manage files on this server.
      */
     public function files(): ServerFiles
     {
         return new ServerFiles($this);
-    }
-
-    public function editableFiles(): HasMany
-    {
-        return $this->hasMany(File::class);
     }
 
     /**

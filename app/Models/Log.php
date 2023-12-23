@@ -18,7 +18,7 @@ class Log extends Model
 
     public static function queryForLogs(Server $server): Builder
     {
-        static::$logs = $server->files()->logFiles()->toArray();
+        static::$logs = $server->logFiles();
 
         return static::query();
     }
