@@ -62,7 +62,8 @@ class ServerResource extends Resource
                                 table: SshKey::class,
                                 column: 'id',
                                 modifyRuleUsing: fn (Exists $rule) => $rule->where('user_id', auth()->id())
-                            ),
+                            )
+                            ->visibleOn('create'),
                     ]),
             ]);
     }
@@ -86,20 +87,6 @@ class ServerResource extends Resource
                         'archived', 'unknown' => 'gray',
                     })
                     ->alignEnd(),
-            ])
-            ->filters([
-                //
-            ])
-            ->actions([
-                //                Tables\Actions\ViewAction::make()
-                //                    ->url(fn (Model $record): string => static::getUrl('custom', ['record' => $record])),
-                //                    ->visible(fn (Model $record) => $record->provisioned_at !== null),
-                //                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    //                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
             ])
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make(),

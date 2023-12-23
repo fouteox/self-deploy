@@ -13,6 +13,8 @@ class EditServer extends EditRecord
 
     protected static string $resource = ServerResource::class;
 
+    protected static ?string $title = 'Settings';
+
     protected static ?string $navigationIcon = 'heroicon-s-cog-6-tooth';
 
     protected function getHeaderActions(): array
