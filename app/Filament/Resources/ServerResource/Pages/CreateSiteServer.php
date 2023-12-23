@@ -195,8 +195,6 @@ class CreateSiteServer extends Page
      */
     public function store(Set $set): void
     {
-        //        abort_unless($this->team()->subscriptionOptions()->canCreateSiteOnServer($server), 403);
-
         $site = $this->getRecord()->sites()->make(Arr::except($this->form->getState(), ['deploy_key', 'server_public_key']));
 
         $site->tls_setting = TlsSetting::Auto;
