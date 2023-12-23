@@ -13,10 +13,21 @@ class EditSite extends EditRecord
 
     protected static string $resource = SiteResource::class;
 
+    protected static ?string $title = 'Settings';
+
+    protected static ?string $navigationIcon = 'heroicon-s-cog-6-tooth';
+
     protected function getHeaderActions(): array
     {
         return [
             Actions\DeleteAction::make(),
+        ];
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getSaveFormAction(),
         ];
     }
 }
