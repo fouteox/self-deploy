@@ -57,8 +57,7 @@ class FileServer extends Page implements HasTable
                     ->wrap(),
             ])
             ->actions([
-                Action::make('name of your action')
-                    ->label('View')
+                Action::make('view')
                     ->button()
                     ->form([
                         Textarea::make('fileContents')
