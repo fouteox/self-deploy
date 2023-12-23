@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Contracts\LogProviderInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Sushi\Sushi;
@@ -16,9 +17,9 @@ class Log extends Model
 
     protected $keyType = 'string';
 
-    public static function queryForLogs(Server $server): Builder
+    public static function queryForLogs(LogProviderInterface $model): Builder
     {
-        static::$logs = $server->logFiles();
+        static::$logs = $model->logFiles();
 
         return static::query();
     }

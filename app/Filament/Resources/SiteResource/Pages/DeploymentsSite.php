@@ -19,7 +19,7 @@ class DeploymentsSite extends Page
 
     protected static ?string $title = 'Deployments';
 
-    protected static ?string $navigationIcon = 'heroicon-s-globe-alt';
+    protected static ?string $navigationIcon = 'heroicon-s-queue-list';
 
     public function mount(int|string $record): void
     {

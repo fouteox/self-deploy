@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Contracts\FileProviderInterface;
+use App\Contracts\LogProviderInterface;
 use App\Events\SiteUpdated;
 use App\Jobs\CreateDeployment;
 use App\Jobs\DeploySite;
@@ -28,7 +30,7 @@ use ProtoneMedia\LaravelTaskRunner\PendingTask;
  * @property Deployment|null $latestDeployment
  * @property Server $server
  */
-class Site extends Model
+class Site extends Model implements FileProviderInterface, LogProviderInterface
 {
     use HasUlids;
 
@@ -81,6 +83,24 @@ class Site extends Model
             $site->writeable_directories ??= [];
             $site->shared_files ??= [];
         });
+    }
+
+    public function logFiles(): array
+    {
+        return $this->files()->logFiles()->toArray();
+    }
+
+    /**
+     * Returns an instance of SiteFiles to manage the site's files.
+     */
+    public function files(): SiteFiles
+    {
+        return new SiteFiles($this);
+    }
+
+    public function editableFiles(): array
+    {
+        return $this->files()->editableFiles()->toArray();
     }
 
     /**
@@ -274,14 +294,6 @@ class Site extends Model
 
         return $this->server->team->allUsers()->firstWhere('email', $this->deploy_notification_email)
             ?: Notification::route('mail', $this->deploy_notification_email);
-    }
-
-    /**
-     * Returns an instance of SiteFiles to manage the site's files.
-     */
-    public function files(): SiteFiles
-    {
-        return new SiteFiles($this);
     }
 
     public function server(): BelongsTo

@@ -23,8 +23,12 @@ class SiteResource extends Resource
     {
         return $page->generateNavigationItems([
             Pages\ViewSite::class,
-            Pages\EditSite::class,
             Pages\DeploymentsSite::class,
+            Pages\DeploymentSettingsSite::class,
+            Pages\SslSite::class,
+            Pages\FileSite::class,
+            Pages\LogSite::class,
+            Pages\EditSite::class,
         ]);
     }
 
@@ -44,15 +48,6 @@ class SiteResource extends Resource
                 TextColumn::make('server.name'),
                 TextColumn::make('created_at'),
             ])
-            ->filters([
-                //
-            ])
-            ->actions([
-                //                Tables\Actions\ViewAction::make(),
-            ])
-            ->bulkActions([
-                //
-            ])
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make(),
             ])
@@ -67,6 +62,10 @@ class SiteResource extends Resource
             'create' => Pages\CreateSite::route('/create'),
             'edit' => Pages\EditSite::route('/{record}/edit'),
             'deployments_site' => Pages\DeploymentsSite::route('/{record}/deployments'),
+            'deployments_settings' => Pages\DeploymentSettingsSite::route('/{record}/deployments-settings'),
+            'ssl' => Pages\SslSite::route('/{record}/ssl'),
+            'files' => Pages\FileSite::route('/{record}/files'),
+            'logs' => Pages\LogSite::route('/{record}/logs'),
         ];
     }
 
