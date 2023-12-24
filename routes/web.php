@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ServerProvisionScriptController;
+use App\Http\Controllers\SiteDeploymentController;
 use App\Http\Controllers\TaskWebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+Route::any('/deploy/{site}/{token}', [SiteDeploymentController::class, 'deployWithToken'])->name('site.deploy-with-token');
 
 Route::middleware('signed:relative')->group(function () {
     // Backups...
