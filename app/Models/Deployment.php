@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Notifications\DeploymentFailed;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
@@ -16,7 +15,6 @@ use Illuminate\Support\Str;
  */
 class Deployment extends Model
 {
-    use HasFactory;
     use HasUlids;
 
     protected $casts = [
