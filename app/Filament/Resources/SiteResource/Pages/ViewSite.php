@@ -11,4 +11,6 @@ class ViewSite extends ViewRecord
     use BreadcrumbTrait;
 
     protected static string $resource = SiteResource::class;
+
+    protected static ?string $title = 'Overview';
 }
