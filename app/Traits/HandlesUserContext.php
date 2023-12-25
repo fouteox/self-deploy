@@ -5,11 +5,12 @@ namespace App\Traits;
 use App\Models\ActivityLog;
 use App\Models\Team;
 use App\Models\User;
+use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Model;
 
 trait HandlesUserContext
 {
-    public function logActivity(string $description, Model $subject = null): ActivityLog
+    public function logActivity(string $description, ?Model $subject = null): ActivityLog
     {
         return ActivityLog::create([
             'team_id' => $this->team()->id,
@@ -28,5 +29,13 @@ trait HandlesUserContext
     protected function user(): User
     {
         return auth()->user();
+    }
+
+    public function sendNotification(string $title, string $type = 'success'): void
+    {
+        Notification::make()
+            ->title($title)
+            ->{$type}()
+            ->send();
     }
 }
