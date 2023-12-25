@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\SiteResource\Pages;
+use App\Jobs\UninstallSite;
 use App\Models\ActivityLog;
 use App\Models\Site;
 use Filament\Forms\Form;
@@ -22,6 +23,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Livewire\Component;
 
 class SiteResource extends Resource
 {
@@ -132,8 +134,28 @@ class SiteResource extends Resource
                         Actions::make([
                             Action::make('delete')
                                 ->label(__('Delete Site'))
-                                ->color('danger'),
-                            // TODO : add action to delete action site
+                                ->color('danger')
+                                ->requiresConfirmation()
+                                ->action(function (Site $record, Component $livewire) {
+                                    $record->delete();
+
+                                    dispatch(new UninstallSite($record->server, $record->path));
+
+                                    ActivityLog::create([
+                                        'team_id' => auth()->user()->current_team_id,
+                                        'user_id' => auth()->id(),
+                                        'subject_id' => $record->getKey(),
+                                        'subject_type' => $record->getMorphClass(),
+                                        'description' => __("Deleted site ':address' from server ':server'", ['address' => $record->address, 'server' => $record->server->name]),
+                                    ]);
+
+                                    Notification::make()
+                                        ->title(__('The site is deleted and will be uninstalled from the server shortly.'))
+                                        ->success()
+                                        ->send();
+
+                                    $livewire->redirect(ServerResource::getUrl('sites', ['record' => $record->server]), navigate: true);
+                                }),
                         ]),
                     ]),
             ]);
