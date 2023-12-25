@@ -16,7 +16,6 @@ use Filament\Forms;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -101,10 +100,7 @@ class CronServer extends ManageRelatedRecords
 
                         $this->logActivity(__("Deleted cron ':command' from server ':server'", ['command' => $record->command, 'server' => $record->server->name]), $record);
 
-                        Notification::make()
-                            ->title(__('The Cron will be uninstalled from the server.'))
-                            ->success()
-                            ->send();
+                        $this->sendNotification(__('The Cron will be uninstalled from the server.'));
                     }),
             ]);
     }

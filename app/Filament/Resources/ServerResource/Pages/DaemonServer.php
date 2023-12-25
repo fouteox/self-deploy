@@ -84,7 +84,7 @@ class DaemonServer extends ManageRelatedRecords
 
                         $this->logActivity(__("Deleted daemon ':command' from server ':server'", ['command' => $record->command, 'server' => $record->server->name]), $record);
 
-                        $this->sendNotification(__('The Daemon will be uninstalled from the server shortly.'));
+                        $this->sendNotification(__('The Daemon will be uninstalled from the server.'));
                     }),
             ]);
     }
