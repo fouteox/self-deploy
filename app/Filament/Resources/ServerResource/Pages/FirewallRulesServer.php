@@ -5,17 +5,16 @@ namespace App\Filament\Resources\ServerResource\Pages;
 use App\Enum;
 use App\Filament\Resources\ServerResource;
 use App\Jobs\UninstallFirewallRule;
-use App\Models\ActivityLog;
 use App\Models\FirewallRule;
 use App\Rules\FirewallPort;
 use App\Server\Firewall\RuleAction;
 use App\Traits\BreadcrumbTrait;
+use App\Traits\HandlesUserContext;
 use App\Traits\RedirectsIfProvisioned;
 use App\View\Components\StatusColumn;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -24,7 +23,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class FirewallRulesServer extends ManageRelatedRecords
 {
-    use BreadcrumbTrait, RedirectsIfProvisioned;
+    use BreadcrumbTrait, HandlesUserContext, RedirectsIfProvisioned;
 
     protected static string $resource = ServerResource::class;
 
@@ -69,26 +68,14 @@ class FirewallRulesServer extends ManageRelatedRecords
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->after(function (FirewallRule $record): void {
-                        ActivityLog::create([
-                            'team_id' => auth()->user()->current_team_id,
-                            'user_id' => auth()->id(),
-                            'subject_id' => $record->getKey(),
-                            'subject_type' => $record->getMorphClass(),
-                            'description' => __("Created firewall rule ':name' on server ':server'", ['name' => $record->name, 'server' => $record->server->name]),
-                        ]);
+                        $this->logActivity(__("Created firewall rule ':name' on server ':server'", ['name' => $record->name, 'server' => $record->server->name]), $record);
                     })
                     ->successNotificationTitle(__('The Firewall Rule has been created and will be installed on the server.')),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->after(function (FirewallRule $record): void {
-                        ActivityLog::create([
-                            'team_id' => auth()->user()->current_team_id,
-                            'user_id' => auth()->id(),
-                            'subject_id' => $record->getKey(),
-                            'subject_type' => $record->getMorphClass(),
-                            'description' => __("Updated firewall rule ':name' on server ':server'", ['name' => $record->name, 'server' => $record->server->name]),
-                        ]);
+                        $this->logActivity(__("Updated firewall rule ':name' on server ':server'", ['name' => $record->name, 'server' => $record->server->name]), $record);
                     })
                     ->successNotificationTitle(__('The Firewall Rule name has been updated.')),
                 Tables\Actions\DeleteAction::make()
@@ -97,18 +84,9 @@ class FirewallRulesServer extends ManageRelatedRecords
 
                         dispatch(new UninstallFirewallRule($record, auth()->user()));
 
-                        ActivityLog::create([
-                            'team_id' => auth()->user()->current_team_id,
-                            'user_id' => auth()->id(),
-                            'subject_id' => $record->getKey(),
-                            'subject_type' => $record->getMorphClass(),
-                            'description' => __("Deleted firewall rule ':name' on server ':server'", ['name' => $record->name, 'server' => $record->server->name]),
-                        ]);
+                        $this->logActivity(__("Deleted firewall rule ':name' from server ':server'", ['name' => $record->name, 'server' => $record->server->name]), $record);
 
-                        Notification::make()
-                            ->title(__('The Firewall Rule will be uninstalled from the server.'))
-                            ->success()
-                            ->send();
+                        $this->sendNotification(__('The Firewall Rule will be uninstalled from the server.'));
                     }),
             ]);
     }

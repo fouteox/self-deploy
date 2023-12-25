@@ -5,13 +5,12 @@ namespace App\Filament\Resources\ServerResource\Pages;
 use App\Filament\Resources\ServerResource;
 use App\Jobs\MakeSoftwareDefaultOnServer;
 use App\Jobs\RestartSoftwareOnServer;
-use App\Models\ActivityLog;
 use App\Models\Server;
 use App\Models\Software;
 use App\Server\SoftwareEnum;
 use App\Traits\BreadcrumbTrait;
+use App\Traits\HandlesUserContext;
 use App\Traits\RedirectsIfProvisioned;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
 use Filament\Tables\Actions\Action;
@@ -23,7 +22,7 @@ use Filament\Tables\Table;
 /* @method Server getRecord() */
 class SoftwareServer extends Page implements HasTable
 {
-    use BreadcrumbTrait, InteractsWithRecord, InteractsWithTable, RedirectsIfProvisioned {
+    use BreadcrumbTrait, HandlesUserContext, InteractsWithRecord, InteractsWithTable, RedirectsIfProvisioned {
         BreadcrumbTrait::getBreadcrumbs insteadof InteractsWithRecord;
     }
 
@@ -91,24 +90,5 @@ class SoftwareServer extends Page implements HasTable
         $this->logActivity($activityDescription);
         $this->sendNotification($notificationTitle);
         $this->dispatch('close-modal', id: $softwareId);
-    }
-
-    private function logActivity(string $activityDescription): void
-    {
-        ActivityLog::create([
-            'team_id' => auth()->user()->current_team_id,
-            'user_id' => auth()->id(),
-            'subject_id' => $this->getRecord()->getKey(),
-            'subject_type' => $this->getRecord()->getMorphClass(),
-            'description' => $activityDescription,
-        ]);
-    }
-
-    private function sendNotification(string $notificationTitle): void
-    {
-        Notification::make()
-            ->title($notificationTitle)
-            ->success()
-            ->send();
     }
 }

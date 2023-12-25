@@ -5,11 +5,11 @@ namespace App\Filament\Resources\ServerResource\Pages;
 use App\Filament\Resources\ServerResource;
 use App\Jobs\InstallCron;
 use App\Jobs\UninstallCron;
-use App\Models\ActivityLog;
 use App\Models\Cron;
 use App\Models\Server;
 use App\Rules\CronExpression;
 use App\Traits\BreadcrumbTrait;
+use App\Traits\HandlesUserContext;
 use App\Traits\RedirectsIfProvisioned;
 use App\View\Components\StatusColumn;
 use Filament\Forms;
@@ -26,7 +26,7 @@ use Illuminate\Database\Eloquent\Builder;
 /* @method Server getRecord() */
 class CronServer extends ManageRelatedRecords
 {
-    use BreadcrumbTrait, RedirectsIfProvisioned;
+    use BreadcrumbTrait, HandlesUserContext, RedirectsIfProvisioned;
 
     protected static string $resource = ServerResource::class;
 
@@ -73,13 +73,7 @@ class CronServer extends ManageRelatedRecords
                         return $this->mutateCronFormData($data);
                     })
                     ->after(function (Cron $record): void {
-                        ActivityLog::create([
-                            'team_id' => auth()->user()->current_team_id,
-                            'user_id' => auth()->id(),
-                            'subject_id' => $record->getKey(),
-                            'subject_type' => $record->getMorphClass(),
-                            'description' => __("Created cron ':command' on server ':server'", ['command' => $record->command, 'server' => $record->server->name]),
-                        ]);
+                        $this->logActivity(__("Created cron ':command' on server ':server'", ['command' => $record->command, 'server' => $record->server->name]), $record);
                     })
                     ->successNotificationTitle(__('The Cron has been created and will be installed on the server.')),
             ])
@@ -92,13 +86,7 @@ class CronServer extends ManageRelatedRecords
                             'uninstallation_failed_at' => null,
                         ])->update($this->mutateCronFormData($data));
 
-                        ActivityLog::create([
-                            'team_id' => auth()->user()->current_team_id,
-                            'user_id' => auth()->id(),
-                            'subject_id' => $record->getKey(),
-                            'subject_type' => $record->getMorphClass(),
-                            'description' => __("Updated cron ':command' on server ':server'", ['command' => $record->command, 'server' => $record->server->name]),
-                        ]);
+                        $this->logActivity(__("Updated cron ':command' on server ':server'", ['command' => $record->command, 'server' => $record->server->name]), $record);
 
                         dispatch(new InstallCron($record, auth()->user()));
 
@@ -111,13 +99,7 @@ class CronServer extends ManageRelatedRecords
 
                         dispatch(new UninstallCron($record, auth()->user()));
 
-                        ActivityLog::create([
-                            'team_id' => auth()->user()->current_team_id,
-                            'user_id' => auth()->id(),
-                            'subject_id' => $record->getKey(),
-                            'subject_type' => $record->getMorphClass(),
-                            'description' => __("Deleted cron ':command' from server ':server'", ['command' => $record->command, 'server' => $record->server->name]),
-                        ]);
+                        $this->logActivity(__("Deleted cron ':command' from server ':server'", ['command' => $record->command, 'server' => $record->server->name]), $record);
 
                         Notification::make()
                             ->title(__('The Cron will be uninstalled from the server.'))

@@ -6,16 +6,15 @@ use App\Enum;
 use App\Filament\Resources\ServerResource;
 use App\Jobs\InstallDaemon;
 use App\Jobs\UninstallDaemon;
-use App\Models\ActivityLog;
 use App\Models\Daemon;
 use App\Models\Server;
 use App\Signal;
 use App\Traits\BreadcrumbTrait;
+use App\Traits\HandlesUserContext;
 use App\Traits\RedirectsIfProvisioned;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -25,7 +24,7 @@ use Illuminate\Database\Eloquent\Builder;
 /* @method Server getRecord() */
 class DaemonServer extends ManageRelatedRecords
 {
-    use BreadcrumbTrait, RedirectsIfProvisioned;
+    use BreadcrumbTrait, HandlesUserContext, RedirectsIfProvisioned;
 
     protected static string $resource = ServerResource::class;
 
@@ -61,13 +60,7 @@ class DaemonServer extends ManageRelatedRecords
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->after(function (Daemon $record): void {
-                        ActivityLog::create([
-                            'team_id' => auth()->user()->current_team_id,
-                            'user_id' => auth()->id(),
-                            'subject_id' => $record->getKey(),
-                            'subject_type' => $record->getMorphClass(),
-                            'description' => __("Created daemon ':command' on server ':server'", ['command' => $record->command, 'server' => $record->server->name]),
-                        ]);
+                        $this->logActivity(__("Created daemon ':command' on server ':server'", ['command' => $record->command, 'server' => $record->server->name]), $record);
                     })
                     ->successNotificationTitle(__('The Daemon has been created and will be installed on the server.')),
             ])
@@ -76,13 +69,7 @@ class DaemonServer extends ManageRelatedRecords
                     ->using(function (Daemon $record, array $data): Daemon {
                         $record->forceFill(['installed_at' => null])->update($data);
 
-                        ActivityLog::create([
-                            'team_id' => auth()->user()->current_team_id,
-                            'user_id' => auth()->id(),
-                            'subject_id' => $record->getKey(),
-                            'subject_type' => $record->getMorphClass(),
-                            'description' => __("Updated daemon ':command' on server ':server'", ['command' => $record->command, 'server' => $record->server->name]),
-                        ]);
+                        $this->logActivity(__("Updated daemon ':command' on server ':server'", ['command' => $record->command, 'server' => $record->server->name]), $record);
 
                         dispatch(new InstallDaemon($record, auth()->user()));
 
@@ -95,18 +82,9 @@ class DaemonServer extends ManageRelatedRecords
 
                         dispatch(new UninstallDaemon($record, auth()->user()));
 
-                        ActivityLog::create([
-                            'team_id' => auth()->user()->current_team_id,
-                            'user_id' => auth()->id(),
-                            'subject_id' => $record->getKey(),
-                            'subject_type' => $record->getMorphClass(),
-                            'description' => __("Deleted daemon ':command' from server ':server'", ['command' => $record->command, 'server' => $record->server->name]),
-                        ]);
+                        $this->logActivity(__("Deleted daemon ':command' from server ':server'", ['command' => $record->command, 'server' => $record->server->name]), $record);
 
-                        Notification::make()
-                            ->title(__('The Daemon will be uninstalled from the server.'))
-                            ->success()
-                            ->send();
+                        $this->sendNotification(__('The Daemon will be uninstalled from the server shortly.'));
                     }),
             ]);
     }

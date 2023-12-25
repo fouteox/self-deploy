@@ -6,11 +6,11 @@ use App\Filament\Resources\ServerResource;
 use App\Filament\Resources\ServerResource\Widgets\CreateDatabaseUserWidget;
 use App\Jobs\InstallDatabase;
 use App\Jobs\InstallDatabaseUser;
-use App\Models\ActivityLog;
 use App\Models\Database;
 use App\Models\DatabaseUser;
 use App\Models\Server;
 use App\Traits\BreadcrumbTrait;
+use App\Traits\HandlesUserContext;
 use App\Traits\RedirectsIfProvisioned;
 use App\View\Components\StatusColumn;
 use Filament\Forms\Components\Actions\Action;
@@ -19,7 +19,6 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -31,7 +30,7 @@ use Illuminate\Validation\Rules\Unique;
 /* @method Server getRecord() */
 class DatabaseServer extends ManageRelatedRecords
 {
-    use BreadcrumbTrait, RedirectsIfProvisioned;
+    use BreadcrumbTrait, HandlesUserContext, RedirectsIfProvisioned;
 
     protected static string $resource = ServerResource::class;
 
@@ -83,21 +82,12 @@ class DatabaseServer extends ManageRelatedRecords
                         'server_id' => $this->getRecord()->id,
                     ]))
                     ->after(function (Database $record, array $data): void {
-                        ActivityLog::create([
-                            'team_id' => auth()->user()->current_team_id,
-                            'user_id' => auth()->id(),
-                            'subject_id' => $record->getKey(),
-                            'subject_type' => $record->getMorphClass(),
-                            'description' => __("Created database ':name' on server ':server'", ['name' => $record->name, 'server' => $this->getRecord()->name]),
-                        ]);
+                        $this->logActivity(__("Created database ':name' on server ':server'", ['name' => $record->name, 'server' => $this->getRecord()->name]), $record);
 
                         if (! $data['create_user']) {
                             dispatch(new InstallDatabase($record, auth()->user()));
 
-                            Notification::make()
-                                ->title(__('The database will be created shortly.'))
-                                ->success()
-                                ->send();
+                            $this->sendNotification(__('The database will be created shortly.'));
                         } else {
                             $databaseUser = $record->users()->make([
                                 'name' => $data['user'],
@@ -108,23 +98,14 @@ class DatabaseServer extends ManageRelatedRecords
                             $databaseUser->save();
                             $databaseUser->databases()->attach($record);
 
-                            ActivityLog::create([
-                                'team_id' => auth()->user()->current_team_id,
-                                'user_id' => auth()->id(),
-                                'subject_id' => $record->getKey(),
-                                'subject_type' => $record->getMorphClass(),
-                                'description' => __("Created database user ':name' on server ':server'", ['name' => $databaseUser->name, 'server' => $this->getRecord()->name]),
-                            ]);
+                            $this->logActivity(__("Created database user ':name' on server ':server'", ['name' => $databaseUser->name, 'server' => $this->getRecord()->name]), $databaseUser);
 
                             Bus::chain([
                                 new InstallDatabase($record, auth()->user()),
                                 new InstallDatabaseUser($databaseUser, $data['password'], auth()->user()),
                             ])->dispatch();
 
-                            Notification::make()
-                                ->title(__('The database and user will be created shortly.'))
-                                ->success()
-                                ->send();
+                            $this->sendNotification(__('The database and user will be created shortly.'));
                         }
                     })
                     ->createAnother(false)
