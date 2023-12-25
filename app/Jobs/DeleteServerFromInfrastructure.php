@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\Server;
 use App\Models\User;
 use App\Notifications\ServerDeletionFailed;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -25,6 +26,8 @@ class DeleteServerFromInfrastructure implements ShouldQueue
 
     /**
      * Execute the job.
+     *
+     * @throws Exception
      */
     public function handle(): void
     {
