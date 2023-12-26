@@ -102,7 +102,7 @@ class ServerResource extends Resource
             'index' => Pages\ListServers::route('/'),
             'create' => Pages\CreateServer::route('/create'),
             'edit' => Pages\EditServer::route('/{record}/edit'),
-            'provisioning' => Pages\ServerProvisioning::route('/{record}/provisioning'),
+            'provisioning' => Pages\ViewProvisioningServer::route('/{record}/provisioning'),
             'sites' => Pages\ListSitesServer::route('/{record}/sites'),
             'sites/create' => Pages\CreateSiteServer::route('/{record}/sites/create'),
             'databases' => Pages\DatabaseServer::route('/{record}/databases'),
