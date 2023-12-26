@@ -9,12 +9,14 @@ use App\Models\Server;
 use App\Provider;
 use App\Server\ProvisionStep;
 use App\Server\SoftwareEnum;
+use App\Services\StepsServerProvisioning;
 use App\Traits\HandlesUserContext;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\Actions;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ViewEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
 
@@ -83,15 +85,14 @@ class ViewProvisioningServer extends ViewRecord
 
                         return "Step $currentStep/$totalSteps";
                     })
-                    ->schema([
-                        TextEntry::make('steps')
-                            ->hiddenLabel()
-                            ->state(fn () => [
-                                1, 2, 3, 4, 5,
-                            ])
-                            ->listWithLineBreaks()
-                            ->bulleted(),
-                    ])
+                    ->schema(function (Server $record) {
+                        return array_map(function ($key, $step) {
+                            return ViewEntry::make("step-$key")
+                                ->view('filament.infolists.entries.status-provisioning')
+                                ->hiddenLabel()
+                                ->state($step);
+                        }, array_keys(StepsServerProvisioning::allSteps($record)), StepsServerProvisioning::allSteps($record));
+                    })
                     ->columnSpan(['md' => 2])
                     ->columnStart(['md' => 1]),
                 Section::make(__('Server Provisioning'))

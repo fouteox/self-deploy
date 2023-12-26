@@ -35,7 +35,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\URL;
-use Illuminate\Support\HtmlString;
 use ProtoneMedia\LaravelTaskRunner\Connection;
 use ProtoneMedia\LaravelTaskRunner\PendingTask;
 
@@ -193,9 +192,9 @@ class Server extends Model implements FileProviderInterface, LogProviderInterfac
     /**
      * A bash provision command used to start the provision of custom servers.
      */
-    public function provisionCommand(): HtmlString
+    public function provisionCommand(): string
     {
-        return new HtmlString("wget --no-verbose -O - {$this->provisionScriptUrl()} | bash");
+        return "wget --no-verbose -O - {$this->provisionScriptUrl()} | bash";
     }
 
     /**
@@ -326,17 +325,17 @@ class Server extends Model implements FileProviderInterface, LogProviderInterfac
         return $this->files()->logFiles()->toArray();
     }
 
-    public function editableFiles(): array
-    {
-        return $this->files()->editableFiles()->toArray();
-    }
-
     /**
      * Returns an instance of ServerFiles to manage files on this server.
      */
     public function files(): ServerFiles
     {
         return new ServerFiles($this);
+    }
+
+    public function editableFiles(): array
+    {
+        return $this->files()->editableFiles()->toArray();
     }
 
     /**
