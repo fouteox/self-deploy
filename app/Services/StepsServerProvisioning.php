@@ -51,12 +51,10 @@ class StepsServerProvisioning
     {
         $manualSteps = [
             [
-                'name' => 'serverCreation',
                 'status' => $server->status === ServerStatus::New ? 'current' : 'completed',
                 'description' => __('Create the server at the provider'),
             ],
             [
-                'name' => 'serverStarting',
                 'status' => $server->status === ServerStatus::Starting ? 'current' : ($server->status === ServerStatus::New ? 'upcoming' : 'completed'),
                 'description' => __('Wait for the server to start up'),
             ],
