@@ -20,6 +20,15 @@ class Software extends Model
     {
         static::$softwares = $server->installedSoftware()->toArray();
 
+        if (empty(static::$softwares)) {
+            static::$softwares = [[
+                'id' => null,
+                'name' => null,
+                'hasRestartTask' => false,
+                'hasUpdateAlternativesTask' => false,
+            ]];
+        }
+
         return static::query();
     }
 
@@ -27,10 +36,10 @@ class Software extends Model
     {
         return collect(static::$softwares)->map(function ($software) {
             return [
-                'id' => $software->value,
-                'name' => $software->getDisplayName(),
-                'hasRestartTask' => (bool) $software->restartTaskClass(),
-                'hasUpdateAlternativesTask' => (bool) $software->updateAlternativesTask(),
+                'id' => is_array($software) ? $software['id'] : $software->value,
+                'name' => is_array($software) ? $software['name'] : $software->getDisplayName(),
+                'hasRestartTask' => (bool) (is_array($software) ? $software['hasRestartTask'] : $software->restartTaskClass()),
+                'hasUpdateAlternativesTask' => (bool) (is_array($software) ? $software['hasUpdateAlternativesTask'] : $software->updateAlternativesTask()),
             ];
         })->toArray();
     }
