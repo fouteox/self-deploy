@@ -7,8 +7,6 @@ use App\Infrastructure\Entities\ServerStatus;
 use App\Jobs\DeleteServerFromInfrastructure;
 use App\Models\Server;
 use App\Provider;
-use App\Server\ProvisionStep;
-use App\Server\SoftwareEnum;
 use App\Services\StepsServerProvisioning;
 use App\Traits\HandlesUserContext;
 use Filament\Actions\Action;
@@ -49,42 +47,7 @@ class ViewProvisioningServer extends ViewRecord
         return $infolist
             ->schema([
                 Section::make('Step')
-                    ->heading(function (Server $record): string {
-                        $isNew = $record->status === ServerStatus::New;
-                        $isStarting = $record->status === ServerStatus::Starting;
-
-                        $completedSteps = $record->completed_provision_steps->toArray();
-                        $installedSoftware = $record->installed_software->toArray();
-
-                        $totalSteps = 2 + count(ProvisionStep::forFreshServer()) + count(SoftwareEnum::defaultStack());
-                        $currentStep = 1;
-
-                        $statusForServerCreation = $isNew ? 'current' : 'completed';
-                        if ($statusForServerCreation === 'completed') {
-                            $currentStep++;
-                        }
-
-                        $statusForServerStarting = $isStarting ? 'current' : ($isNew ? 'upcoming' : 'completed');
-                        if ($statusForServerStarting === 'completed') {
-                            $currentStep++;
-                        }
-
-                        foreach (ProvisionStep::forFreshServer() as $step) {
-                            if (! in_array($step->value, $completedSteps)) {
-                                break;
-                            }
-                            $currentStep++;
-                        }
-
-                        foreach (SoftwareEnum::defaultStack() as $software) {
-                            if (! in_array($software->value, $installedSoftware)) {
-                                break;
-                            }
-                            $currentStep++;
-                        }
-
-                        return "Step $currentStep/$totalSteps";
-                    })
+                    ->heading(fn (Server $record): string => StepsServerProvisioning::countSteps($record))
                     ->schema(function (Server $record) {
                         return array_map(function ($key, $step) {
                             return ViewEntry::make("step-$key")
