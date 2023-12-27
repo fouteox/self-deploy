@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Contracts\FileProviderInterface;
 use App\Contracts\LogProviderInterface;
+use App\Events\ServerDeleted;
 use App\Events\ServerUpdated;
 use App\Exceptions\ServerHandler;
 use App\Infrastructure\Entities\ServerStatus;
@@ -100,9 +101,9 @@ class Server extends Model implements FileProviderInterface, LogProviderInterfac
             $server->installed_software ??= [];
         });
 
-        //        static::deleted(function ($server) {
-        //            event(new ServerDeleted($server->id, $server->team_id));
-        //        });
+        static::deleted(function ($server) {
+            event(new ServerDeleted($server->id, $server->team_id));
+        });
     }
 
     /**
