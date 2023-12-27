@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ServerResource\Widgets;
 
 use App\Jobs\InstallDatabaseUser;
+use App\Jobs\UninstallDatabaseUser;
 use App\Jobs\UpdateDatabaseUser;
 use App\Models\Database;
 use App\Models\DatabaseUser;
@@ -143,7 +144,16 @@ class CreateDatabaseUserWidget extends BaseWidget
                         dispatch(new UpdateDatabaseUser($record, $data['password'] ?? null, auth()->user()));
                     })
                     ->successNotificationTitle(__('The database user will be updated shortly.')),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->using(function (DatabaseUser $record): void {
+                        $record->markUninstallationRequest();
+
+                        dispatch(new UninstallDatabaseUser($record, $this->user()));
+
+                        $this->logActivity(__("Deleted database user ':name' from server ':server'", ['name' => $record->name, 'server' => $record->server->name]), $record);
+
+                        $this->sendNotification(__('The database user will be uninstalled from the server.'));
+                    }),
             ])
             ->paginated(false);
     }

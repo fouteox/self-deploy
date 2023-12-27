@@ -6,6 +6,7 @@ use App\Filament\Resources\ServerResource;
 use App\Filament\Resources\ServerResource\Widgets\CreateDatabaseUserWidget;
 use App\Jobs\InstallDatabase;
 use App\Jobs\InstallDatabaseUser;
+use App\Jobs\UninstallDatabase;
 use App\Models\Database;
 use App\Models\DatabaseUser;
 use App\Models\Server;
@@ -109,7 +110,16 @@ class DatabaseServer extends ManageRelatedRecords
                     ->successNotificationTitle(false),
             ])
             ->actions([
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->using(function (Database $record): void {
+                        $record->markUninstallationRequest();
+
+                        dispatch(new UninstallDatabase($record, $this->user()));
+
+                        $this->logActivity(__("Deleted database ':name' from server ':server'", ['name' => $record->name, 'server' => $record->server->name]), $record);
+
+                        $this->sendNotification(__('The database will be uninstalled from the server.'));
+                    }),
             ])
             ->paginated(false);
     }

@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\DatabaseUser;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -26,6 +27,8 @@ class UninstallDatabaseUser implements ShouldQueue
 
     /**
      * Execute the job.
+     *
+     * @throws BindingResolutionException
      */
     public function handle(): void
     {
