@@ -43,7 +43,7 @@ class ManageDeploymentsSite extends ManageRelatedRecords
             ->schema([
                 TextEntry::make('task.output')
                     ->label(__('Output'))
-                    ->formatStateUsing(fn (string $state): string => nl2br(trim($state), false))
+                    ->formatStateUsing(fn (string $state): string => $state ? nl2br(trim($state), false) : '...')
                     ->html()
                     ->hiddenLabel()
                     ->columnSpanFull(),
