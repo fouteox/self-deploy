@@ -100,7 +100,7 @@ return [
     |
     */
 
-    'legacy_model_binding' => true, // TODO: verifier de temps en temps si cela est désactivable
+    'legacy_model_binding' => false,
 
     /*
     |---------------------------------------------------------------------------
