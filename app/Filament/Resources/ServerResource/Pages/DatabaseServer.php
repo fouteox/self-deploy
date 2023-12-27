@@ -72,9 +72,6 @@ class DatabaseServer extends ManageRelatedRecords
                     ->state(fn (Database $record): string => StatusColumn::getStatus(record: $record))
                     ->alignEnd(),
             ])
-            ->filters([
-                // ...
-            ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->using(fn (array $data): Database => Database::create([
@@ -113,12 +110,6 @@ class DatabaseServer extends ManageRelatedRecords
             ])
             ->actions([
                 Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                // ...
-            ])
-            ->emptyStateActions([
-                // ...
             ])
             ->paginated(false);
     }
