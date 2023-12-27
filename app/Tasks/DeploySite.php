@@ -15,9 +15,9 @@ use Illuminate\Http\Request;
 
 class DeploySite extends Task implements HasCallbacks
 {
-    protected int $timeout = 600;
-
     public Site $site;
+
+    protected int $timeout = 600;
 
     public function __construct(public Deployment $deployment, public array $environmentVariables = [])
     {
@@ -27,42 +27,6 @@ class DeploySite extends Task implements HasCallbacks
     public function onOutputUpdated(string $output): void
     {
         event(new DeploymentUpdated($this->deployment));
-    }
-
-    protected function onTimeout(TaskModel $task, Request $request)
-    {
-        $this->deployment->forceFill(['status' => DeploymentStatus::Timeout])->save();
-        $this->deployment->notifyUserAboutFailedDeployment();
-    }
-
-    protected function onFailed(TaskModel $task, Request $request)
-    {
-        $this->deployment->forceFill(['status' => DeploymentStatus::Failed])->save();
-        $this->deployment->notifyUserAboutFailedDeployment();
-    }
-
-    protected function onFinished(TaskModel $task, Request $request)
-    {
-        $this->deployment->forceFill(['status' => DeploymentStatus::Finished])->save();
-
-        if (! $this->site->installed_at) {
-            dispatch(new InstallSiteCaddyfile($this->site, $this->deployment->user));
-
-            if ($this->site->type === SiteType::Wordpress) {
-                dispatch(new InstallWordpressCron($this->site));
-            }
-        }
-    }
-
-    protected function onCustomCallback(TaskModel $task, Request $request)
-    {
-        $data = $request->validate([
-            'git_hash' => ['nullable', 'string', new Sha1],
-        ]);
-
-        if ($gitHash = $data['git_hash'] ?? null) {
-            $this->deployment->forceFill(['git_hash' => $gitHash])->save();
-        }
     }
 
     public function getViewData(): array
@@ -75,5 +39,41 @@ class DeploySite extends Task implements HasCallbacks
                 $this->environmentVariables
             ),
         ];
+    }
+
+    protected function onTimeout(TaskModel $task, Request $request): void
+    {
+        $this->deployment->forceFill(['status' => DeploymentStatus::Timeout])->save();
+        $this->deployment->notifyUserAboutFailedDeployment();
+    }
+
+    protected function onFailed(TaskModel $task, Request $request): void
+    {
+        $this->deployment->forceFill(['status' => DeploymentStatus::Failed])->save();
+        $this->deployment->notifyUserAboutFailedDeployment();
+    }
+
+    protected function onFinished(TaskModel $task, Request $request): void
+    {
+        $this->deployment->forceFill(['status' => DeploymentStatus::Finished])->save();
+
+        if (! $this->site->installed_at) {
+            dispatch(new InstallSiteCaddyfile($this->site, $this->deployment->user));
+
+            if ($this->site->type === SiteType::Wordpress) {
+                dispatch(new InstallWordpressCron($this->site));
+            }
+        }
+    }
+
+    protected function onCustomCallback(TaskModel $task, Request $request): void
+    {
+        $data = $request->validate([
+            'git_hash' => ['nullable', 'string', new Sha1],
+        ]);
+
+        if ($gitHash = $data['git_hash'] ?? null) {
+            $this->deployment->forceFill(['git_hash' => $gitHash])->save();
+        }
     }
 }

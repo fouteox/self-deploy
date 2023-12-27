@@ -3,6 +3,8 @@
 namespace App\View\Components;
 
 use App\Models\Site;
+use Closure;
+use Illuminate\Contracts\View\View;
 
 class SiteCaddyfile extends Component implements Caddyfile
 {
@@ -17,10 +19,8 @@ class SiteCaddyfile extends Component implements Caddyfile
 
     /**
      * Get the view / contents that represent the component.
-     *
-     * @return \Illuminate\Contracts\View\View|\Closure|string
      */
-    public function render()
+    public function render(): View|string|Closure
     {
         return view('components.server.site-caddyfile');
     }

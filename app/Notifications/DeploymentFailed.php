@@ -26,7 +26,7 @@ class DeploymentFailed extends Notification implements ShouldQueue
      *
      * @return array<int, string>
      */
-    public function via(object $notifiable): array
+    public function via(): array
     {
         return ['mail'];
     }
@@ -48,7 +48,7 @@ class DeploymentFailed extends Notification implements ShouldQueue
             ->when($output, function (MailMessage $message, $output) {
                 $message
                     ->line(__("Here you'll find the 10 last lines of the task that failed:"))
-                    ->line(Markdown::parse("```{$output}```"));
+                    ->line(Markdown::parse("```$output```"));
             })
             ->action(__('View Site'), route('servers.sites.show', [$this->deployment->site->server, $this->deployment->site]));
     }

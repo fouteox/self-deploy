@@ -8,21 +8,18 @@ use App\Tasks\GetFile;
 use App\Tasks\HasCallbacks;
 use Exception;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
-use ProtoneMedia\LaravelTaskRunner\ProcessOutput;
 
 /**
  * @property Server $server
  */
 class Task extends Model
 {
-    use HasFactory;
     use HasUlids;
 
     protected $casts = [
@@ -50,24 +47,23 @@ class Task extends Model
     }
 
     /**
-     * Returns the path to the task's output file on the server.
+     * Same as updateOutput() but without the callback handling.
+     *
+     * @throws Exception
      */
-    public function outputLogPath(): string
+    public function updateOutputWithoutCallbacks(): self
     {
-        $directory = $this->user === 'root'
-            ? $this->server->connectionAsRoot()->scriptPath
-            : $this->server->connectionAsUser()->scriptPath;
-
-        return "{$directory}/task-{$this->id}.log";
+        return $this->updateOutput(handleCallbacks: false);
     }
 
     /**
      * It downloads the output file from the server, stores it
      * in the database, and handles any callbacks.
+     *
+     * @throws Exception
      */
     public function updateOutput(bool $handleCallbacks = true): self
     {
-        /** @var ProcessOutput */
         $output = $this->server->runTask(new GetFile($this->outputLogPath()))->asRoot()->dispatch();
 
         if (! $output->isSuccessful()) {
@@ -87,11 +83,15 @@ class Task extends Model
     }
 
     /**
-     * Same as updateOutput() but without the callback handling.
+     * Returns the path to the task's output file on the server.
      */
-    public function updateOutputWithoutCallbacks(): self
+    public function outputLogPath(): string
     {
-        return $this->updateOutput(handleCallbacks: false);
+        $directory = $this->user === 'root'
+            ? $this->server->connectionAsRoot()->scriptPath
+            : $this->server->connectionAsUser()->scriptPath;
+
+        return "$directory/task-$this->id.log";
     }
 
     /**
@@ -105,6 +105,14 @@ class Task extends Model
     }
 
     /**
+     * Return the last given number of lines.
+     */
+    public function tailOutput(int $lines = 10): string
+    {
+        return $this->outputLines()->take($lines * -1)->implode(PHP_EOL);
+    }
+
+    /**
      * Returns the output as a collection of lines.
      */
     public function outputLines(): Collection
@@ -112,12 +120,9 @@ class Task extends Model
         return Collection::make(explode(PHP_EOL, $this->output));
     }
 
-    /**
-     * Return the last given number of lines.
-     */
-    public function tailOutput(int $lines = 10): string
+    public function timeoutUrl(): string
     {
-        return $this->outputLines()->take($lines * -1)->implode(PHP_EOL);
+        return $this->webhookUrl('markAsTimedOut');
     }
 
     /**
@@ -128,11 +133,6 @@ class Task extends Model
         $name = Str::kebab($name);
 
         return URL::relativeSignedRoute('webhook.task.'.$name, ['task' => $this->id]);
-    }
-
-    public function timeoutUrl(): string
-    {
-        return $this->webhookUrl('markAsTimedOut');
     }
 
     public function failedUrl(): string
@@ -153,7 +153,7 @@ class Task extends Model
     /**
      * Calls the callback handler on the Task instance.
      */
-    public function handleCallback(Request $request, CallbackType $type)
+    public function handleCallback(Request $request, CallbackType $type): void
     {
         $instance = unserialize($this->instance);
 
