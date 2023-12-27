@@ -15,4 +15,11 @@ class DeploymentSettingsSite extends EditRecord
     protected static ?string $title = 'Deployments Settings';
 
     protected static ?string $navigationIcon = 'heroicon-s-wrench-screwdriver';
+
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getSaveFormAction(),
+        ];
+    }
 }

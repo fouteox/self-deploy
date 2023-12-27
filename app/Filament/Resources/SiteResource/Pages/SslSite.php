@@ -15,4 +15,11 @@ class SslSite extends EditRecord
     protected static ?string $title = 'SSL';
 
     protected static ?string $navigationIcon = 'heroicon-s-lock-closed';
+
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getSaveFormAction(),
+        ];
+    }
 }
