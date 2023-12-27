@@ -55,7 +55,8 @@ class ManageDeploymentsSite extends ManageRelatedRecords
         return $table
             ->columns([
                 TextColumn::make('updated_at')
-                    ->label(__('Deployed at')),
+                    ->label(__('Deployed at'))
+                    ->dateTime(),
                 TextColumn::make('user.name')
                     ->default(__('Via Deploy URL')),
                 TextColumn::make('short_git_hash')

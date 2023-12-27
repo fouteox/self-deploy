@@ -57,7 +57,8 @@ class ViewSite extends ViewRecord
                     ->schema([
                         IconEntry::make('zero_downtime_deployment')
                             ->boolean(),
-                        TextEntry::make('latestDeployment.updated_at'),
+                        TextEntry::make('latestDeployment.updated_at')
+                            ->dateTime(),
                         TextEntry::make('deploy_url')
                             ->label(__('Deploy URL'))
                             ->state(fn (Site $record): string => route('site.deploy-with-token', [$record, $record->deploy_token]))
