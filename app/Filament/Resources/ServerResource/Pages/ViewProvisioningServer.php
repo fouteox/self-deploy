@@ -25,6 +25,11 @@ class ViewProvisioningServer extends ViewRecord
 
     protected static string $resource = ServerResource::class;
 
+    public function getSubNavigation(): array
+    {
+        return [];
+    }
+
     public function getHeading(): string
     {
         return $this->getRecord()->name;
