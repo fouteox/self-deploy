@@ -4,10 +4,10 @@ namespace App\Filament\Resources\ServerResource\Widgets;
 
 use App\Jobs\InstallDatabaseUser;
 use App\Jobs\UpdateDatabaseUser;
-use App\Models\ActivityLog;
 use App\Models\Database;
 use App\Models\DatabaseUser;
 use App\Models\Server;
+use App\Traits\HandlesUserContext;
 use App\View\Components\StatusColumn;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
@@ -25,6 +25,8 @@ use Illuminate\Validation\Rules\Unique;
 
 class CreateDatabaseUserWidget extends BaseWidget
 {
+    use HandlesUserContext;
+
     public Server $server;
 
     protected int|string|array $columnSpan = 'full';
@@ -86,13 +88,7 @@ class CreateDatabaseUserWidget extends BaseWidget
                         'server_id' => $this->server->id,
                     ]))
                     ->after(function (DatabaseUser $record, array $data): void {
-                        ActivityLog::create([
-                            'team_id' => auth()->user()->current_team_id,
-                            'user_id' => auth()->id(),
-                            'subject_id' => $record->getKey(),
-                            'subject_type' => $record->getMorphClass(),
-                            'description' => __("Created database user ':name' on server ':server'", ['name' => $record->name, 'server' => $this->server->name]),
-                        ]);
+                        $this->logActivity(__("Created database user ':name' on server ':server'", ['name' => $record->name, 'server' => $this->server->name]), $record);
 
                         if (is_array($data['databases']) && ! empty($data['databases'])) {
                             $record->databases()->attach($data['databases']);
@@ -142,13 +138,7 @@ class CreateDatabaseUserWidget extends BaseWidget
                             'uninstallation_failed_at' => null,
                         ])->save();
 
-                        ActivityLog::create([
-                            'team_id' => auth()->user()->current_team_id,
-                            'user_id' => auth()->id(),
-                            'subject_id' => $record->getKey(),
-                            'subject_type' => $record->getMorphClass(),
-                            'description' => __("Updated database user ':name' on server ':server'", ['name' => $record->name, 'server' => $this->server->name]),
-                        ]);
+                        $this->logActivity(__("Updated database user ':name' on server ':server'", ['name' => $record->name, 'server' => $this->server->name]), $record);
 
                         dispatch(new UpdateDatabaseUser($record, $data['password'] ?? null, auth()->user()));
                     })
