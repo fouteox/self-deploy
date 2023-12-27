@@ -23,7 +23,7 @@ class SiteResource extends Resource
     {
         return $page->generateNavigationItems([
             Pages\ViewSite::class,
-            Pages\DeploymentsSite::class,
+            Pages\ManageDeploymentsSite::class,
             Pages\DeploymentSettingsSite::class,
             Pages\SslSite::class,
             Pages\FileSite::class,
@@ -61,7 +61,7 @@ class SiteResource extends Resource
             'view' => Pages\ViewSite::route('/{record}'),
             'create' => Pages\CreateSite::route('/create'),
             'edit' => Pages\EditSite::route('/{record}/edit'),
-            'deployments_site' => Pages\DeploymentsSite::route('/{record}/deployments'),
+            'deployments_site' => Pages\ManageDeploymentsSite::route('/{record}/deployments'),
             'deployments_settings' => Pages\DeploymentSettingsSite::route('/{record}/deployments-settings'),
             'ssl' => Pages\SslSite::route('/{record}/ssl'),
             'files' => Pages\FileSite::route('/{record}/files'),
