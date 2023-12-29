@@ -15,6 +15,6 @@ class PrettifyCaddyfile extends Task
      */
     public function render(): string
     {
-        return "caddy fmt {$this->path} --overwrite";
+        return "caddy fmt $this->path --overwrite";
     }
 }

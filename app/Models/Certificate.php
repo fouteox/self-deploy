@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -12,7 +11,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Certificate extends Model
 {
-    use HasFactory;
     use HasUlids;
 
     protected $casts = [
@@ -35,19 +33,19 @@ class Certificate extends Model
     }
 
     /**
-     * The directory on the server where the certificate is stored.
-     */
-    public function siteDirectory(): string
-    {
-        return "{$this->site->path}/certificates/{$this->id}";
-    }
-
-    /**
      * The path to the certificate on the server.
      */
     public function certificatePath(): string
     {
         return "{$this->siteDirectory()}/certificate.cert";
+    }
+
+    /**
+     * The directory on the server where the certificate is stored.
+     */
+    public function siteDirectory(): string
+    {
+        return "{$this->site->path}/certificates/$this->id";
     }
 
     /**

@@ -38,7 +38,7 @@ class CaddyfilePatcher
     {
         $regex = '/root\s+\*\s+.*$/m';
 
-        $this->caddyfile = preg_replace($regex, "root * {$newPublicFolder}", $this->caddyfile);
+        $this->caddyfile = preg_replace($regex, "root * $newPublicFolder", $this->caddyfile);
 
         return $this;
     }
@@ -50,7 +50,7 @@ class CaddyfilePatcher
     {
         $this->caddyfile = str_replace(
             "{$this->site->address}:{$this->site->port}",
-            "{$this->site->address}:{$newPort}",
+            "{$this->site->address}:$newPort",
             $this->caddyfile
         );
 
@@ -58,8 +58,8 @@ class CaddyfilePatcher
             $addressWithoutWww = substr($this->site->address, 4);
 
             $this->caddyfile = str_replace(
-                "{$addressWithoutWww}:{$this->site->port}",
-                "{$addressWithoutWww}:{$newPort}",
+                "$addressWithoutWww:{$this->site->port}",
+                "$addressWithoutWww:$newPort",
                 $this->caddyfile
             );
         }
@@ -69,8 +69,10 @@ class CaddyfilePatcher
 
     /**
      * Replaces the TLS snippet for the site with a new one.
+     *
+     * @throws Exception
      */
-    public function replaceTlsSnippet(TlsSetting $newTlsSetting, Certificate $certificate = null): self
+    public function replaceTlsSnippet(TlsSetting $newTlsSetting, ?Certificate $certificate = null): self
     {
         $lines = explode(PHP_EOL, $this->caddyfile);
 
