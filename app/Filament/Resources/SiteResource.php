@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SiteResource\Pages;
 use App\Models\Site;
+use App\Services\CreateSiteForm;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
@@ -34,10 +35,22 @@ class SiteResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                //
-            ]);
+        return CreateSiteForm::form($form);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListSites::route('/'),
+            'create' => Pages\CreateSite::route('/create'),
+            'view' => Pages\ViewSite::route('/{record}'),
+            'edit' => Pages\EditSite::route('/{record}/edit'),
+            'deployments_site' => Pages\ManageDeploymentsSite::route('/{record}/deployments'),
+            'deployments_settings' => Pages\DeploymentSettingsSite::route('/{record}/deployments-settings'),
+            'ssl' => Pages\SslSite::route('/{record}/ssl'),
+            'files' => Pages\FileSite::route('/{record}/files'),
+            'logs' => Pages\LogSite::route('/{record}/logs'),
+        ];
     }
 
     public static function table(Table $table): Table
@@ -52,28 +65,6 @@ class SiteResource extends Resource
                 Tables\Actions\CreateAction::make(),
             ])
             ->recordUrl(fn (Site $site): string => static::getUrl('view', ['record' => $site]));
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => Pages\ListSites::route('/'),
-            'view' => Pages\ViewSite::route('/{record}'),
-            'create' => Pages\CreateSite::route('/create'),
-            'edit' => Pages\EditSite::route('/{record}/edit'),
-            'deployments_site' => Pages\ManageDeploymentsSite::route('/{record}/deployments'),
-            'deployments_settings' => Pages\DeploymentSettingsSite::route('/{record}/deployments-settings'),
-            'ssl' => Pages\SslSite::route('/{record}/ssl'),
-            'files' => Pages\FileSite::route('/{record}/files'),
-            'logs' => Pages\LogSite::route('/{record}/logs'),
-        ];
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getEloquentQuery(): Builder
