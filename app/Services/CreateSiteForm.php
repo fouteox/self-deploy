@@ -32,8 +32,6 @@ class CreateSiteForm
             $servers = Server::where('team_id', auth()->user()->current_team_id)->get();
         }
 
-        $type_key = 'server_public_key';
-
         return $form
             ->schema([
                 Section::make()
@@ -146,7 +144,6 @@ class CreateSiteForm
                             ->default(fn (Get $get) => $servers->firstWhere('id', $get('server_id'))?->user_public_key)
                             ->disabled()
                             ->dehydrated()
-                            ->hidden(fn ($get) => $type_key !== 'server_public_key')
                             ->extraAttributes(fn ($state): array => [
                                 'x-on:click' => 'window.navigator.clipboard.writeText("'.$state.'"); $tooltip("Copied to clipboard", { timeout: 1500 });',
                             ])
@@ -166,7 +163,6 @@ class CreateSiteForm
                             ->helperText('Instead of adding the public key of the server, you can add this deploy key to Github or other repository provider.')
                             ->disabled()
                             ->dehydrated()
-                            ->hidden(fn ($get) => $type_key !== 'server_public_key')
                             ->extraAttributes(fn ($state): array => [
                                 'x-on:click' => 'window.navigator.clipboard.writeText("'.$state.'"); $tooltip("Copied to clipboard", { timeout: 1500 });',
                             ])
