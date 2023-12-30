@@ -5,6 +5,7 @@ namespace App\Filament\Resources\SiteResource\Pages;
 use App\Filament\Resources\SiteResource;
 use App\Models\PendingDeploymentException;
 use App\Models\Server;
+use App\Models\Site;
 use App\Models\TlsSetting;
 use App\Traits\HandlesUserContext;
 use Filament\Notifications\Notification;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 
+/* @method Site getRecord() */
 class CreateSite extends CreateRecord
 {
     use HandlesUserContext;
