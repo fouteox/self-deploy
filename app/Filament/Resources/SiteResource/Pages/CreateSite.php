@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\SiteResource\Pages;
 
 use App\Filament\Resources\SiteResource;
+use App\Models\Site;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
 
@@ -14,6 +15,6 @@ class CreateSite extends CreateRecord
 
     protected function handleRecordCreation(array $data): Model
     {
-        return static::getModel()::create($data);
+        return Site::create($data);
     }
 }
