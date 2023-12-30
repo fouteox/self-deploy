@@ -19,6 +19,7 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Exists;
 use Illuminate\Validation\Rules\Unique;
 use Livewire\Component;
 
@@ -42,6 +43,10 @@ class CreateSiteForm
                             ->label('Server')
                             ->options(fn () => $servers->pluck('name', 'id'))
                             ->required()
+                            ->exists(
+                                table: Server::class,
+                                column: 'id',
+                                modifyRuleUsing: fn (Exists $rule) => $rule->where('team_id', auth()->user()->current_team_id))
                             ->default($serverId)
                             ->live()
                             ->afterStateUpdated(fn (Set $set, $state) => $set('server_public_key', $servers->firstWhere('id', $state)?->user_public_key))
@@ -115,8 +120,8 @@ class CreateSiteForm
                         Hidden::make('type_key')
                             ->default(true)
                             ->hiddenOn('edit'),
-                        Hidden::make('key_pair')
-                            ->default(function (KeyPairGenerator $keyPairGenerator) {
+                        Hidden::make('deploy_key_uuid')
+                            ->default(function (Set $set, KeyPairGenerator $keyPairGenerator) {
                                 $userId = auth()->id();
                                 $deploy_key_uuid = Cache::get('deploy-key-uuid-{$userId}');
 
@@ -133,8 +138,9 @@ class CreateSiteForm
 
                                 $key_pair_genereted = new KeyPair($key_pair->privateKey, $key_pair->publicKey, $key_pair->type);
 
-                                return $key_pair_genereted->publicKey;
+                                return $deploy_key_uuid;
                             })
+                            ->required()
                             ->hiddenOn('edit'),
                         TextInput::make('server_public_key')
                             ->label('Public Key Server')
