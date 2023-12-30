@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\KeyPair;
 use App\KeyPairGenerator;
 use App\Models\Server;
 use App\Models\SiteType;
@@ -49,7 +48,25 @@ class CreateSiteForm
                                 modifyRuleUsing: fn (Exists $rule) => $rule->where('team_id', auth()->user()->current_team_id))
                             ->default($serverId)
                             ->live()
-                            ->afterStateUpdated(fn (Set $set, $state) => $set('server_public_key', $servers->firstWhere('id', $state)?->user_public_key))
+                            ->afterStateUpdated(function (Set $set, $state, KeyPairGenerator $keyPairGenerator) use ($servers) {
+                                $userId = auth()->id();
+                                $deploy_key_uuid = Cache::get('deploy-key-uuid-{$userId}');
+
+                                if (! $deploy_key_uuid) {
+                                    $deploy_key_uuid = Str::uuid()->toString();
+                                    Cache::put('deploy-key-uuid-{$userId}', $deploy_key_uuid, config('session.lifetime') * 60);
+                                }
+
+                                $key_pair = Cache::remember(
+                                    key: "deploy-key-$userId-$deploy_key_uuid",
+                                    ttl: config('session.lifetime') * 60,
+                                    callback: fn () => $keyPairGenerator->ed25519()
+                                );
+
+                                $set('server_public_key', $servers->firstWhere('id', $state)?->user_public_key);
+                                $set('deploy_key', $key_pair->publicKey);
+                                $set('deploy_key_uuid', $deploy_key_uuid);
+                            })
                             ->hidden(fn (Component $livewire, $operation): bool => isset($livewire->record) || $operation === 'edit'),
                         TextInput::make('address')
                             ->label('Hostname')
@@ -121,25 +138,6 @@ class CreateSiteForm
                             ->default(true)
                             ->hiddenOn('edit'),
                         Hidden::make('deploy_key_uuid')
-                            ->default(function (Set $set, KeyPairGenerator $keyPairGenerator) {
-                                $userId = auth()->id();
-                                $deploy_key_uuid = Cache::get('deploy-key-uuid-{$userId}');
-
-                                if (! $deploy_key_uuid) {
-                                    $deploy_key_uuid = Str::uuid()->toString();
-                                    Cache::put('deploy-key-uuid-{$userId}', $deploy_key_uuid, config('session.lifetime') * 60);
-                                }
-
-                                $key_pair = Cache::remember(
-                                    key: "deploy-key-$userId-$deploy_key_uuid",
-                                    ttl: config('session.lifetime') * 60,
-                                    callback: fn () => $keyPairGenerator->ed25519()
-                                );
-
-                                $key_pair_genereted = new KeyPair($key_pair->privateKey, $key_pair->publicKey, $key_pair->type);
-
-                                return $deploy_key_uuid;
-                            })
                             ->required()
                             ->hiddenOn('edit'),
                         TextInput::make('server_public_key')
@@ -166,7 +164,6 @@ class CreateSiteForm
                         TextInput::make('deploy_key')
                             ->label('Deploy key UUID')
                             ->helperText('Instead of adding the public key of the server, you can add this deploy key to Github or other repository provider.')
-                            ->default(fn (Get $get) => trim($get('key_pair')))
                             ->disabled()
                             ->dehydrated()
                             ->hidden(fn ($get) => $type_key !== 'server_public_key')
