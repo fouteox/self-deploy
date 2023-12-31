@@ -4,7 +4,7 @@ namespace App\Rules;
 
 use App\Infrastructure\DigitalOcean;
 use App\Infrastructure\ProviderFactory;
-use App\Models\Credentials;
+use App\Models\Credential;
 use App\Provider;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -33,7 +33,7 @@ class DigitalOceanToken implements ValidationRule
         $providerFactory = app(ProviderFactory::class);
 
         /** @var DigitalOcean */
-        $digitalOcean = $providerFactory->forCredentials(new Credentials([
+        $digitalOcean = $providerFactory->forCredentials(new Credential([
             'provider' => Provider::DigitalOcean,
             'credentials' => ['digital_ocean_token' => $value],
         ]));

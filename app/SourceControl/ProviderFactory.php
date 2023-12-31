@@ -2,13 +2,13 @@
 
 namespace App\SourceControl;
 
-use App\Models\Credentials;
+use App\Models\Credential;
 use App\Provider;
 use Exception;
 
 class ProviderFactory
 {
-    public function forCredentials(Credentials $credentials): mixed
+    public function forCredentials(Credential $credentials): mixed
     {
         return match ($credentials->provider) {
             Provider::Github => new Github($credentials->credentials['token']),

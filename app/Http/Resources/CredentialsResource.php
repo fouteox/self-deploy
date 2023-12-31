@@ -8,7 +8,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /**
  * @codeCoverageIgnore Handled by Dusk tests.
  *
- * @mixin \App\Models\Credentials
+ * @mixin \App\Models\Credential
  */
 class CredentialsResource extends JsonResource
 {

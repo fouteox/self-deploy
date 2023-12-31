@@ -18,6 +18,8 @@ use Illuminate\Support\Str;
 use Illuminate\Translation\Translator;
 use Illuminate\Validation\Factory;
 use Illuminate\Validation\Validator;
+use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\GithubProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -38,7 +40,7 @@ class AppServiceProvider extends ServiceProvider
 
         Blade::anonymousComponentPath(__DIR__.'/../../resources/views/filament/components');
 
-        //        $this->app->bind(GithubProvider::class, fn () => Socialite::driver('github'));
+        $this->app->bind(GithubProvider::class, fn () => Socialite::driver('github'));
 
         /** @var Factory $validatorFactory */
         $validatorFactory = app(Factory::class);
@@ -103,6 +105,8 @@ class AppServiceProvider extends ServiceProvider
 
         // Everything strict, all the time.
         Model::shouldBeStrict();
+
+        \Debugbar::disable();
 
         // But in production, log the violation instead of throwing an exception.
         if ($this->app->isProduction()) {

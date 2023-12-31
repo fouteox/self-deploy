@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Models\Credentials;
+use App\Models\Credential;
 use App\Models\Server;
 use App\SourceControl\ProviderFactory;
 use Exception;
@@ -21,7 +21,7 @@ class AddServerSshKeyToGithub implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(public Server $server, public Credentials $githubCredentials)
+    public function __construct(public Server $server, public Credential $githubCredentials)
     {
     }
 

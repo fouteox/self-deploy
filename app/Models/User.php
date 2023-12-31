@@ -16,10 +16,10 @@ use Illuminate\Notifications\Notification;
 
 /**
  * @property Collection<int, Disk> $disks
- * @property Collection<int, Credentials> $credentials
+ * @property Collection<int, Credential> $credentials
  * @property Collection<int, SshKey> $sshKeys
  * @property Team $currentTeam
- * @property Credentials|null $githubCredentials
+ * @property Credential|null $githubCredentials
  */
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -99,8 +99,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function credentials(): HasMany
     {
-        return $this->hasMany(Credentials::class)->orderBy(
-            (new Credentials)->qualifyColumn('name')
+        return $this->hasMany(Credential::class)->orderBy(
+            (new Credential)->qualifyColumn('name')
         );
     }
 

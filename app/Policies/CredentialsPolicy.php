@@ -2,7 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\Credentials;
+use App\Models\Credential;
 use App\Models\User;
 
 class CredentialsPolicy
@@ -18,7 +18,7 @@ class CredentialsPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Credentials $credentials): bool
+    public function view(User $user, Credential $credentials): bool
     {
         return $user->id === $credentials->user_id;
     }
@@ -34,7 +34,7 @@ class CredentialsPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Credentials $credentials): bool
+    public function update(User $user, Credential $credentials): bool
     {
         return $user->id === $credentials->user_id;
     }
@@ -42,7 +42,7 @@ class CredentialsPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Credentials $credentials): bool
+    public function delete(User $user, Credential $credentials): bool
     {
         return $user->id === $credentials->user_id;
     }

@@ -7,7 +7,7 @@ use App\Infrastructure\Entities\Region;
 use App\Infrastructure\Entities\ServerType;
 use App\Infrastructure\ProviderFactory;
 use App\Infrastructure\ServerProvider;
-use App\Models\Credentials;
+use App\Models\Credential;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -67,7 +67,7 @@ class CreateServerRequest extends FormRequest
 
         $validator->after(function (Validator $validator) {
 
-            $credentials = Credentials::query()->whereUserId($this->user()->id)->find($this->input('credentials_id'));
+            $credentials = Credential::query()->whereUserId($this->user()->id)->find($this->input('credentials_id'));
 
             if (! $credentials) {
                 // The credentials_id field will already have a validation error

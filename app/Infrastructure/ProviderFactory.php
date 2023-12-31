@@ -2,7 +2,7 @@
 
 namespace App\Infrastructure;
 
-use App\Models\Credentials;
+use App\Models\Credential;
 use App\Models\Server;
 use App\Provider;
 use Exception;
@@ -27,7 +27,7 @@ class ProviderFactory
         throw new Exception('No credentials found');
     }
 
-    public function forCredentials(Credentials $credentials): mixed
+    public function forCredentials(Credential $credentials): mixed
     {
         return match ($credentials->provider) {
             Provider::DigitalOcean => new DigitalOcean($credentials->credentials['digital_ocean_token']),

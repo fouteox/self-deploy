@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Credentials;
+use App\Models\Credential;
 use App\Provider;
 use App\Rules\DigitalOceanToken;
 use App\Rules\HetznerCloudToken;
@@ -32,7 +32,7 @@ class UpdateCredentialsRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
         ];
 
-        /** @var Credentials */
+        /** @var Credential */
         $credentials = $this->route('credentials');
 
         $providerAttribute = match ($credentials->provider) {

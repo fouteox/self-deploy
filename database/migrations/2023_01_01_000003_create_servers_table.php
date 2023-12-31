@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Credentials;
+use App\Models\Credential;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
@@ -18,7 +18,7 @@ return new class extends Migration
             $table->ulid('id')->primary();
             $table->foreignIdFor(Team::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(User::class, 'created_by_user_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignIdFor(Credentials::class)->nullable()->constrained()->nullOnDelete();
+            $table->foreignIdFor(Credential::class)->nullable()->constrained()->nullOnDelete();
             $table->string('name');
             $table->string('provider');
             $table->string('provider_id')->nullable();

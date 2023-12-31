@@ -8,7 +8,7 @@ use App\Infrastructure\Entities\Region;
 use App\Infrastructure\Entities\ServerType;
 use App\Infrastructure\ProviderFactory;
 use App\Infrastructure\ServerProvider;
-use App\Models\Credentials;
+use App\Models\Credential;
 
 /**
  * @codeCoverageIgnore Handled by Dusk tests.
@@ -19,7 +19,7 @@ class ServerProviderController extends Controller
     {
     }
 
-    public function regions(Credentials $credentials)
+    public function regions(Credential $credentials)
     {
         /** @var ServerProvider */
         $provider = $this->providerFactory->forCredentials($credentials);
@@ -29,7 +29,7 @@ class ServerProviderController extends Controller
         });
     }
 
-    public function types(Credentials $credentials, $region)
+    public function types(Credential $credentials, $region)
     {
         /** @var ServerProvider */
         $provider = $this->providerFactory->forCredentials($credentials);
@@ -43,7 +43,7 @@ class ServerProviderController extends Controller
             });
     }
 
-    public function images(Credentials $credentials, $region)
+    public function images(Credential $credentials, $region)
     {
         /** @var ServerProvider */
         $provider = $this->providerFactory->forCredentials($credentials);

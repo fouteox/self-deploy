@@ -44,7 +44,7 @@ use ProtoneMedia\LaravelTaskRunner\PendingTask;
  * @property EloquentCollection $daemons
  * @property EloquentCollection $firewallRules
  * @property Team $team
- * @property Credentials|null $credentials
+ * @property Credential|null $credentials
  * @property User|null $createdByUser
  */
 class Server extends Model implements FileProviderInterface, LogProviderInterface
@@ -361,12 +361,12 @@ class Server extends Model implements FileProviderInterface, LogProviderInterfac
 
     public function credentials(): BelongsTo
     {
-        return $this->belongsTo(Credentials::class);
+        return $this->belongsTo(Credential::class);
     }
 
     public function githubCredentials(): BelongsTo
     {
-        return $this->belongsTo(Credentials::class, 'github_credentials_id');
+        return $this->belongsTo(Credential::class, 'github_credentials_id');
     }
 
     public function tasks(): HasMany

@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enum;
 use App\Http\Requests\UpdateCredentialsRequest;
-use App\Models\Credentials;
+use App\Models\Credential;
 use App\Models\Team;
 use App\Provider;
 use App\Rules\DigitalOceanToken;
@@ -24,7 +24,7 @@ class CredentialsController extends Controller
      */
     public function __construct()
     {
-        $this->authorizeResource(Credentials::class, 'credentials');
+        $this->authorizeResource(Credential::class, 'credentials');
     }
 
     /**
@@ -36,9 +36,9 @@ class CredentialsController extends Controller
             'credentials' => SpladeTable::for($this->user()->credentials()->with(['user', 'team']))
                 ->column('name', __('Name'))
                 ->column('provider_name', __('Provider'))
-                ->column('team', __('Bound to team'), as: fn (Team $team = null) => $team ? $team->name : '-')
+                ->column('team', __('Bound to team'), as: fn (?Team $team = null) => $team ? $team->name : '-')
                 ->column('actions', label: '', alignment: 'right')
-                ->rowModal(fn (Credentials $credentials) => route('credentials.edit', $credentials))
+                ->rowModal(fn (Credential $credentials) => route('credentials.edit', $credentials))
                 ->defaultSort('name')
                 ->paginate(),
         ]);
@@ -96,7 +96,7 @@ class CredentialsController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Credentials $credentials)
+    public function edit(Credential $credentials)
     {
         return view('credentials.edit', [
             'credentials' => $credentials,
@@ -107,7 +107,7 @@ class CredentialsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateCredentialsRequest $request, Credentials $credentials)
+    public function update(UpdateCredentialsRequest $request, Credential $credentials)
     {
         $data = $request->validated();
 
@@ -121,7 +121,7 @@ class CredentialsController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Credentials $credentials)
+    public function destroy(Credential $credentials)
     {
         $credentials->delete();
 

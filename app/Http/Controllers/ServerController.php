@@ -6,7 +6,7 @@ use App\Http\Requests\CreateServerRequest;
 use App\Infrastructure\Entities\ServerStatus;
 use App\Jobs\DeleteServerFromInfrastructure;
 use App\KeyPairGenerator;
-use App\Models\Credentials;
+use App\Models\Credential;
 use App\Models\Server;
 use App\Models\SshKey;
 use App\Provider;
@@ -65,7 +65,7 @@ class ServerController extends Controller
             ->canBeUsedByTeam($this->team())
             ->select('id', 'name', 'provider')
             ->get()
-            ->mapWithKeys(fn (Credentials $credentials) => [$credentials->id => $credentials->nameWithProvider]);
+            ->mapWithKeys(fn (Credential $credentials) => [$credentials->id => $credentials->nameWithProvider]);
 
         if ($credentials->isEmpty() && ! $request->query('withoutCredentials')) {
             return view('servers.credentials-missing');
@@ -96,7 +96,7 @@ class ServerController extends Controller
     {
         $customServer = $request->boolean('custom_server');
 
-        /** @var Credentials|null */
+        /** @var Credential|null */
         $credentials = $customServer ? null : $this->user()->credentials()
             ->canBeUsedByTeam($this->team())
             ->findOrFail($request->validated('credentials_id'));
