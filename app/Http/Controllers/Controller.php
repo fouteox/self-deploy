@@ -15,11 +15,17 @@ class Controller extends BaseController
     use AuthorizesRequests, ValidatesRequests;
 
     /**
-     * Get the authenticated user.
+     * Log an activity.
      */
-    protected function user(): User
+    public function logActivity(string $description, ?Model $subject = null): ActivityLog
     {
-        return auth()->user();
+        return ActivityLog::create([
+            'team_id' => $this->team()->id,
+            'user_id' => $this->user()->id,
+            'subject_id' => $subject?->getKey(),
+            'subject_type' => $subject?->getMorphClass(),
+            'description' => $description,
+        ]);
     }
 
     /**
@@ -31,16 +37,10 @@ class Controller extends BaseController
     }
 
     /**
-     * Log an activity.
+     * Get the authenticated user.
      */
-    public function logActivity(string $description, Model $subject = null): ActivityLog
+    protected function user(): User
     {
-        return ActivityLog::create([
-            'team_id' => $this->team()->id,
-            'user_id' => $this->user()->id,
-            'subject_id' => $subject ? $subject->getKey() : null,
-            'subject_type' => $subject ? $subject->getMorphClass() : null,
-            'description' => $description,
-        ]);
+        return auth()->user();
     }
 }
