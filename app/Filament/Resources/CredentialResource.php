@@ -38,7 +38,8 @@ class CredentialResource extends Resource
             ->columns([
                 TextColumn::make('name'),
                 TextColumn::make('provider_name'),
-                TextColumn::make('team'),
+                TextColumn::make('team')
+                    ->default('-'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
