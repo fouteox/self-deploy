@@ -2,17 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Filament\Resources\CredentialResource;
 use App\Provider;
 use App\SourceControl\Entities\GitRepository;
 use App\SourceControl\Github;
 use App\SourceControl\ProviderFactory;
+use Exception;
+use Filament\Notifications\Notification;
 use GuzzleHttp\Exception\ClientException;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Laravel\Socialite\Two\GithubProvider;
-use Laravel\Socialite\Two\User as GithubUser;
-use ProtoneMedia\Splade\Facades\Toast;
 
 class GithubController extends Controller
 {
@@ -22,9 +24,12 @@ class GithubController extends Controller
     public function redirect(GithubProvider $githubProvider): RedirectResponse
     {
         if ($this->user()->credentials()->where('provider', Provider::Github)->exists()) {
-            Toast::warning(__('You already have a Github account connected.'));
+            Notification::make()
+                ->title(__('You already have a Github account connected.'))
+                ->warning()
+                ->send();
 
-            return to_route('credentials.index');
+            return redirect(CredentialResource::getUrl());
         }
 
         return $githubProvider->setScopes([
@@ -36,28 +41,38 @@ class GithubController extends Controller
 
     /**
      * Handles the callback from Github.
+     *
+     * @throws BindingResolutionException
      */
     public function callback(GithubProvider $githubProvider)
     {
         if ($this->user()->credentials()->where('provider', Provider::Github)->exists()) {
-            Toast::warning(__('You already have a Github account connected.'));
+            Notification::make()
+                ->title(__('You already have a Github account connected.'))
+                ->warning()
+                ->send();
 
-            return to_route('credentials.index');
+            return redirect(CredentialResource::getUrl());
         }
 
         try {
-            /** @var GithubUser */
             $user = $githubProvider->user();
-        } catch (ClientException $e) {
-            Toast::warning(__('Failed to connect to Github.'));
+        } catch (ClientException) {
+            Notification::make()
+                ->title(__('Failed to connect to Github.'))
+                ->warning()
+                ->send();
 
-            return to_route('credentials.index');
+            return redirect(CredentialResource::getUrl());
         }
 
         if (! app()->makeWith(Github::class, ['token' => $user->token])->canConnect()) {
-            Toast::warning(__('Failed to connect to Github.'));
+            Notification::make()
+                ->title(__('Failed to connect to Github.'))
+                ->warning()
+                ->send();
 
-            return to_route('credentials.index');
+            return redirect(CredentialResource::getUrl());
         }
 
         $this->user()->credentials()->create([
@@ -69,13 +84,18 @@ class GithubController extends Controller
             ],
         ]);
 
-        Toast::info(__('Successfully connected to Github.'));
+        Notification::make()
+            ->title(__('Successfully connected to Github.'))
+            ->success()
+            ->send();
 
-        return to_route('credentials.index');
+        return redirect(CredentialResource::getUrl());
     }
 
     /**
      * Returns a list of all the repositories that the user has access to.
+     *
+     * @throws Exception
      */
     public function repositories(ProviderFactory $providerFactory)
     {
@@ -85,11 +105,9 @@ class GithubController extends Controller
             return [];
         }
 
-        /** @var Github */
         $github = $providerFactory->forCredentials($githubCredentials);
 
-        return Cache::remember("github_repositories.{$githubCredentials->id}", 5 * 60, function () use ($github) {
-            /** @var Collection */
+        return Cache::remember("github_repositories.$githubCredentials->id", 5 * 60, function () use ($github) {
             $repositories = rescue(fn () => $github->findRepositories(), Collection::make(), false);
 
             return $repositories->mapWithKeys(function (GitRepository $repository) {

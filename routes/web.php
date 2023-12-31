@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\GithubController;
 use App\Http\Controllers\ServerProvisionScriptController;
 use App\Http\Controllers\SiteDeploymentController;
 use App\Http\Controllers\TaskWebhookController;
@@ -31,4 +32,10 @@ Route::middleware('signed:relative')->group(function () {
     Route::post('/webhook/task/{task}/failed', [TaskWebhookController::class, 'markAsFailed'])->name('webhook.task.mark-as-failed');
     Route::post('/webhook/task/{task}/finished', [TaskWebhookController::class, 'markAsFinished'])->name('webhook.task.mark-as-finished');
     Route::post('/webhook/task/{task}/callback', [TaskWebhookController::class, 'callback'])->name('webhook.task.callback');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('github/redirect', [GithubController::class, 'redirect'])->name('github.redirect');
+    Route::get('github/callback', [GithubController::class, 'callback'])->name('github.callback');
+    Route::get('github/repositories', [GithubController::class, 'repositories'])->name('github.repositories');
 });
