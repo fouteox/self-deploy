@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Credentials;
+use App\Models\Credential;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('servers', function (Blueprint $table) {
-            $table->foreignIdFor(Credentials::class, 'github_credentials_id')
+            $table->foreignIdFor(Credential::class, 'github_credentials_id')
                 ->after('installed_software')
                 ->nullable()
                 ->constrained('credentials')

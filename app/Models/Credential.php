@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 /**
  * @property User $user
  */
-class Credentials extends Model
+class Credential extends Model
 {
     use HasUlids;
 
@@ -28,7 +28,7 @@ class Credentials extends Model
 
     protected static function booted()
     {
-        static::creating(function (Credentials $credentials) {
+        static::creating(function (Credential $credentials) {
             // Make sure that credentials is always an array.
             if (blank($credentials->credentials)) {
                 $credentials->credentials = [];
