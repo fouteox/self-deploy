@@ -42,8 +42,8 @@ class CredentialResource extends Resource
                     ->default('-'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->successNotificationTitle(__('Credentials deleted.')),
             ]);
     }
 
