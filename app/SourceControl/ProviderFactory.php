@@ -8,6 +8,9 @@ use Exception;
 
 class ProviderFactory
 {
+    /**
+     * @throws Exception
+     */
     public function forCredentials(Credential $credentials): mixed
     {
         return match ($credentials->provider) {

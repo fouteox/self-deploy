@@ -30,6 +30,8 @@ class CreateSite extends CreateRecord
      */
     protected function handleRecordCreation(array $data): Model
     {
+        $data['repository_url'] = $data['repository_provider'] ?? $data['repository_url'];
+
         $server = Server::find($data['server_id']);
         $site = $server->sites()->make(Arr::only($data, [
             'address',

@@ -12,6 +12,8 @@ use App\Models\Site;
 use App\Models\SiteType;
 use App\Models\TlsSetting;
 use App\Server\PhpVersion;
+use App\SourceControl\Entities\GitRepository;
+use App\SourceControl\ProviderFactory;
 use App\Traits\BreadcrumbTrait;
 use App\Traits\HandlesUserContext;
 use App\Traits\RedirectsIfProvisioned;
@@ -23,11 +25,13 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Unique;
@@ -129,9 +133,32 @@ class CreateSiteServer extends Page
                             ->label('Enable zero downtime deployment')
                             ->default(true)
                             ->rules(['boolean']),
+                        Select::make('repository_provider')
+                            ->label(__('Github Repository'))
+                            ->options(function (ProviderFactory $providerFactory) {
+                                $githubCredentials = auth()->user()->githubCredentials;
+
+                                if (! $githubCredentials) {
+                                    return [];
+                                }
+
+                                $github = $providerFactory->forCredentials($githubCredentials);
+
+                                return Cache::remember("github_repositories.$githubCredentials->id", 5 * 60, function () use ($github) {
+                                    $repositories = rescue(fn () => $github->findRepositories(), Collection::make(), false);
+
+                                    return $repositories->mapWithKeys(function (GitRepository $repository) {
+                                        return [$repository->url => $repository->name];
+                                    })->all();
+                                });
+                            })
+                            ->live()
+                            ->visible(fn (Get $get): bool => auth()->user()->hasGithubCredentials()),
                         TextInput::make('repository_url')
                             ->label('Repository URL')
-                            ->maxValue(255),
+                            ->maxValue(255)
+                            ->dehydrated(fn (Get $get): bool => filled($get('repository_provider')))
+                            ->disabled(fn (Get $get): bool => filled($get('repository_provider'))),
                         TextInput::make('repository_branch')
                             ->label('Repository branch')
                             ->default('main')

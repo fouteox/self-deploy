@@ -6,6 +6,8 @@ use App\KeyPairGenerator;
 use App\Models\Server;
 use App\Models\SiteType;
 use App\Server\PhpVersion;
+use App\SourceControl\Entities\GitRepository;
+use App\SourceControl\ProviderFactory;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Grid;
@@ -16,6 +18,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Exists;
@@ -123,10 +126,33 @@ class CreateSiteForm
                             ->rules(['boolean'])
                             ->visible(fn (Get $get): bool => filled($get('server_id')))
                             ->hiddenOn('edit'),
+                        Select::make('repository_provider')
+                            ->label(__('Github Repository'))
+                            ->options(function (ProviderFactory $providerFactory) {
+                                $githubCredentials = auth()->user()->githubCredentials;
+
+                                if (! $githubCredentials) {
+                                    return [];
+                                }
+
+                                $github = $providerFactory->forCredentials($githubCredentials);
+
+                                return Cache::remember("github_repositories.$githubCredentials->id", 5 * 60, function () use ($github) {
+                                    $repositories = rescue(fn () => $github->findRepositories(), Collection::make(), false);
+
+                                    return $repositories->mapWithKeys(function (GitRepository $repository) {
+                                        return [$repository->url => $repository->name];
+                                    })->all();
+                                });
+                            })
+                            ->live()
+                            ->visible(fn (Get $get): bool => filled($get('server_id')) && auth()->user()->hasGithubCredentials()),
                         TextInput::make('repository_url')
                             ->label('Repository URL')
                             ->maxValue(255)
-                            ->visible(fn (Get $get): bool => filled($get('server_id'))),
+                            ->visible(fn (Get $get): bool => filled($get('server_id')))
+                            ->dehydrated(fn (Get $get): bool => filled($get('repository_provider')))
+                            ->disabled(fn (Get $get): bool => filled($get('repository_provider'))),
                         TextInput::make('repository_branch')
                             ->label('Repository branch')
                             ->default('main')
